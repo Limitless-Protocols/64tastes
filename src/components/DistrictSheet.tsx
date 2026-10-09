@@ -13,7 +13,7 @@ export default function DistrictSheet({ districtId, eaten, onToggle, onClose }: 
   const list = dishesByDistrict[districtId] ?? [];
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-lg rounded-t-2xl bg-white p-4 shadow-2xl">
+    <div className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-lg rounded-t-2xl border-t border-gray-200 bg-white p-4 text-gray-900 shadow-2xl">
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-xl font-bold">{district.nameBn}</h2>

@@ -15,11 +15,11 @@ export default function FoodMap() {
 
   function fillClass(districtId: string) {
     const list = dishesByDistrict[districtId] ?? [];
-    if (list.length === 0) return 'fill-gray-200';
+    if (list.length === 0) return 'fill-gray-200 hover:fill-gray-300';
     const n = list.filter((d) => eaten.has(d.id)).length;
-    if (n === 0) return 'fill-amber-100';
-    if (n < list.length) return 'fill-emerald-300';
-    return 'fill-emerald-600';
+    if (n === 0) return 'fill-amber-100 hover:fill-amber-300';
+    if (n < list.length) return 'fill-emerald-300 hover:fill-emerald-400';
+    return 'fill-emerald-600 hover:fill-emerald-700';
   }
 
   return (
@@ -43,7 +43,7 @@ export default function FoodMap() {
             key={d.id}
             d={paths[d.id]}
             vectorEffect="non-scaling-stroke"
-            className={`${fillClass(d.id)} cursor-pointer stroke-white stroke-1 outline-none hover:brightness-95`}
+            className={`${fillClass(d.id)} cursor-pointer stroke-white stroke-1 outline-none transition-colors`}
             role="button"
             tabIndex={0}
             aria-label={d.nameEn}
