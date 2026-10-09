@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bangladesh Food Map (64tastes)
 
-## Getting Started
+An interactive map of Bangladesh's districts. Tap a district to see its famous dishes and check
+off the ones you've eaten; your progress and current "taster tier" update as you go.
 
-First, run the development server:
+Built with [Next.js](https://nextjs.org) 16 (App Router), React 19, TypeScript, and Tailwind CSS 4.
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Dev server (Turbopack) |
+| `npm run lint` | ESLint (flat config in `eslint.config.mjs`) |
+| `npx tsc --noEmit` | Typecheck (no `typecheck` script exists; `npm run build` typechecks too) |
+| `npm run build` | Production build |
 
-## Learn More
+There is no test suite or CI workflow.
 
-To learn more about Next.js, take a look at the following resources:
+### Build requires `DATABASE_URL`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`npm run build` prerenders `/api/health`, which pings Neon and fails the build if
+`DATABASE_URL` is missing. The repo ships no `.env*` file (they're gitignored), so a fresh clone
+cannot build as-is. Set a Neon connection string before building:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+DATABASE_URL="postgresql://user:pass@host/db?sslmode=require" npm run build
+```
 
-## Deploy on Vercel
+## Project layout
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+  app/            Next.js App Router: page.tsx (the whole UI), api/health, api/og-test
+  components/     FoodMap.tsx (SVG map + progress), DistrictSheet.tsx (dish list)
+  lib/            data.ts (single data access point), useProgress.ts, tiers.ts, types.ts
+  data/           districts.json, dishes.json, districtPaths.json (SVG geometry)
+  assets/         NotoSansBengali-Bold.ttf (used by the OG image route)
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+All content lives in `src/data/*.json` and is read through `src/lib/data.ts`, which builds the
+derived indexes (`dishesByDistrict`, `districtById`, `totalDishes`). Import from `@/lib/data`
+rather than the JSON files directly.
+
+Progress is stored in the browser under the localStorage key `foodmap:progress:v1` — there is no
+backend or account system.
+
+## Notes
+
+- Path alias: `@/*` maps to `./src/*`.
+- The JSON content files are UTF-8 with Bengali text. If they look like garbled characters in a
+  Windows terminal, that's a display issue — don't re-encode them.
+- Tailwind 4 is loaded through a Turbopack rule in `next.config.ts`; there is no PostCSS config.
+- District path data comes from [geoBoundaries](https://www.geoboundaries.org/).
+
+## Deploy
+
+Deploys on [Vercel](https://vercel.com). Remember the `DATABASE_URL` env var, or remove/prerender-guard
+`/api/health` first — see above.
