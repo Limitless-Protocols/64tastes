@@ -4,6 +4,7 @@ import { decodeProgress } from '@/lib/share';
 import { getTier } from '@/lib/tiers';
 import { totalDishes } from '@/lib/data';
 import { bn } from '@/lib/format';
+import { Suspense } from 'react';
 
 type Props = { params: Promise<{ code: string }> };
 
@@ -22,7 +23,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ResultPage({ params }: Props) {
+export default function ResultPage({ params }: Props) {
+  return (
+    <Suspense fallback={<p>লোড হচ্ছে…</p>}>
+      <ResultContent params={params} />
+    </Suspense>
+  );
+}
+
+async function ResultContent({ params }: Props) {
   const { code } = await params;
   return <ResultView code={code} />;
 }
