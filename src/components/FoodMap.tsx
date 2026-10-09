@@ -4,6 +4,7 @@ import { districts, dishesByDistrict, paths, viewBox, totalDishes } from '@/lib/
 import { useProgress } from '@/lib/useProgress';
 import { getTier } from '@/lib/tiers';
 import DistrictSheet from './DistrictSheet';
+import SharePanel from './SharePanel';
 
 export default function FoodMap() {
   const { eaten, toggle, reset } = useProgress();
@@ -12,6 +13,8 @@ export default function FoodMap() {
   const count = eaten.size;
   const tier = getTier(count, totalDishes);
   const pct = totalDishes ? Math.round((count / totalDishes) * 100) : 0;
+
+  const [showShare, setShowShare] = useState(false);
 
   function fillClass(districtId: string) {
     const list = dishesByDistrict[districtId] ?? [];
@@ -35,6 +38,14 @@ export default function FoodMap() {
           <div className="h-2 rounded-full bg-emerald-600 transition-all" style={{ width: `${pct}%` }} />
         </div>
         <p className="mt-1 text-xs text-gray-500">{tier.en}</p>
+        {count > 0 && (
+          <button
+            onClick={() => setShowShare(true)}
+            className="mt-3 w-full rounded-lg bg-emerald-600 py-2 font-medium text-white"
+          >
+            Share my map
+          </button>
+        )}
       </header>
 
       <svg viewBox={viewBox} className="h-auto w-full" role="group" aria-label="Map of Bangladesh districts">
@@ -85,6 +96,8 @@ export default function FoodMap() {
           onClose={() => setSelected(null)}
         />
       )}
+
+      {showShare && <SharePanel eaten={eaten} onClose={() => setShowShare(false)} />}
     </div>
   );
 }

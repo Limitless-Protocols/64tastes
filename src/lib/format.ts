@@ -1,0 +1,1 @@
+export const bn = (n: number) => n.toLocaleString('bn-BD');
