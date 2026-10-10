@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/site';
 import { Noto_Sans_Bengali } from 'next/font/google';
 import './globals.css';
+import VerifierHost from '@/components/VerifierHost';
 
 const noto = Noto_Sans_Bengali({ subsets: ['bengali', 'latin'], display: 'swap' });
 
@@ -22,7 +23,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${noto.className} bg-white text-gray-900 antialiased`}>{children}</body>
+      <body className={`${noto.className} bg-white text-gray-900 antialiased`}>
+        {children}
+        <VerifierHost />
+      </body>
     </html>
   );
 }

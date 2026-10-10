@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 
 export const COOKIE = 'ft_session';
 export const MAX_AGE = 60 * 60 * 24 * 3; // 3 days
+export const ADMIN_COOKIE = 'ft_admin';
 
 const sign = (data: string) =>
   createHmac('sha256', process.env.SESSION_SECRET!).update(data).digest('base64url');

@@ -7,7 +7,7 @@ import { districtTone, type DistrictTone } from '@/lib/colors';
 import DistrictSheet from './DistrictSheet';
 import SharePanel from './SharePanel';
 import Link from 'next/link';
-import Verifier from './Verifier';
+import { usePlacePicks } from '@/lib/usePlacePicks';
 import { useRatings } from '@/lib/useRatings';
 
 /** Base fill vs. the darker shade used to highlight the selected district. */
@@ -20,7 +20,8 @@ const FILLS: Record<DistrictTone, { base: string; selected: string }> = {
 
 export default function FoodMap() {
   const { eaten, toggle, reset } = useProgress();
-  const { ratings, rate, needsVerify, verify } = useRatings();
+  const { ratings, rate } = useRatings();
+  const { picks, pick, clearLocal } = usePlacePicks();
   const [selected, setSelected] = useState<string | null>(null);
 
   const count = eaten.size;
@@ -30,7 +31,10 @@ export default function FoodMap() {
   const [showShare, setShowShare] = useState(false);
 
   function handleToggle(id: number) {
-    if (eaten.has(id) && ratings[id]) rate(id, null); // un-eating removes the rating
+    if (eaten.has(id)) {
+      if (ratings[id]) rate(id, null);
+      clearLocal(id);
+    }
     toggle(id);
   }
 
@@ -103,25 +107,19 @@ export default function FoodMap() {
       </footer>
 
       {selected && (
-        <DistrictSheet
-          districtId={selected}
-          eaten={eaten}
-          ratings={ratings}
-          onToggle={handleToggle}
-          onRate={rate}
-          onClose={() => setSelected(null)}
-        />
+      <DistrictSheet
+        districtId={selected}
+        eaten={eaten}
+        ratings={ratings}
+        places={picks}
+        onToggle={handleToggle}
+        onRate={rate}
+        onPlace={pick}
+        onClose={() => setSelected(null)}
+      />
       )}
 
       {showShare && <SharePanel eaten={eaten} onClose={() => setShowShare(false)} />}
-      {needsVerify && (
-        <div className="fixed inset-0 z-30 grid place-items-center bg-black/40 p-4">
-          <div className="rounded-xl bg-white p-4 text-center text-gray-900">
-            <p className="mb-2 text-sm">একটু যাচাই করছি…</p>
-            <Verifier onToken={verify} />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

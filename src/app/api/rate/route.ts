@@ -36,6 +36,7 @@ export async function POST(req: Request) {
 
   if (rating === null) {
     await sql`delete from ratings where device_id = ${deviceId} and dish_id = ${dishId}`;
+    await sql`delete from place_picks where device_id = ${deviceId} and dish_id = ${dishId}`;
   } else {
     await sql`
       insert into ratings (device_id, dish_id, rating, overrated, updated_at)

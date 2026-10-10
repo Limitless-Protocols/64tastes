@@ -1,6 +1,8 @@
 'use client';
 import { districtById, dishesByDistrict } from '@/lib/data';
 import type { MyRating, Rating } from '@/lib/useRatings';
+import PlaceRow from './PlaceRow';
+import SuggestForm from './SuggestForm';
 
 const OPTIONS: { value: Rating; label: string }[] = [
   { value: 'loved', label: '😍 দারুণ' },
@@ -12,12 +14,16 @@ type Props = {
   districtId: string;
   eaten: Set<number>;
   ratings: Record<number, MyRating>;
+  places: Record<number, string>;
   onToggle: (id: number) => void;
   onRate: (id: number, value: MyRating | null) => void;
+  onPlace: (id: number, placeId: string | null) => void;
   onClose: () => void;
 };
 
-export default function DistrictSheet({ districtId, eaten, ratings, onToggle, onRate, onClose }: Props) {
+export default function DistrictSheet({
+  districtId, eaten, ratings, places, onToggle, onRate, onPlace, onClose,
+}: Props) {
   const district = districtById[districtId];
   const list = dishesByDistrict[districtId] ?? [];
 
@@ -33,7 +39,7 @@ export default function DistrictSheet({ districtId, eaten, ratings, onToggle, on
 
       {list.length === 0 ? (
         <p className="mt-3 text-sm text-gray-500">
-          No famous dish listed yet. Know one? Suggestions are coming soon.
+          এই জেলার বিখ্যাত খাবার এখনও যোগ হয়নি। তুমি জানলে বলো!
         </p>
       ) : (
         <ul className="mt-3 space-y-3">
@@ -57,47 +63,59 @@ export default function DistrictSheet({ districtId, eaten, ratings, onToggle, on
                 </button>
 
                 {has && (
-                  <div className="mt-2 flex flex-wrap gap-2 px-1">
-                    {OPTIONS.map((o) => (
-                      <button
-                        key={o.value}
-                        aria-pressed={mine?.rating === o.value}
-                        onClick={() =>
-                          onRate(
-                            dish.id,
+                  <>
+                    <div className="mt-2 flex flex-wrap gap-2 px-1">
+                      {OPTIONS.map((o) => (
+                        <button
+                          key={o.value}
+                          aria-pressed={mine?.rating === o.value}
+                          onClick={() =>
+                            onRate(
+                              dish.id,
+                              mine?.rating === o.value
+                                ? null
+                                : { rating: o.value, overrated: mine?.overrated ?? false }
+                            )
+                          }
+                          className={`rounded-full border px-3 py-1 text-sm ${
                             mine?.rating === o.value
-                              ? null
-                              : { rating: o.value, overrated: mine?.overrated ?? false }
-                          )
-                        }
-                        className={`rounded-full border px-3 py-1 text-sm ${
-                          mine?.rating === o.value
-                            ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
+                              ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
+                              : 'border-gray-300 text-gray-700'
+                          }`}
+                        >
+                          {o.label}
+                        </button>
+                      ))}
+                      <button
+                        disabled={!mine}
+                        aria-pressed={mine?.overrated ?? false}
+                        onClick={() => mine && onRate(dish.id, { ...mine, overrated: !mine.overrated })}
+                        className={`rounded-full border px-3 py-1 text-sm disabled:opacity-40 ${
+                          mine?.overrated
+                            ? 'border-amber-600 bg-amber-50 text-amber-800'
                             : 'border-gray-300 text-gray-700'
                         }`}
                       >
-                        {o.label}
+                        🙄 ওভাররেটেড
                       </button>
-                    ))}
-                    <button
-                      disabled={!mine}
-                      aria-pressed={mine?.overrated ?? false}
-                      onClick={() => mine && onRate(dish.id, { ...mine, overrated: !mine.overrated })}
-                      className={`rounded-full border px-3 py-1 text-sm disabled:opacity-40 ${
-                        mine?.overrated
-                          ? 'border-amber-600 bg-amber-50 text-amber-800'
-                          : 'border-gray-300 text-gray-700'
-                      }`}
-                    >
-                      🙄 ওভাররেটেড
-                    </button>
-                  </div>
+                    </div>
+
+                    {mine && (
+                      <PlaceRow
+                        name={places[dish.id]}
+                        onSave={(n) => onPlace(dish.id, n)}
+                        onClear={() => onPlace(dish.id, null)}
+                      />
+                    )}
+                  </>
                 )}
               </li>
             );
           })}
         </ul>
       )}
+
+      <SuggestForm key={districtId} districtId={districtId} />
     </div>
   );
 }
