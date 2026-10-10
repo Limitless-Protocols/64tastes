@@ -540,6 +540,12 @@
     border-color: var(--green-700);
     color: #fff;
   }
+  /* Amber variant for the "overrated" toggle (warn tokens, not brand green) */
+  .chip.warn[aria-pressed="true"] {
+    background: var(--warn-bg);
+    border-color: var(--warn-line);
+    color: var(--warn-ink);
+  }
 
   /* Notice (⚠️ price disclaimer) */
   .notice {

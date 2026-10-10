@@ -6,6 +6,9 @@ import { getTier } from '@/lib/tiers';
 import { districtTone, type DistrictTone } from '@/lib/colors';
 import DistrictSheet from './DistrictSheet';
 import SharePanel from './SharePanel';
+import Link from 'next/link';
+import Verifier from './Verifier';
+import { useRatings } from '@/lib/useRatings';
 
 /** Base fill vs. the darker shade used to highlight the selected district. */
 const FILLS: Record<DistrictTone, { base: string; selected: string }> = {
@@ -17,6 +20,7 @@ const FILLS: Record<DistrictTone, { base: string; selected: string }> = {
 
 export default function FoodMap() {
   const { eaten, toggle, reset } = useProgress();
+  const { ratings, rate, needsVerify, verify } = useRatings();
   const [selected, setSelected] = useState<string | null>(null);
 
   const count = eaten.size;
@@ -24,6 +28,11 @@ export default function FoodMap() {
   const pct = totalDishes ? Math.round((count / totalDishes) * 100) : 0;
 
   const [showShare, setShowShare] = useState(false);
+
+  function handleToggle(id: number) {
+    if (eaten.has(id) && ratings[id]) rate(id, null); // un-eating removes the rating
+    toggle(id);
+  }
 
   function fillOf(districtId: string) {
     return FILLS[districtTone(districtId, eaten)];
@@ -50,6 +59,7 @@ export default function FoodMap() {
             Share my map
           </button>
         )}
+        <Link href="/top" className="mt-2 inline-block text-sm text-brand-700 underline">সেরা খাবার দেখো →</Link>
       </header>
 
       <svg viewBox={viewBox} className="h-auto w-full" role="group" aria-label="Map of Bangladesh districts">
@@ -96,12 +106,22 @@ export default function FoodMap() {
         <DistrictSheet
           districtId={selected}
           eaten={eaten}
-          onToggle={toggle}
+          ratings={ratings}
+          onToggle={handleToggle}
+          onRate={rate}
           onClose={() => setSelected(null)}
         />
       )}
 
       {showShare && <SharePanel eaten={eaten} onClose={() => setShowShare(false)} />}
+      {needsVerify && (
+        <div className="modal-backdrop">
+          <div className="modal text-center">
+            <p className="mb-3 caption">একটু যাচাই করছি…</p>
+            <Verifier onToken={verify} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
