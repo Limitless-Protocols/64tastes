@@ -1,10 +1,19 @@
 'use client';
 import { useState } from 'react';
-import { districts, dishesByDistrict, paths, viewBox, totalDishes } from '@/lib/data';
+import { districts, paths, viewBox, totalDishes } from '@/lib/data';
 import { useProgress } from '@/lib/useProgress';
 import { getTier } from '@/lib/tiers';
+import { districtTone, type DistrictTone } from '@/lib/colors';
 import DistrictSheet from './DistrictSheet';
 import SharePanel from './SharePanel';
+
+/** Base fill vs. the darker shade used to highlight the selected district. */
+const FILLS: Record<DistrictTone, { base: string; selected: string }> = {
+  empty: { base: 'fill-gray-200 hover:fill-gray-300', selected: 'fill-gray-400' },
+  new: { base: 'fill-amber-100 hover:fill-amber-300', selected: 'fill-amber-400' },
+  partial: { base: 'fill-emerald-300 hover:fill-emerald-400', selected: 'fill-emerald-500' },
+  complete: { base: 'fill-emerald-600 hover:fill-emerald-700', selected: 'fill-emerald-800' },
+};
 
 export default function FoodMap() {
   const { eaten, toggle, reset } = useProgress();
@@ -16,13 +25,8 @@ export default function FoodMap() {
 
   const [showShare, setShowShare] = useState(false);
 
-  function fillClass(districtId: string) {
-    const list = dishesByDistrict[districtId] ?? [];
-    if (list.length === 0) return 'fill-gray-200 hover:fill-gray-300';
-    const n = list.filter((d) => eaten.has(d.id)).length;
-    if (n === 0) return 'fill-amber-100 hover:fill-amber-300';
-    if (n < list.length) return 'fill-emerald-300 hover:fill-emerald-400';
-    return 'fill-emerald-600 hover:fill-emerald-700';
+  function fillOf(districtId: string) {
+    return FILLS[districtTone(districtId, eaten)];
   }
 
   return (
@@ -54,7 +58,7 @@ export default function FoodMap() {
             key={d.id}
             d={paths[d.id]}
             vectorEffect="non-scaling-stroke"
-            className={`${fillClass(d.id)} cursor-pointer stroke-white stroke-1 outline-none transition-colors`}
+            className={`${fillOf(d.id).base} cursor-pointer stroke-white stroke-1 outline-none transition-colors`}
             role="button"
             tabIndex={0}
             aria-label={d.nameEn}
@@ -67,13 +71,13 @@ export default function FoodMap() {
             }}
           />
         ))}
-        {/* Selected outline drawn last so neighbours don't cover it */}
+        {/* Selected district filled in a darker shade of its normal colour, drawn
+            last so neighbours don't cover it */}
         {selected && (
           <path
             d={paths[selected]}
-            fill="none"
             vectorEffect="non-scaling-stroke"
-            className="pointer-events-none stroke-gray-900 stroke-2"
+            className={`${fillOf(selected).selected} pointer-events-none stroke-white stroke-1 transition-colors`}
           />
         )}
       </svg>
