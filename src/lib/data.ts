@@ -4,7 +4,8 @@ import pathsJson from '@/data/districtPaths.json';
 import type { District, Dish } from './types';
 
 export const districts = districtsJson as District[];
-export const dishes = dishesJson as Dish[];
+// districts.json lists every district; ones without a dish have empty-string fields
+export const dishes = (dishesJson as Dish[]).filter((d) => d.nameEn !== '');
 export const viewBox: string = pathsJson.viewBox;
 export const paths: Record<string, string> = pathsJson.paths;
 
