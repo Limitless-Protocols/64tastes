@@ -13,17 +13,17 @@ export default function DistrictSheet({ districtId, eaten, onToggle, onClose }: 
   const list = dishesByDistrict[districtId] ?? [];
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-lg rounded-t-2xl border-t border-gray-200 bg-white p-4 text-gray-900 shadow-2xl">
+    <div className="sheet" role="dialog" aria-modal="true" aria-label={district.nameEn}>
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-xl font-bold">{district.nameBn}</h2>
-          <p className="text-sm text-gray-500">{district.nameEn}</p>
+          <h2>{district.nameBn}</h2>
+          <p className="caption">{district.nameEn}</p>
         </div>
-        <button onClick={onClose} aria-label="Close" className="p-2 text-2xl leading-none">×</button>
+        <button onClick={onClose} aria-label="Close" className="close">×</button>
       </div>
 
       {list.length === 0 ? (
-        <p className="mt-3 text-sm text-gray-500">
+        <p className="mt-3 caption">
           No famous dish listed yet. Know one? Suggestions are coming soon.
         </p>
       ) : (
@@ -35,13 +35,11 @@ export default function DistrictSheet({ districtId, eaten, onToggle, onClose }: 
                 <button
                   onClick={() => onToggle(dish.id)}
                   aria-pressed={has}
-                  className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left ${
-                    has ? 'border-emerald-600 bg-emerald-50' : 'border-gray-200'
-                  }`}
+                  className="dish-row"
                 >
                   <span>
                     <span className="block font-medium">{dish.nameBn}</span>
-                    <span className="block text-sm text-gray-500">{dish.nameEn}</span>
+                    <span className="caption block">{dish.nameEn}</span>
                   </span>
                   <span className="text-xl">{has ? '✅' : '⬜'}</span>
                 </button>

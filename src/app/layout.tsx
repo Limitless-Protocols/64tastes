@@ -1,9 +1,15 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/site';
-import { Noto_Sans_Bengali } from 'next/font/google';
+import { Hind_Siliguri } from 'next/font/google';
 import './globals.css';
 
-const noto = Noto_Sans_Bengali({ subsets: ['bengali', 'latin'], display: 'swap' });
+// Style guide: Hind Siliguri is the one family for Bangla and Latin.
+// Noto Sans Bengali stays as the CSS fallback in --font (globals.css).
+const hind = Hind_Siliguri({
+  subsets: ['bengali', 'latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -22,7 +28,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${noto.className} bg-white text-gray-900 antialiased`}>{children}</body>
+      <body className={`${hind.className} bg-white text-gray-900 antialiased`}>{children}</body>
     </html>
   );
 }

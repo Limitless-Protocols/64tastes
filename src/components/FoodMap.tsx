@@ -32,20 +32,20 @@ export default function FoodMap() {
   return (
     <div className={selected ? 'pb-72' : ''}>
       <header className="mb-4">
-        <h1 className="text-2xl font-bold">বাংলাদেশ ফুড ম্যাপ</h1>
-        <p className="text-sm text-gray-500">Bangladesh Food Map</p>
+        <h1>বাংলাদেশ ফুড ম্যাপ</h1>
+        <p className="caption">Bangladesh Food Map</p>
         <div className="mt-3 flex items-baseline justify-between">
           <span className="font-semibold">{tier.bn}</span>
-          <span className="text-sm text-gray-600">{count} / {totalDishes}</span>
+          <span className="counter">{count} / {totalDishes}</span>
         </div>
-        <div className="mt-1 h-2 rounded-full bg-gray-200">
-          <div className="h-2 rounded-full bg-emerald-600 transition-all" style={{ width: `${pct}%` }} />
+        <div className="progress mt-1">
+          <div className="progress-fill" style={{ width: `${pct}%` }} />
         </div>
-        <p className="mt-1 text-xs text-gray-500">{tier.en}</p>
+        <p className="caption mt-1">{tier.en}</p>
         {count > 0 && (
           <button
             onClick={() => setShowShare(true)}
-            className="mt-3 w-full rounded-lg bg-emerald-600 py-2 font-medium text-white"
+            className="btn btn-primary mt-3 w-full"
           >
             Share my map
           </button>
@@ -82,7 +82,7 @@ export default function FoodMap() {
         )}
       </svg>
 
-      <footer className="mt-6 text-xs text-gray-400">
+      <footer className="caption mt-6">
         <button
           className="underline"
           onClick={() => { if (confirm('Reset all progress?')) reset(); }}

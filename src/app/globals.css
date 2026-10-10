@@ -1,10 +1,759 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   Unseen Bangladesh — global stylesheet (design system)
+   Sources: the supplied "inspired stylesheet" + the style guide at
+   ~/Downloads/unseen-bangladesh-style-guide.html.
+   CONFIRMED from the live site: --green-700 (#0f6b4f, theme-color).
+   Everything else is proposed — adjust tokens in :root to match.
+
+   How to reuse the tokens:
+   • In CSS  → var(--green-700), var(--radius), var(--shadow) …
+   • In JSX  → the Tailwind aliases generated from the same values below:
+               bg-brand-700, text-ink, border-line, font-sans …
+   • Components → the classes in @layer components (.btn, .card, .chip,
+               .panel, .notice …). They live in a layer, so Tailwind
+               utilities always win when both are on the same element.
+
+   NOTE — Tailwind v4 overlap (intentional, read before renaming):
+   --radius-sm / --radius / --radius-lg and --shadow-sm / --shadow are also
+   Tailwind theme variables. Defining them here is how this design system
+   overrides those utilities: `rounded-lg` now renders 22px and
+   `shadow-sm` / `shadow` render the green-tinted shadows from the style
+   guide, instead of Tailwind's stock values. To keep Tailwind's stock
+   values instead, rename the three radius tokens to the style guide's
+   `--r-sm` / `--r` / `--r-lg` (the style guide itself uses those names).
+   ========================================================================== */
+
+/* ---------- 1. Tokens (single source of truth) ---------- */
 :root {
   color-scheme: light;
+
+  /* Brand */
+  --green-900: #0a4a37;
+  --green-700: #0f6b4f; /* confirmed theme color */
+  --green-600: #13835f;
+  --green-100: #e3f3ec;
+  --green-50: #f3faf6;
+
+  /* Neutrals */
+  --ink: #14201b;
+  --ink-soft: #4a5a53;
+  --line: #dbe5e0;
+  --bg: #fbfdfc;
+  --card: #ffffff;
+
+  /* Accents */
+  --warn-bg: #fff6e0;
+  --warn-ink: #7a5200;
+  --warn-line: #f0d48a;
+  --error: #b3261e; /* style guide — field errors only */
+
+  /* Shape & motion */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --shadow-sm: 0 1px 2px rgb(10 74 55 / 0.08);
+  --shadow: 0 6px 24px rgb(10 74 55 / 0.1);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Type (Bengali-first stack; Hind Siliguri is loaded in layout.tsx) */
+  --font:
+    "Hind Siliguri", "Noto Sans Bengali", "Kalpurush", system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
 }
 
-body {
-  background: #ffffff;
-  color: #111827;
+/* ---------- 2. Tailwind aliases: same tokens, usable as utilities ---------- */
+@theme inline {
+  --font-sans: var(--font);
+
+  --color-brand-50: var(--green-50);
+  --color-brand-100: var(--green-100);
+  --color-brand-600: var(--green-600);
+  --color-brand-700: var(--green-700);
+  --color-brand-900: var(--green-900);
+
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-surface: var(--bg);
+  --color-card: var(--card);
+  --color-error: var(--error);
+}
+
+/* ---------- 3. Base (element-level; utilities can always override) ---------- */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--ink);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
+  p {
+    margin: 0.4em 0 1em;
+    max-width: 62ch; /* style guide: keep body lines under ~70 characters */
+  }
+  a {
+    color: var(--green-700);
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.25;
+    margin: 0 0 0.5em;
+    color: var(--green-900);
+  }
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 700;
+  }
+  h2 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+  }
+  h3 {
+    font-size: 1.15rem;
+  }
+
+  label {
+    font-weight: 600;
+    font-size: 0.92rem;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    font: inherit;
+    color: inherit;
+    padding: 0.6rem 0.85rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--green-600);
+  }
+
+  /* Visible focus ring on every control (style guide) */
+  :focus-visible {
+    outline: 3px solid rgb(19 131 95 / 0.5);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------- 4. Components (reusable classes) ---------- */
+@layer components {
+  /* Layout */
+  .container {
+    width: min(1120px, 100% - 2rem);
+    margin-inline: auto;
+  }
+
+  /* Text helpers */
+  .caption {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+
+  /* Header / nav */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgb(255 255 255 / 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .site-header .bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 60px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 700;
+    color: var(--green-900);
+  }
+  .brand img {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+  .nav {
+    display: flex;
+    gap: 0.25rem;
+    margin-inline: auto;
+    overflow-x: auto;
+  }
+  .nav a {
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    font-weight: 500;
+    transition:
+      background 0.2s var(--ease),
+      color 0.2s var(--ease);
+  }
+  .nav a:hover {
+    background: var(--green-50);
+    color: var(--green-700);
+    text-decoration: none;
+  }
+  .nav a[aria-current="page"],
+  .nav a.active {
+    background: var(--green-100);
+    color: var(--green-700);
+    font-weight: 600;
+  }
+  .lang-toggle {
+    border: 1px solid var(--line);
+    background: var(--card);
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    cursor: pointer;
+    font: inherit;
+    color: var(--ink-soft);
+  }
+
+  /* Buttons — pill-shaped, one primary per view (style guide) */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.7rem 1.25rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      transform 0.15s var(--ease),
+      box-shadow 0.2s var(--ease),
+      background 0.2s;
+  }
+  .btn:hover {
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
+  .btn:active {
+    transform: translateY(0);
+  }
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn-primary {
+    background: var(--green-700);
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-primary:hover {
+    background: var(--green-600);
+    box-shadow: var(--shadow);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--green-700);
+    border-color: var(--green-700);
+  }
+  .btn-ghost:hover {
+    background: var(--green-50);
+  }
+  .btn-sm {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.9rem;
+  }
+
+  /* Hero */
+  .hero {
+    padding: clamp(2.5rem, 7vw, 5rem) 0 3rem;
+    text-align: center;
+    background:
+      radial-gradient(900px 400px at 50% -10%, var(--green-100), transparent 70%),
+      var(--bg);
+  }
+  .eyebrow {
+    display: inline-block;
+    padding: 0.25rem 0.8rem;
+    margin-bottom: 1rem;
+    border-radius: 999px;
+    background: var(--green-100);
+    color: var(--green-700);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .hero p.lead {
+    color: var(--ink-soft);
+    max-width: 40rem;
+    margin: 0 auto 1.5rem;
+  }
+
+  /* Numbered "how it works" steps */
+  .steps {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+  }
+  .step b {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--green-700);
+    color: #fff;
+    font-size: 0.9rem;
+  }
+
+  /* Sections & cards */
+  .section {
+    padding: 3rem 0;
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .counter {
+    font-weight: 700;
+    color: var(--green-700);
+    background: var(--green-100);
+    padding: 0.15rem 0.75rem;
+    border-radius: 999px;
+  }
+
+  /* Progress bar (share/rank progress) */
+  .progress {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--green-100);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--green-700);
+    transition: width 0.3s var(--ease);
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    transition:
+      transform 0.2s var(--ease),
+      box-shadow 0.2s var(--ease);
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+  }
+  .card .icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+  .card ul {
+    padding-left: 1.1rem;
+    color: var(--ink-soft);
+    margin: 0.5rem 0 1rem;
+  }
+  .card .more {
+    font-weight: 600;
+  }
+  .grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+
+  /* Map workspace: controls panel next to the map */
+  .workspace {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
+  }
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .map-area {
+    background: var(--green-50);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+  }
+  .map-area svg path {
+    fill: #cfe3da;
+    stroke: #fff;
+    stroke-width: 0.6;
+    cursor: pointer;
+    transition: fill 0.15s;
+  }
+  .map-area svg path:hover {
+    fill: #9fcab8;
+  }
+  .map-area svg path.selected {
+    fill: var(--green-700);
+  }
+  .tip {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  .tip::before {
+    content: "টিপস: ";
+    font-weight: 600;
+    color: var(--green-700);
+  }
+  .download-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  /* Form fields — label above, always visible; error below (style guide) */
+  .field {
+    display: block;
+    min-width: 220px;
+    flex: 1;
+  }
+  .field.err input,
+  .field.err select {
+    border-color: var(--error);
+  }
+  .field .msg {
+    font-size: 0.85rem;
+    color: var(--error);
+    margin-top: 0.25rem;
+  }
+
+  /* Stepper (− / +) used for days & group size */
+  .stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--card);
+  }
+  .stepper button {
+    width: 38px;
+    height: 38px;
+    border: 0;
+    background: var(--green-50);
+    color: var(--green-700);
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+  .stepper button:hover {
+    background: var(--green-100);
+  }
+  .stepper output {
+    min-width: 3rem;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  /* Numbered planner headings (২, ৩, ৪ …) */
+  .num-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .num-heading b {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--green-700);
+    color: #fff;
+    font-size: 1rem;
+  }
+
+  /* Chips (division / district filters) — the style guide's "pill" */
+  .chip {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    margin: 0 0.3rem 0.3rem 0;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .chip[aria-pressed="true"],
+  .chip.active {
+    background: var(--green-700);
+    border-color: var(--green-700);
+    color: #fff;
+  }
+
+  /* Notice (⚠️ price disclaimer) */
+  .notice {
+    background: var(--warn-bg);
+    color: var(--warn-ink);
+    border: 1px solid var(--warn-line);
+    border-radius: var(--radius);
+    padding: 0.8rem 1rem;
+    font-size: 0.92rem;
+  }
+
+  /* Bottom sheet (district list, mobile) */
+  .sheet {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 10;
+    margin-inline: auto;
+    width: 100%;
+    max-width: 32rem;
+    background: var(--card);
+    color: var(--ink);
+    border-top: 1px solid var(--line);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+  }
+
+  /* Toggle list item (a district's dishes) — pressed state via aria-pressed */
+  .dish-row {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition:
+      border-color 0.15s var(--ease),
+      background 0.15s var(--ease);
+  }
+  .dish-row:hover {
+    border-color: var(--green-600);
+    background: var(--green-50);
+  }
+  .dish-row[aria-pressed="true"] {
+    border-color: var(--green-700);
+    background: var(--green-100);
+  }
+
+  /* Modal (quiz, leaderboard, about).
+     The backdrop docks the panel to the bottom on small screens (the app's
+     sheets) and centers it from 640px up — the one adaptation of the
+     stylesheet's always-centered backdrop. */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgb(10 30 22 / 0.55);
+  }
+  .modal {
+    position: relative;
+    width: min(560px, 100%);
+    max-height: 90vh;
+    overflow: auto;
+    background: var(--card);
+    color: var(--ink);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: 1.75rem;
+    box-shadow: 0 24px 60px rgb(0 0 0 / 0.25);
+  }
+
+  /* Round close button, shared by .modal and .sheet */
+  .close {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--green-50);
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .close:hover {
+    background: var(--green-100);
+    color: var(--ink);
+  }
+  .modal .close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .modal-backdrop {
+      align-items: center;
+      padding: 1rem;
+    }
+    .modal {
+      border-radius: var(--radius-lg);
+    }
+  }
+  .avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--green-100);
+  }
+
+  /* Quiz options */
+  .quiz-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 0.6rem;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    font: inherit;
+    cursor: pointer;
+  }
+  .quiz-option:hover {
+    border-color: var(--green-600);
+    background: var(--green-50);
+  }
+  .quiz-option.correct {
+    background: var(--green-100);
+    border-color: var(--green-700);
+  }
+  .quiz-option.wrong {
+    background: #fde8e8;
+    border-color: #d65a5a;
+  }
+
+  /* Footer */
+  .site-footer {
+    margin-top: 4rem;
+    padding: 2.5rem 0;
+    background: var(--green-900);
+    color: #cfe3da;
+  }
+  .site-footer a {
+    color: #fff;
+  }
+  .site-footer h3 {
+    color: #fff;
+    font-size: 1rem;
+  }
+  .site-footer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .site-footer li {
+    margin-bottom: 0.35rem;
+  }
+  .site-footer .cols {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+
+  /* Responsive overrides — same layer, so utilities still win above them */
+  @media (max-width: 860px) {
+    .workspace {
+      grid-template-columns: 1fr;
+    }
+    .site-footer .cols {
+      grid-template-columns: 1fr;
+    }
+    .site-header .bar {
+      flex-wrap: wrap;
+      padding-block: 0.4rem;
+    }
+    .nav {
+      order: 3;
+      width: 100%;
+      margin: 0;
+    }
+  }
+}
+
+/* ---------- 5. Motion & print (always win) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media print {
+  .site-header,
+  .site-footer,
+  .sheet,
+  .btn,
+  .modal-backdrop {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
 }
