@@ -44,5 +44,5 @@ export function useProgress() {
 
   const reset = useCallback(() => setEaten(new Set()), []);
 
-  return { eaten, toggle, reset };
+  return { eaten, toggle, reset, loaded };
 }
