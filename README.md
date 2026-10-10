@@ -12,7 +12,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000
 
 ## Commands
 
@@ -23,7 +23,7 @@ Open http://localhost:3000.
 | `npx tsc --noEmit` | Typecheck (no `typecheck` script exists; `npm run build` typechecks too) |
 | `npm run build` | Production build |
 
-There is no test suite or CI workflow.
+There is no test suite or CI workflow (yet).
 
 ### Build requires `DATABASE_URL`
 
