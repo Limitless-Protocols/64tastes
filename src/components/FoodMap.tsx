@@ -1,125 +1,348 @@
 'use client';
-import { useState } from 'react';
-import { districts, paths, viewBox, totalDishes } from '@/lib/data';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { districts, dishesByDistrict, districtById, totalDishes } from '@/lib/data';
+import { bn } from '@/lib/format';
 import { useProgress } from '@/lib/useProgress';
-import { getTier } from '@/lib/tiers';
-import { districtTone, type DistrictTone } from '@/lib/colors';
-import DistrictSheet from './DistrictSheet';
-import SharePanel from './SharePanel';
-import Link from 'next/link';
-import { usePlacePicks } from '@/lib/usePlacePicks';
 import { useRatings } from '@/lib/useRatings';
+import { getTier } from '@/lib/tiers';
+import DistrictPanel from './DistrictPanel';
+import MapZone from './MapZone';
+import Passport from './Passport';
+import Polaroids from './Polaroids';
+import SharePanel from './SharePanel';
+import { TopStrip, TopPane } from './TopBoard';
+import DishCatalog from './DishCatalog';
+import DishModal from './DishModal';
+import DistrictSheet from './DistrictSheet';
+import SuggestForm from './SuggestForm';
+import { usePlacePicks } from '@/lib/usePlacePicks';
+import type { Dish } from '@/lib/types';
 
-/** Base fill vs. the darker shade used to highlight the selected district. */
-const FILLS: Record<DistrictTone, { base: string; selected: string }> = {
-  empty: { base: 'fill-gray-200 hover:fill-gray-300', selected: 'fill-gray-400' },
-  new: { base: 'fill-amber-100 hover:fill-amber-300', selected: 'fill-amber-400' },
-  partial: { base: 'fill-emerald-300 hover:fill-emerald-400', selected: 'fill-emerald-500' },
-  complete: { base: 'fill-emerald-600 hover:fill-emerald-700', selected: 'fill-emerald-800' },
-};
+type Modal = null | 'share' | 'suggest';
+type View = 'map' | 'dishes' | 'top';
 
-export default function FoodMap() {
+/** One URL per tab — refreshing lands you back on the tab you were on. */
+const PATHS: Record<View, string> = { map: '/', dishes: '/khabar', top: '/sera' };
+function viewFromPath(path: string): View {
+  if (path.startsWith('/khabar')) return 'dishes';
+  if (path.startsWith('/sera')) return 'top';
+  return 'map';
+}
+
+/** Districts whose food you haven't finished tasting (today: one dish each). */
+function untasted(eaten: Set<number>) {
+  return districts.filter((d) => {
+    const list = dishesByDistrict[d.id] ?? [];
+    return list.length > 0 && !list.every((x) => eaten.has(x.id));
+  });
+}
+
+/**
+ * The Khabar Book — the whole app on one screen (style guide §1):
+ * a paper book on a wooden desk, never scrolling, Bangla first.
+ */
+export default function FoodMap({ initialView = 'map' }: { initialView?: View }) {
   const { eaten, toggle, reset } = useProgress();
-  const { ratings, rate } = useRatings();
-  const { picks, pick, clearLocal } = usePlacePicks();
+  const { ratings, rate, toggleLove, toggleOverrated } = useRatings();
+  const { picks, pick } = usePlacePicks();
   const [selected, setSelected] = useState<string | null>(null);
+  const [view, setView] = useState<View>(initialView);
+  const [modal, setModal] = useState<Modal>(null);
+  const [dish, setDish] = useState<Dish | null>(null);
+  const [sheet, setSheet] = useState<string | null>(null);
+  // suggest modal target: null = unlocked (district dropdown, catalog entry);
+  // a district id = locked (map panel entry, defaults to today's special)
+  const [suggestFrom, setSuggestFrom] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const count = eaten.size;
   const tier = getTier(count, totalDishes);
-  const pct = totalDishes ? Math.round((count / totalDishes) * 100) : 0;
+  const remaining = totalDishes - count;
+  const loveCount = useMemo(
+    () => Object.values(ratings).filter((r) => r.rating === 'love').length,
+    [ratings]
+  );
+  // Today's special: the first district you haven't tasted yet — stable across
+  // renders and identical on server and client.
+  const special = useMemo(() => untasted(eaten)[0]?.id ?? null, [eaten]);
 
-  const [showShare, setShowShare] = useState(false);
+  const showToast = useCallback((m: string) => {
+    setToast(m);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 2400);
+  }, []);
 
-  function handleToggle(id: number) {
-    if (eaten.has(id)) {
-      if (ratings[id]) rate(id, null);
-      clearLocal(id);
+  useEffect(
+    () => () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    },
+    []
+  );
+
+  // Escape closes any open modal (prototype behaviour).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setModal(null);
+        setDish(null);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  /** Shallow tab switch: update the URL without a page navigation, so the
+   *  mounted map keeps its state. Back/forward walk through the tabs. */
+  const goTo = useCallback((v: View) => {
+    setView(v);
+    if (window.location.pathname !== PATHS[v]) {
+      window.history.pushState(null, '', PATHS[v]);
     }
-    toggle(id);
-  }
+  }, []);
 
-  function fillOf(districtId: string) {
-    return FILLS[districtTone(districtId, eaten)];
-  }
+  useEffect(() => {
+    const onPop = () => setView(viewFromPath(window.location.pathname));
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  /** Confetti petals when something good happens. */
+  const burst = useCallback((el: HTMLElement | null) => {
+    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const r = el.getBoundingClientRect();
+    const colors = ['#E94D2E', '#F6C94C', '#47764A', '#86A889'];
+    for (let i = 0; i < 14; i++) {
+      const p = document.createElement('i');
+      const a = (i / 14) * Math.PI * 2;
+      const dist = 36 + Math.random() * 34;
+      p.className = 'bit';
+      p.style.left = `${r.left + r.width / 2}px`;
+      p.style.top = `${r.top + r.height / 2}px`;
+      p.style.setProperty('--dx', `${Math.cos(a) * dist}px`);
+      p.style.setProperty('--dy', `${Math.sin(a) * dist}px`);
+      p.style.background = colors[i % colors.length];
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 900);
+    }
+  }, []);
+
+  const select = useCallback(
+    (id: string) => {
+      const next = selected === id ? null : id;
+      setSelected(next);
+      // phones: tapping a district also opens the slide-up sheet
+      if (window.matchMedia('(max-width:760px)').matches) setSheet(next);
+    },
+    [selected]
+  );
+
+  const toggleEat = useCallback(
+    (dishId: number, el?: HTMLElement | null) => {
+      const wasEaten = eaten.has(dishId);
+      toggle(dishId);
+      if (wasEaten) return;
+      burst(el ?? null);
+      const next = getTier(count + 1, totalDishes);
+      if (next.bn !== tier.bn) showToast('নতুন ব্যাজ: ' + next.bn + ' 🎉');
+    },
+    [eaten, toggle, count, tier.bn, burst, showToast]
+  );
+
+  const surprise = useCallback(() => {
+    const pool = untasted(eaten);
+    if (!pool.length) {
+      showToast('সব খাবার চেখে ফেলেছ! 🎉');
+      return;
+    }
+    setModal(null);
+    select(pool[Math.floor(Math.random() * pool.length)].id);
+  }, [eaten, select, showToast]);
+
+  const heart = useCallback(
+    (dishId: number, el: HTMLElement | null) => {
+      if (ratings[dishId]?.rating !== 'love') burst(el);
+      toggleLove(dishId);
+    },
+    [ratings, toggleLove, burst]
+  );
+
+  const selectedDistrict = selected ? districtById[selected] : null;
 
   return (
-    <div className={selected ? 'pb-72' : ''}>
-      <header className="mb-4">
-        <h1 className="text-2xl font-bold">বাংলাদেশ ফুড ম্যাপ</h1>
-        <p className="text-sm text-gray-500">Bangladesh Food Map</p>
-        <div className="mt-3 flex items-baseline justify-between">
-          <span className="font-semibold">{tier.bn}</span>
-          <span className="text-sm text-gray-600">{count} / {totalDishes}</span>
-        </div>
-        <div className="mt-1 h-2 rounded-full bg-gray-200">
-          <div className="h-2 rounded-full bg-emerald-600 transition-all" style={{ width: `${pct}%` }} />
-        </div>
-        <p className="mt-1 text-xs text-gray-500">{tier.en}</p>
-        {count > 0 && (
-          <button
-            onClick={() => setShowShare(true)}
-            className="mt-3 w-full rounded-lg bg-emerald-600 py-2 font-medium text-white"
-          >
-            Share my map
-          </button>
-        )}
-        <Link href="/top" className="mt-2 inline-block text-sm text-emerald-700 underline">সেরা খাবার দেখো →</Link>
-      </header>
+    <>
+      <div className="desk" aria-hidden="true" />
+      <div className="book">
+        <span className="leaf one" aria-hidden="true">🌿</span>
+        <span className="leaf two" aria-hidden="true">🌱</span>
 
-      <svg viewBox={viewBox} className="h-auto w-full" role="group" aria-label="Map of Bangladesh districts">
-        {districts.map((d) => (
-          <path
-            key={d.id}
-            d={paths[d.id]}
-            vectorEffect="non-scaling-stroke"
-            className={`${fillOf(d.id).base} cursor-pointer stroke-white stroke-1 outline-none transition-colors`}
-            role="button"
-            tabIndex={0}
-            aria-label={d.nameEn}
-            onClick={() => setSelected(d.id)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setSelected(d.id);
-              }
+        <header>
+          <div className="brand">
+            <div className="brand-mark" aria-hidden="true">🍛</div>
+            <div>
+              <div className="brand-name">Khabar<span>Book</span></div>
+              <div className="tagline">খাবার বুক · Edition 01 · Bangladesh</div>
+            </div>
+          </div>
+          <nav aria-label="Main navigation">
+            <button
+              className={view === 'map' ? 'active' : ''}
+              aria-current={view === 'map'}
+              onClick={() => goTo('map')}
+            >
+              🗺️ মানচিত্র
+            </button>
+            <button
+              className={view === 'dishes' ? 'active' : ''}
+              aria-current={view === 'dishes'}
+              onClick={() => goTo('dishes')}
+            >
+              📖 খাবার
+            </button>
+            <button
+              className={view === 'top' ? 'active' : ''}
+              aria-current={view === 'top'}
+              onClick={() => goTo('top')}
+            >
+              🏆 সেরা
+            </button>
+            <button className="cta" onClick={() => setModal('share')}>
+              📤 শেয়ার
+            </button>
+          </nav>
+        </header>
+
+        <main className={view === 'map' ? undefined : 'off'}>
+          <section className="intro">
+            <div className="eyebrow">খাবারের মানচিত্র</div>
+            <h1>তুমি <em>বাংলাদেশের</em> কতটা চেখেছ?</h1>
+            <div className="sub">How much of Bangladesh have you tasted?</div>
+            <p>প্রতিটি জেলার স্বাদ খুঁজে নাও, রেটিং দাও, আর দেখো তোমার ম্যাপ কতটা ভরল।</p>
+          </section>
+
+          <Passport count={count} total={totalDishes} tier={tier} love={loveCount} />
+
+          <MapZone eaten={eaten} selected={selected} onSelect={select} />
+
+          <Polaroids ratings={ratings} onSelect={select} onHeart={heart} />
+
+          <aside className="piece next">
+            <h3>📍 এরপর কী?</h3>
+            <p>আরও <b>{bn(remaining)}</b>টি খাবার চেখে ম্যাপ ভরে ফেলো!</p>
+            <button className="btn" onClick={surprise}>🎲 সারপ্রাইজ</button>
+            <button
+              className="link"
+              onClick={() => {
+                if (window.confirm('সব অগ্রগতি মুছে ফেলবে?')) reset();
+              }}
+            >
+              অগ্রগতি রিসেট
+            </button>
+          </aside>
+
+          <TopStrip onOpen={() => goTo('top')} />
+
+          <aside className="piece panel">
+            <div className="p-label">
+              {selectedDistrict
+                ? `📍 ${selectedDistrict.nameBn} · ${selectedDistrict.nameEn}`
+                : '🔥 আজকের স্পেশাল'}
+            </div>
+            <DistrictPanel
+              districtId={selected ?? special}
+              eaten={eaten}
+              ratings={ratings}
+              onToggle={toggleEat}
+              onRate={rate}
+              onOverrate={toggleOverrated}
+              onSuggest={() => {
+                setSuggestFrom(selected ?? special);
+                setModal('suggest');
+              }}
+            />
+          </aside>
+        </main>
+
+        {view === 'dishes' && (
+          <main className="pane">
+            <DishCatalog
+              onOpenDish={setDish}
+              onSuggest={() => {
+                setSuggestFrom(null);
+                setModal('suggest');
+              }}
+            />
+          </main>
+        )}
+
+        {view === 'top' && (
+          <main className="pane">
+            <TopPane
+              onOpenDish={setDish}
+              onSelect={(id) => {
+                select(id);
+                goTo('map');
+              }}
+            />
+          </main>
+        )}
+
+        {/* toast + modals sit at book level so they work from every tab */}
+        <div className={`toast${toast ? ' show' : ''}`} role="status">
+          {toast}
+        </div>
+
+        {dish && (
+          <DishModal
+            dish={dish}
+            onClose={() => setDish(null)}
+            onShowOnMap={(id) => {
+              setDish(null);
+              select(id);
+              goTo('map');
             }}
           />
-        ))}
-        {/* Selected district filled in a darker shade of its normal colour, drawn
-            last so neighbours don't cover it */}
-        {selected && (
-          <path
-            d={paths[selected]}
-            vectorEffect="non-scaling-stroke"
-            className={`${fillOf(selected).selected} pointer-events-none stroke-white stroke-1 transition-colors`}
+        )}
+
+        {modal === 'share' && <SharePanel eaten={eaten} onClose={() => setModal(null)} />}
+        {modal === 'suggest' && (
+          <div
+            className="mb"
+            role="dialog"
+            aria-modal="true"
+            aria-label="খাবার পরামর্শ দাও"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setModal(null);
+            }}
+          >
+            <div className="modal">
+              <h2>
+                খাবার পরামর্শ দাও
+                <button className="x" onClick={() => setModal(null)} aria-label="বন্ধ">✕</button>
+              </h2>
+              <p className="note">
+                {suggestFrom
+                  ? `${districtById[suggestFrom]?.nameBn} জেলার জন্য`
+                  : 'বইয়ের যেকোনো জেলার জন্য'}
+              </p>
+              <SuggestForm key={suggestFrom ?? 'any'} districtId={suggestFrom ?? undefined} standalone />
+            </div>
+          </div>
+        )}
+
+        {sheet && (
+          <DistrictSheet
+            districtId={sheet}
+            eaten={eaten}
+            ratings={ratings}
+            places={picks}
+            onToggle={toggleEat}
+            onRate={rate}
+            onPlace={pick}
+            onClose={() => setSheet(null)}
           />
         )}
-      </svg>
-
-      <footer className="mt-6 text-xs text-gray-400">
-        <button
-          className="underline"
-          onClick={() => { if (confirm('Reset all progress?')) reset(); }}
-        >
-          Reset progress
-        </button>
-        <p className="mt-2">Map data: geoBoundaries</p>
-      </footer>
-
-      {selected && (
-      <DistrictSheet
-        districtId={selected}
-        eaten={eaten}
-        ratings={ratings}
-        places={picks}
-        onToggle={handleToggle}
-        onRate={rate}
-        onPlace={pick}
-        onClose={() => setSelected(null)}
-      />
-      )}
-
-      {showShare && <SharePanel eaten={eaten} onClose={() => setShowShare(false)} />}
-    </div>
+      </div>
+    </>
   );
 }

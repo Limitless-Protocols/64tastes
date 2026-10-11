@@ -1,19 +1,34 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/site';
-import { Noto_Sans_Bengali } from 'next/font/google';
+import { Hind_Siliguri, Tiro_Bangla } from 'next/font/google';
 import './globals.css';
 import VerifierHost from '@/components/VerifierHost';
 
-const noto = Noto_Sans_Bengali({ subsets: ['bengali', 'latin'], display: 'swap' });
+// Style guide §3: Tiro Bangla is the serif (italics for English asides),
+// Hind Siliguri the UI family — Bangla first, English second.
+// The variables feed --serif / --sans in globals.css.
+const hind = Hind_Siliguri({
+  subsets: ['bengali', 'latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-hind',
+});
+const tiro = Tiro_Bangla({
+  subsets: ['bengali', 'latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  display: 'swap',
+  variable: '--font-tiro',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'Bangladesh Food Map',
-  description: 'তুমি বাংলাদেশের কতটা চেখেছ?',
+  title: 'খাবার বুক · The Khabar Book',
+  description: 'তুমি বাংলাদেশের কতটা চেখেছ? ৬৪ জেলার খাবারের মানচিত্র।',
   openGraph: {
-    title: 'বাংলাদেশ ফুড ম্যাপ',
-    description: 'তুমি বাংলাদেশের কতটা চেখেছ?',
-    images: ['/og/default.png'],
+    title: 'খাবার বুক · The Khabar Book',
+    description: 'তুমি বাংলাদেশের কতটা চেখেছ? ৬৪ জেলার খাবারের মানচিত্র।',
+    images: ['/og/bangladesh-food-map-post.png'],
     locale: 'bn_BD',
     type: 'website',
   },
@@ -22,8 +37,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${noto.className} bg-white text-gray-900 antialiased`}>
+    <html lang="bn" className={`${hind.variable} ${tiro.variable}`}>
+      <body>
         {children}
         <VerifierHost />
       </body>
