@@ -12,12 +12,22 @@ import Polaroids from './Polaroids';
 import SharePanel from './SharePanel';
 import { TopStrip, TopPane } from './TopBoard';
 import DishCatalog from './DishCatalog';
+import DishModal from './DishModal';
 import DistrictSheet from './DistrictSheet';
 import SuggestForm from './SuggestForm';
 import { usePlacePicks } from '@/lib/usePlacePicks';
+import type { Dish } from '@/lib/types';
 
 type Modal = null | 'share' | 'suggest';
 type View = 'map' | 'dishes' | 'top';
+
+/** One URL per tab — refreshing lands you back on the tab you were on. */
+const PATHS: Record<View, string> = { map: '/', dishes: '/khabar', top: '/sera' };
+function viewFromPath(path: string): View {
+  if (path.startsWith('/khabar')) return 'dishes';
+  if (path.startsWith('/sera')) return 'top';
+  return 'map';
+}
 
 /** Districts whose food you haven't finished tasting (today: one dish each). */
 function untasted(eaten: Set<number>) {
@@ -31,13 +41,14 @@ function untasted(eaten: Set<number>) {
  * The Khabar Book — the whole app on one screen (style guide §1):
  * a paper book on a wooden desk, never scrolling, Bangla first.
  */
-export default function FoodMap() {
+export default function FoodMap({ initialView = 'map' }: { initialView?: View }) {
   const { eaten, toggle, reset } = useProgress();
   const { ratings, rate, toggleLove, toggleOverrated } = useRatings();
   const { picks, pick } = usePlacePicks();
   const [selected, setSelected] = useState<string | null>(null);
-  const [view, setView] = useState<View>('map');
+  const [view, setView] = useState<View>(initialView);
   const [modal, setModal] = useState<Modal>(null);
+  const [dish, setDish] = useState<Dish | null>(null);
   const [sheet, setSheet] = useState<string | null>(null);
   // suggest modal target: null = unlocked (district dropdown, catalog entry);
   // a district id = locked (map panel entry, defaults to today's special)
@@ -72,10 +83,28 @@ export default function FoodMap() {
   // Escape closes any open modal (prototype behaviour).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setModal(null);
+      if (e.key === 'Escape') {
+        setModal(null);
+        setDish(null);
+      }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  /** Shallow tab switch: update the URL without a page navigation, so the
+   *  mounted map keeps its state. Back/forward walk through the tabs. */
+  const goTo = useCallback((v: View) => {
+    setView(v);
+    if (window.location.pathname !== PATHS[v]) {
+      window.history.pushState(null, '', PATHS[v]);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onPop = () => setView(viewFromPath(window.location.pathname));
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
   }, []);
 
   /** Confetti petals when something good happens. */
@@ -159,21 +188,21 @@ export default function FoodMap() {
             <button
               className={view === 'map' ? 'active' : ''}
               aria-current={view === 'map'}
-              onClick={() => setView('map')}
+              onClick={() => goTo('map')}
             >
               🗺️ মানচিত্র
             </button>
             <button
               className={view === 'dishes' ? 'active' : ''}
               aria-current={view === 'dishes'}
-              onClick={() => setView('dishes')}
+              onClick={() => goTo('dishes')}
             >
               📖 খাবার
             </button>
             <button
               className={view === 'top' ? 'active' : ''}
               aria-current={view === 'top'}
-              onClick={() => setView('top')}
+              onClick={() => goTo('top')}
             >
               🏆 সেরা
             </button>
@@ -211,7 +240,7 @@ export default function FoodMap() {
             </button>
           </aside>
 
-          <TopStrip onOpen={() => setView('top')} />
+          <TopStrip onOpen={() => goTo('top')} />
 
           <aside className="piece panel">
             <div className="p-label">
@@ -237,10 +266,7 @@ export default function FoodMap() {
         {view === 'dishes' && (
           <main className="pane">
             <DishCatalog
-              onSelectDistrict={(id) => {
-                select(id);
-                setView('map');
-              }}
+              onOpenDish={setDish}
               onSuggest={() => {
                 setSuggestFrom(null);
                 setModal('suggest');
@@ -252,9 +278,10 @@ export default function FoodMap() {
         {view === 'top' && (
           <main className="pane">
             <TopPane
+              onOpenDish={setDish}
               onSelect={(id) => {
                 select(id);
-                setView('map');
+                goTo('map');
               }}
             />
           </main>
@@ -264,6 +291,18 @@ export default function FoodMap() {
         <div className={`toast${toast ? ' show' : ''}`} role="status">
           {toast}
         </div>
+
+        {dish && (
+          <DishModal
+            dish={dish}
+            onClose={() => setDish(null)}
+            onShowOnMap={(id) => {
+              setDish(null);
+              select(id);
+              goTo('map');
+            }}
+          />
+        )}
 
         {modal === 'share' && <SharePanel eaten={eaten} onClose={() => setModal(null)} />}
         {modal === 'suggest' && (

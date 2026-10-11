@@ -208,14 +208,14 @@ main.pane>*{flex:0 0 auto}
 .cat-tools input::-webkit-search-cancel-button{display:none}
 .cat-tools .link{margin-top:0;white-space:nowrap}
 .cat-count{margin:0;font-size:13.5px;color:var(--muted)}
-.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:9px}
-.cat-card{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);border-radius:8px;padding:7px 13px 7px 7px;text-align:left;font-weight:600;font-size:15.5px;transition:translate .15s,rotate .15s}
-.cat-card:hover{translate:0 -3px;rotate:-.6deg}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:12px}
+.cat-card{display:flex;flex-direction:column;align-items:stretch;padding:0;overflow:hidden;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);border-radius:10px;text-align:left;font-weight:600;font-size:15.5px;transition:translate .15s,rotate .15s}
+.cat-card:hover{translate:0 -4px;rotate:-.6deg}
 .cat-card>span{min-width:0}
-.cat-card .ph{width:46px;height:46px;border-radius:7px;flex:none}
-.cat-card .ph::before{font-size:22px}
-.cat-card small{display:block;font-weight:400;font-size:12.5px;color:var(--muted)}
-.cat-card .dist{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat-card .ph{width:100%;aspect-ratio:1;border-radius:0;flex:none}
+.cat-card .ph::before{font-size:44px}
+.cat-meta{display:grid;gap:2px;padding:10px 13px 12px;align-content:start}
+.cat-meta .dist{font-weight:400;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* slide-up district sheet (phones) */
 .sheet{position:fixed;left:50%;translate:-50% 0;bottom:0;z-index:35;width:min(560px,100%);max-height:min(72dvh,660px);overflow-y:auto;background:var(--paper);border:2px solid var(--ink);border-bottom:0;border-radius:16px 16px 0 0;box-shadow:0 -12px 34px rgba(36,35,31,.35);padding:14px 16px 22px;animation:sheetIn .4s cubic-bezier(.2,1.1,.4,1)}
@@ -239,6 +239,14 @@ main.pane>*{flex:0 0 auto}
 .sf-acts .link{margin-top:0}
 .sf-ok{margin:0;font-size:14px;color:var(--green);font-weight:700}
 .sf-err{margin:0;font-size:14px;color:var(--tomato-d);font-weight:700}
+
+/* dish detail modal (opened from খাবার / সেরা) */
+.dish-modal .ph{width:100%;aspect-ratio:16/10;border:1px solid var(--edge);border-radius:6px;flex:none}
+.dish-modal .ph::before{font-size:54px}
+.dish-en{font:italic 16px var(--serif);color:var(--muted);margin-top:-6px}
+.dish-loc{font-weight:700;font-size:14px;color:var(--tomato-d)}
+.dish-story{margin:0;font-size:15px;line-height:1.55;color:var(--body)}
+.dish-modal .btn{align-self:flex-start;margin-top:2px}
 
 /* place pick row (sheet) */
 .place-edit{display:flex;gap:8px;align-items:center;margin-top:2px}

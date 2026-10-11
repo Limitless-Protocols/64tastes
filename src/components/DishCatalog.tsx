@@ -2,20 +2,22 @@
 import { useState } from 'react';
 import { districtById, districts, dishes, dishesByDistrict, totalDishes } from '@/lib/data';
 import { bn } from '@/lib/format';
+import type { Dish } from '@/lib/types';
 import PhotoSlot from './PhotoSlot';
 
 type Props = {
-  onSelectDistrict: (districtId: string) => void;
+  /** Dish cards open the detail modal (no map jump from this tab). */
+  onOpenDish: (dish: Dish) => void;
   onSuggest: () => void;
 };
 
 /**
- * The খাবার tab: every dish in the book as one flat card grid — dish name
- * plus a district subtext. Search matches dish OR district names (Bangla or
- * English); the dropdown narrows to a single district. Picking a dish jumps
- * back to the map tab with its district selected.
+ * The খাবার tab: every dish in the book as one flat grid of vertical cards —
+ * big square image on top, dish name + district underneath. Search matches
+ * dish OR district names (Bangla or English); the dropdown narrows to a
+ * single district. Picking a card opens the dish detail modal.
  */
-export default function DishCatalog({ onSelectDistrict, onSuggest }: Props) {
+export default function DishCatalog({ onOpenDish, onSuggest }: Props) {
   const [q, setQ] = useState('');
   const [dist, setDist] = useState('');
 
@@ -98,11 +100,11 @@ export default function DishCatalog({ onSelectDistrict, onSuggest }: Props) {
               <button
                 key={dish.id}
                 className="cat-card"
-                onClick={() => onSelectDistrict(dish.districtId)}
+                onClick={() => onOpenDish(dish)}
                 title={`${dish.nameBn} — ${d?.nameBn}`}
               >
                 <PhotoSlot dish={dish} />
-                <span>
+                <span className="cat-meta">
                   {dish.nameBn}
                   <small className="dist">📍 {d?.nameBn}</small>
                 </span>

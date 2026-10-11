@@ -49,7 +49,15 @@ export function TopStrip({ onOpen }: { onOpen: () => void }) {
  * popular spots) when GET /api/top answers, the demo boards otherwise, and
  * the honest empty state when the API works but nothing is ranked yet.
  */
-export function TopPane({ onSelect }: { onSelect: (districtId: string) => void }) {
+export function TopPane({
+  onSelect,
+  onOpenDish,
+}: {
+  /** District rows jump to the map with that district selected. */
+  onSelect: (districtId: string) => void;
+  /** Dish rows open the detail modal instead of navigating. */
+  onOpenDish: (dish: Leader['dish']) => void;
+}) {
   const data = useTopData();
   const [tab, setTab] = useState<'love' | 'over'>('love');
 
@@ -100,7 +108,7 @@ export function TopPane({ onSelect }: { onSelect: (districtId: string) => void }
               <button
                 className="rank rank-btn"
                 key={l.dish.slug}
-                onClick={() => onSelect(l.dish.districtId)}
+                onClick={() => onOpenDish(l.dish)}
                 title={`${l.dish.nameBn} — ${districtById[l.dish.districtId]?.nameBn}`}
               >
                 <PhotoSlot dish={l.dish} />
