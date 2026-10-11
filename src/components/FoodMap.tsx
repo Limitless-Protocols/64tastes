@@ -10,9 +10,14 @@ import MapZone from './MapZone';
 import Passport from './Passport';
 import Polaroids from './Polaroids';
 import SharePanel from './SharePanel';
-import { TopModal, TopStrip } from './TopBoard';
+import { TopStrip, TopPane } from './TopBoard';
+import DishCatalog from './DishCatalog';
+import DistrictSheet from './DistrictSheet';
+import SuggestForm from './SuggestForm';
+import { usePlacePicks } from '@/lib/usePlacePicks';
 
-type Modal = null | 'top' | 'share';
+type Modal = null | 'share' | 'suggest';
+type View = 'map' | 'dishes' | 'top';
 
 /** Districts whose food you haven't finished tasting (today: one dish each). */
 function untasted(eaten: Set<number>) {
@@ -29,9 +34,14 @@ function untasted(eaten: Set<number>) {
 export default function FoodMap() {
   const { eaten, toggle, reset } = useProgress();
   const { ratings, rate, toggleLove, toggleOverrated } = useRatings();
+  const { picks, pick } = usePlacePicks();
   const [selected, setSelected] = useState<string | null>(null);
+  const [view, setView] = useState<View>('map');
   const [modal, setModal] = useState<Modal>(null);
-  const [tab, setTab] = useState<'love' | 'over'>('love');
+  const [sheet, setSheet] = useState<string | null>(null);
+  // suggest modal target: null = unlocked (district dropdown, catalog entry);
+  // a district id = locked (map panel entry, defaults to today's special)
+  const [suggestFrom, setSuggestFrom] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -88,9 +98,15 @@ export default function FoodMap() {
     }
   }, []);
 
-  const select = useCallback((id: string) => {
-    setSelected((prev) => (prev === id ? null : id));
-  }, []);
+  const select = useCallback(
+    (id: string) => {
+      const next = selected === id ? null : id;
+      setSelected(next);
+      // phones: tapping a district also opens the slide-up sheet
+      if (window.matchMedia('(max-width:760px)').matches) setSheet(next);
+    },
+    [selected]
+  );
 
   const toggleEat = useCallback(
     (dishId: number, el?: HTMLElement | null) => {
@@ -140,15 +156,24 @@ export default function FoodMap() {
             </div>
           </div>
           <nav aria-label="Main navigation">
-            <button className={modal === null ? 'active' : ''} onClick={() => setModal(null)}>
+            <button
+              className={view === 'map' ? 'active' : ''}
+              aria-current={view === 'map'}
+              onClick={() => setView('map')}
+            >
               🗺️ মানচিত্র
             </button>
             <button
-              className={modal === 'top' ? 'active' : ''}
-              onClick={() => {
-                setTab('love');
-                setModal('top');
-              }}
+              className={view === 'dishes' ? 'active' : ''}
+              aria-current={view === 'dishes'}
+              onClick={() => setView('dishes')}
+            >
+              📖 খাবার
+            </button>
+            <button
+              className={view === 'top' ? 'active' : ''}
+              aria-current={view === 'top'}
+              onClick={() => setView('top')}
             >
               🏆 সেরা
             </button>
@@ -158,7 +183,7 @@ export default function FoodMap() {
           </nav>
         </header>
 
-        <main>
+        <main className={view === 'map' ? undefined : 'off'}>
           <section className="intro">
             <div className="eyebrow">খাবারের মানচিত্র</div>
             <h1>তুমি <em>বাংলাদেশের</em> কতটা চেখেছ?</h1>
@@ -186,7 +211,7 @@ export default function FoodMap() {
             </button>
           </aside>
 
-          <TopStrip onOpen={() => { setTab('love'); setModal('top'); }} />
+          <TopStrip onOpen={() => setView('top')} />
 
           <aside className="piece panel">
             <div className="p-label">
@@ -201,19 +226,83 @@ export default function FoodMap() {
               onToggle={toggleEat}
               onRate={rate}
               onOverrate={toggleOverrated}
-              onSuggest={() => showToast('ধন্যবাদ! সাজেস্ট ফর্ম শীঘ্রই আসবে।')}
+              onSuggest={() => {
+                setSuggestFrom(selected ?? special);
+                setModal('suggest');
+              }}
             />
           </aside>
-
-          <div className={`toast${toast ? ' show' : ''}`} role="status">
-            {toast}
-          </div>
-
-          {modal === 'top' && (
-            <TopModal tab={tab} onTab={setTab} onClose={() => setModal(null)} />
-          )}
-          {modal === 'share' && <SharePanel eaten={eaten} onClose={() => setModal(null)} />}
         </main>
+
+        {view === 'dishes' && (
+          <main className="pane">
+            <DishCatalog
+              onSelectDistrict={(id) => {
+                select(id);
+                setView('map');
+              }}
+              onSuggest={() => {
+                setSuggestFrom(null);
+                setModal('suggest');
+              }}
+            />
+          </main>
+        )}
+
+        {view === 'top' && (
+          <main className="pane">
+            <TopPane
+              onSelect={(id) => {
+                select(id);
+                setView('map');
+              }}
+            />
+          </main>
+        )}
+
+        {/* toast + modals sit at book level so they work from every tab */}
+        <div className={`toast${toast ? ' show' : ''}`} role="status">
+          {toast}
+        </div>
+
+        {modal === 'share' && <SharePanel eaten={eaten} onClose={() => setModal(null)} />}
+        {modal === 'suggest' && (
+          <div
+            className="mb"
+            role="dialog"
+            aria-modal="true"
+            aria-label="খাবার পরামর্শ দাও"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setModal(null);
+            }}
+          >
+            <div className="modal">
+              <h2>
+                খাবার পরামর্শ দাও
+                <button className="x" onClick={() => setModal(null)} aria-label="বন্ধ">✕</button>
+              </h2>
+              <p className="note">
+                {suggestFrom
+                  ? `${districtById[suggestFrom]?.nameBn} জেলার জন্য`
+                  : 'বইয়ের যেকোনো জেলার জন্য'}
+              </p>
+              <SuggestForm key={suggestFrom ?? 'any'} districtId={suggestFrom ?? undefined} standalone />
+            </div>
+          </div>
+        )}
+
+        {sheet && (
+          <DistrictSheet
+            districtId={sheet}
+            eaten={eaten}
+            ratings={ratings}
+            places={picks}
+            onToggle={toggleEat}
+            onRate={rate}
+            onPlace={pick}
+            onClose={() => setSheet(null)}
+          />
+        )}
       </div>
     </>
   );

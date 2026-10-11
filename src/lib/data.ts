@@ -6,6 +6,7 @@ import type { District, Dish } from './types';
 export const districts = districtsJson as District[];
 // districts.json lists every district; ones without a dish have empty-string fields
 export const dishes = (dishesJson as Dish[]).filter((d) => d.nameEn !== '');
+export const dishById: Record<number, Dish> = Object.fromEntries(dishes.map((d) => [d.id, d]));
 // The declared viewBox with a little padding, so the country (and the map's
 // drop shadow) always sits fully inside the SVG box — nothing can spill out
 // of the map zone and hide under the pieces around it.

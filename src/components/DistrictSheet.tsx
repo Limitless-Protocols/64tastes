@@ -16,6 +16,12 @@ type Props = {
   onClose: () => void;
 };
 
+/**
+ * The district sheet: a slide-up piece on phones (style guide — the map's
+ * district panel stays as-is on desktop; tapping a district on a phone opens
+ * this with the full dish + place list). Kept from origin/main, restyled to
+ * the Khabar Book paper look and wired to the unified rating model.
+ */
 export default function DistrictSheet({
   districtId, eaten, ratings, places, onToggle, onRate, onPlace, onClose,
 }: Props) {
@@ -23,21 +29,21 @@ export default function DistrictSheet({
   const list = dishesByDistrict[districtId] ?? [];
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-10 mx-auto max-h-[70vh] max-w-lg overflow-y-auto rounded-t-2xl border-t border-gray-200 bg-white p-4 text-gray-900 shadow-2xl">
-      <div className="flex items-start justify-between">
+    <div className="sheet" role="dialog" aria-modal="true" aria-label={district.nameBn}>
+      <div className="sheet-h">
         <div>
-          <h2 className="text-xl font-bold">{district.nameBn}</h2>
-          <p className="text-sm text-gray-500">{district.nameEn}</p>
+          <h2>{district.nameBn}</h2>
+          <p className="caption">{district.nameEn}</p>
         </div>
-        <button onClick={onClose} aria-label="Close" className="p-2 text-2xl leading-none">×</button>
+        <button onClick={onClose} aria-label="বন্ধ করো" className="x">✕</button>
       </div>
 
       {list.length === 0 ? (
-        <p className="mt-3 text-sm text-gray-500">
+        <p className="sheet-empty">
           এই জেলার বিখ্যাত খাবার এখনও যোগ হয়নি। তুমি জানলে বলো!
         </p>
       ) : (
-        <ul className="mt-3 space-y-3">
+        <ul>
           {list.map((dish) => {
             const has = eaten.has(dish.id);
             const mine = ratings[dish.id];
@@ -46,20 +52,20 @@ export default function DistrictSheet({
                 <button
                   onClick={() => onToggle(dish.id)}
                   aria-pressed={has}
-                  className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left ${
-                    has ? 'border-emerald-600 bg-emerald-50' : 'border-gray-200'
-                  }`}
+                  className={`p-more-row${has ? ' on' : ''}`}
                 >
                   <span>
-                    <span className="block font-medium">{dish.nameBn}</span>
-                    <span className="block text-sm text-gray-500">{dish.nameEn}</span>
+                    {dish.nameBn}
+                    <small style={{ display: 'block', fontWeight: 400, fontSize: 13, color: 'var(--muted)' }}>
+                      {dish.nameEn}
+                    </small>
                   </span>
-                  <span className="text-xl">{has ? '✅' : '⬜'}</span>
+                  <span>{has ? '✅' : '⬜'}</span>
                 </button>
 
                 {has && (
                   <>
-                    <div className="mt-2 flex flex-wrap gap-2 px-1">
+                    <div className="seg">
                       {RATING_OPTIONS.map((o) => (
                         <button
                           key={o.v}
@@ -72,11 +78,7 @@ export default function DistrictSheet({
                                 : { rating: o.v, overrated: mine?.overrated ?? false }
                             )
                           }
-                          className={`rounded-full border px-3 py-1 text-sm ${
-                            mine?.rating === o.v
-                              ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
-                              : 'border-gray-300 text-gray-700'
-                          }`}
+                          className={`chip${mine?.rating === o.v ? ' on' : ''}`}
                         >
                           {o.e} {o.bn}
                         </button>
@@ -85,11 +87,7 @@ export default function DistrictSheet({
                         disabled={!mine}
                         aria-pressed={mine?.overrated ?? false}
                         onClick={() => mine && onRate(dish.id, { ...mine, overrated: !mine.overrated })}
-                        className={`rounded-full border px-3 py-1 text-sm disabled:opacity-40 ${
-                          mine?.overrated
-                            ? 'border-amber-600 bg-amber-50 text-amber-800'
-                            : 'border-gray-300 text-gray-700'
-                        }`}
+                        className={`chip over${mine?.overrated ? ' on' : ''}`}
                       >
                         🙄 ওভাররেটেড
                       </button>
