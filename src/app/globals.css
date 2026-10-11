@@ -185,7 +185,7 @@ h1 em{font-style:normal;color:var(--green);text-decoration:underline;text-decora
 main.off{display:none}
 main.pane{display:flex;flex-direction:column;gap:13px;overflow-y:auto;padding:clamp(14px,3dvh,26px) 4.2% 30px;animation:rise .5s cubic-bezier(.2,1.1,.4,1) backwards}
 /* main>* sets min-height:0 — in the pane's column flex that would let tall
-   content (42 catalog sections) flex-shrink to nothing; scroll instead */
+   content (the catalog grid) flex-shrinks to nothing; scroll instead */
 main.pane>*{flex:0 0 auto}
 .pane h1{font-size:clamp(26px,2.6vw,38px)}
 .pane .mlist{list-style:none;padding-left:0;margin:0}
@@ -198,19 +198,24 @@ main.pane>*{flex:0 0 auto}
 .spot-row a{color:var(--green);font-weight:700}
 .spot-row span{color:var(--muted);font-size:13.5px;white-space:nowrap}
 
-/* খাবার catalog */
+/* খাবার catalog: flat dish-card grid with search + district filter */
 .cat-h{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
 .cat-h h1{margin-bottom:0}
-.cat-sec{border-top:1px dashed var(--line);padding-top:12px}
-.cat-sec:first-of-type{border-top:0;padding-top:0}
-.cat-sec h3{font:400 20px var(--serif);margin:0 0 9px}
-.cat-sec h3 small{font:italic 14px var(--serif);color:var(--muted);margin-left:9px}
-.cat-row{display:flex;flex-wrap:wrap;gap:8px}
-.cat-card{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);border-radius:8px;padding:6px 13px 6px 6px;text-align:left;font-weight:600;font-size:15px;transition:translate .15s,rotate .15s}
-.cat-card:hover{translate:0 -3px;rotate:-1deg}
-.cat-card .ph{width:40px;height:40px;border-radius:6px;flex:none}
-.cat-card .ph::before{font-size:20px}
+.cat-tools{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.cat-tools input,.cat-tools select{border:1.5px solid var(--edge);background:#fff;color:var(--ink);border-radius:8px;padding:9px 12px;font:400 15px var(--sans)}
+.cat-tools input{flex:1;min-width:180px}
+.cat-tools input:focus,.cat-tools select:focus{border-color:var(--green);outline:none}
+.cat-tools input::-webkit-search-cancel-button{display:none}
+.cat-tools .link{margin-top:0;white-space:nowrap}
+.cat-count{margin:0;font-size:13.5px;color:var(--muted)}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:9px}
+.cat-card{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);border-radius:8px;padding:7px 13px 7px 7px;text-align:left;font-weight:600;font-size:15.5px;transition:translate .15s,rotate .15s}
+.cat-card:hover{translate:0 -3px;rotate:-.6deg}
+.cat-card>span{min-width:0}
+.cat-card .ph{width:46px;height:46px;border-radius:7px;flex:none}
+.cat-card .ph::before{font-size:22px}
 .cat-card small{display:block;font-weight:400;font-size:12.5px;color:var(--muted)}
+.cat-card .dist{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* slide-up district sheet (phones) */
 .sheet{position:fixed;left:50%;translate:-50% 0;bottom:0;z-index:35;width:min(560px,100%);max-height:min(72dvh,660px);overflow-y:auto;background:var(--paper);border:2px solid var(--ink);border-bottom:0;border-radius:16px 16px 0 0;box-shadow:0 -12px 34px rgba(36,35,31,.35);padding:14px 16px 22px;animation:sheetIn .4s cubic-bezier(.2,1.1,.4,1)}

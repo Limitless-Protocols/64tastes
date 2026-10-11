@@ -1,5 +1,6 @@
 'use client';
-import { districts, dishesByDistrict, totalDishes } from '@/lib/data';
+import { useState } from 'react';
+import { districtById, districts, dishes, dishesByDistrict, totalDishes } from '@/lib/data';
 import { bn } from '@/lib/format';
 import PhotoSlot from './PhotoSlot';
 
@@ -9,13 +10,34 @@ type Props = {
 };
 
 /**
- * The খাবার tab: every dish in the book, grouped by district. Picking a dish
- * jumps back to the map tab with its district selected. The suggest button
- * opens the form with a district dropdown (the map's entry point is locked
- * to the tapped district instead).
+ * The খাবার tab: every dish in the book as one flat card grid — dish name
+ * plus a district subtext. Search matches dish OR district names (Bangla or
+ * English); the dropdown narrows to a single district. Picking a dish jumps
+ * back to the map tab with its district selected.
  */
 export default function DishCatalog({ onSelectDistrict, onSuggest }: Props) {
+  const [q, setQ] = useState('');
+  const [dist, setDist] = useState('');
+
   const withDishes = districts.filter((d) => (dishesByDistrict[d.id] ?? []).length > 0);
+
+  const needle = q.trim().toLowerCase();
+  const rows = dishes.filter((dish) => {
+    if (dist && dish.districtId !== dist) return false;
+    if (!needle) return true;
+    const d = districtById[dish.districtId];
+    return (
+      dish.nameBn.includes(needle) ||
+      dish.nameEn.toLowerCase().includes(needle) ||
+      (d?.nameBn ?? '').includes(needle) ||
+      (d?.nameEn ?? '').toLowerCase().includes(needle)
+    );
+  });
+
+  const clear = () => {
+    setQ('');
+    setDist('');
+  };
 
   return (
     <>
@@ -30,30 +52,65 @@ export default function DishCatalog({ onSelectDistrict, onSuggest }: Props) {
         <button className="btn" onClick={onSuggest}>🍽️ খাবার পরামর্শ দাও</button>
       </div>
 
-      {withDishes.map((d) => (
-        <section className="cat-sec" key={d.id}>
-          <h3>
-            {d.nameBn}
-            <small>{d.nameEn}</small>
-          </h3>
-          <div className="cat-row">
-            {(dishesByDistrict[d.id] ?? []).map((dish) => (
+      <div className="cat-tools">
+        <input
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="🔍 খাবার বা জেলা খোঁজো…"
+          aria-label="খাবার বা জেলা খোঁজো"
+        />
+        <select
+          value={dist}
+          onChange={(e) => setDist(e.target.value)}
+          aria-label="জেলা বাছো"
+        >
+          <option value="">সব জেলা</option>
+          {withDishes.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.nameBn} ({d.nameEn})
+            </option>
+          ))}
+        </select>
+        {(q || dist) && (
+          <button className="link" onClick={clear}>
+            মুছো ✕
+          </button>
+        )}
+      </div>
+
+      <p className="cat-count">
+        {rows.length === totalDishes
+          ? `${bn(totalDishes)}টি খাবার`
+          : `${bn(rows.length)}টি খাবার দেখানো হচ্ছে · ${bn(totalDishes)}টের মধ্যে`}
+      </p>
+
+      {rows.length === 0 ? (
+        <div className="piece pane-note">
+          <p className="note">কোনো খাবার পাওয়া যায়নি — নাম বা জেলা বদলে দেখো।</p>
+          <button className="link" onClick={clear}>ফিল্টার মুছো</button>
+        </div>
+      ) : (
+        <div className="cat-grid">
+          {rows.map((dish) => {
+            const d = districtById[dish.districtId];
+            return (
               <button
                 key={dish.id}
                 className="cat-card"
-                onClick={() => onSelectDistrict(d.id)}
-                title={`${dish.nameBn} — ${d.nameBn}`}
+                onClick={() => onSelectDistrict(dish.districtId)}
+                title={`${dish.nameBn} — ${d?.nameBn}`}
               >
                 <PhotoSlot dish={dish} />
                 <span>
                   {dish.nameBn}
-                  <small>{dish.nameEn}</small>
+                  <small className="dist">📍 {d?.nameBn}</small>
                 </span>
               </button>
-            ))}
-          </div>
-        </section>
-      ))}
+            );
+          })}
+        </div>
+      )}
     </>
   );
 }
