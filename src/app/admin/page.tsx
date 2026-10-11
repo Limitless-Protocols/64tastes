@@ -8,6 +8,7 @@ import AdminLogin from '@/components/AdminLogin';
 import ModerateButtons from '@/components/ModerateButtons';
 import { MIN_PICKS } from '@/lib/spots';
 import PlaceModerateRow from '@/components/PlaceModerateRow';
+import LogoutButton from '@/components/LogoutButton';
 
 export const metadata = { title: 'Admin', robots: { index: false, follow: false } };
 
@@ -66,6 +67,7 @@ async function AdminContent() {
 
   return (
     <>
+      <LogoutButton/>
       <h2 className="mt-6 text-lg font-semibold">Pending ({pending.length})</h2>
       <ul className="mt-2 space-y-3">
         {pending.map((r) => (

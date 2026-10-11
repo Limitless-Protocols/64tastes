@@ -7,8 +7,8 @@ export const ADMIN_COOKIE = 'ft_admin';
 const sign = (data: string) =>
   createHmac('sha256', process.env.SESSION_SECRET!).update(data).digest('base64url');
 
-export function makeSession(deviceId: string): string {
-  const data = `${deviceId}.${Date.now() + MAX_AGE * 1000}`;
+export function makeSession(deviceId: string, maxAgeSeconds = MAX_AGE): string {
+  const data = `${deviceId}.${Date.now() + maxAgeSeconds * 1000}`;
   return `${data}.${sign(data)}`;
 }
 

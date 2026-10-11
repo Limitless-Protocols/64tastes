@@ -1,39 +1,72 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+
+type GoogleId = {
+  initialize: (options: Record<string, unknown>) => void;
+  renderButton: (el: HTMLElement, options: Record<string, unknown>) => void;
+};
+declare global {
+  interface Window {
+    google?: { accounts?: { id: GoogleId } };
+  }
+}
+
+const SRC = 'https://accounts.google.com/gsi/client';
 
 export default function AdminLogin() {
   const router = useRouter();
-  const [token, setToken] = useState('');
-  const [error, setError] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
-  async function login() {
-    const res = await fetch('/api/admin/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-    });
-    if (res.ok) router.refresh();
-    else setError(true);
-  }
+  useEffect(() => {
+    let cancelled = false;
+
+    async function onCredential(response: { credential: string }) {
+      setMessage(null);
+      const res = await fetch('/api/admin/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+      if (res.ok) router.refresh();
+      else if (res.status === 403) setMessage('This Google account is not on the admin list.');
+      else setMessage('Sign-in failed. Please try again.');
+    }
+
+    function setup() {
+      const gid = window.google?.accounts?.id;
+      if (cancelled || !box.current || !gid) return;
+      gid.initialize({
+        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        callback: onCredential,
+      });
+      gid.renderButton(box.current, { theme: 'outline', size: 'large', text: 'signin_with' });
+    }
+
+    if (window.google?.accounts?.id) {
+      setup();
+    } else {
+      let script = document.querySelector<HTMLScriptElement>(`script[src="${SRC}"]`);
+      if (!script) {
+        script = document.createElement('script');
+        script.src = SRC;
+        script.async = true;
+        document.head.appendChild(script);
+      }
+      script.addEventListener('load', setup);
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   return (
-    <form
-      className="mt-4 space-y-2"
-      onSubmit={(e) => {
-        e.preventDefault();
-        login();
-      }}
-    >
-      <input
-        type="password"
-        value={token}
-        onChange={(e) => setToken(e.target.value)}
-        placeholder="Admin token"
-        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900"
-      />
-      <button type="submit" className="rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white">Log in</button>
-      {error && <p className="text-sm text-red-600">Wrong token or too many attempts.</p>}
-    </form>
+    <div className="mt-4">
+      <p className="mb-3 text-sm text-gray-600">Sign in with an admin Google account.</p>
+      <div ref={box} />
+      {message && <p className="mt-3 text-sm text-red-600">{message}</p>}
+    </div>
   );
 }
