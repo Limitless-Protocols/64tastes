@@ -15,7 +15,7 @@ export const metadata = { title: 'Admin', robots: { index: false, follow: false 
 export default function AdminPage() {
   return (
     <main className="mx-auto max-w-lg p-4 text-gray-900">
-      <h1 className="text-2xl font-bold">Dish suggestions</h1>
+      <h1 className="text-2xl font-bold">Admin Moderation</h1>
       <Suspense fallback={<p className="mt-4 text-gray-500">Loading…</p>}>
         <AdminContent />
       </Suspense>
@@ -68,7 +68,7 @@ async function AdminContent() {
   return (
     <>
       <LogoutButton/>
-      <h2 className="mt-6 text-lg font-semibold">Pending ({pending.length})</h2>
+      <h2 className="mt-6 text-lg font-semibold">Food suggestions to review ({pending.length})</h2>
       <ul className="mt-2 space-y-3">
         {pending.map((r) => (
           <li key={r.id} className="rounded-xl border border-gray-200 p-3">
