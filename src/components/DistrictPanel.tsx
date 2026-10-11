@@ -1,14 +1,15 @@
 'use client';
 import { districtById, dishesByDistrict } from '@/lib/data';
-import { RATING_OPTIONS, type Rating } from '@/lib/useRatings';
+import { RATING_OPTIONS, type MyRating } from '@/lib/useRatings';
 import PhotoSlot from './PhotoSlot';
 
 type Props = {
   districtId: string | null;
   eaten: Set<number>;
-  ratings: Record<number, Rating>;
+  ratings: Record<number, MyRating>;
   onToggle: (dishId: number, el: HTMLElement | null) => void;
-  onRate: (dishId: number, r: Rating) => void;
+  onRate: (dishId: number, r: MyRating | null) => void;
+  onOverrate: (dishId: number) => void;
   onSuggest: () => void;
 };
 
@@ -24,6 +25,7 @@ export default function DistrictPanel({
   ratings,
   onToggle,
   onRate,
+  onOverrate,
   onSuggest,
 }: Props) {
   const list = districtId ? dishesByDistrict[districtId] ?? [] : [];
@@ -72,13 +74,28 @@ export default function DistrictPanel({
         {RATING_OPTIONS.map((r) => (
           <button
             key={r.v}
-            className={`chip${rating === r.v ? ' on' : ''}`}
-            aria-pressed={rating === r.v}
-            onClick={() => onRate(dish.id, r.v)}
+            className={`chip${rating?.rating === r.v ? ' on' : ''}`}
+            aria-pressed={rating?.rating === r.v}
+            onClick={() =>
+              onRate(
+                dish.id,
+                rating?.rating === r.v
+                  ? null
+                  : { rating: r.v, overrated: rating?.overrated ?? false }
+              )
+            }
           >
             {r.e} {r.bn}
           </button>
         ))}
+        <button
+          className={`chip over${rating?.overrated ? ' on' : ''}`}
+          disabled={!rating}
+          aria-pressed={!!rating?.overrated}
+          onClick={() => onOverrate(dish.id)}
+        >
+          🙄 ওভাররেটেড
+        </button>
       </div>
 
       {list.length > 1 && (

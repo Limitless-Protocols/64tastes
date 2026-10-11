@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/site';
 import { Hind_Siliguri, Tiro_Bangla } from 'next/font/google';
 import './globals.css';
+import VerifierHost from '@/components/VerifierHost';
 
 // Style guide §3: Tiro Bangla is the serif (italics for English asides),
 // Hind Siliguri the UI family — Bangla first, English second.
@@ -37,7 +38,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="bn" className={`${hind.variable} ${tiro.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <VerifierHost />
+      </body>
     </html>
   );
 }

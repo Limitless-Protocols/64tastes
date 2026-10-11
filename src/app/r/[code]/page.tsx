@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default function ResultPage({ params }: Props) {
   return (
-    <Suspense fallback={<p>লোড হচ্ছে…</p>}>
+    <Suspense fallback={<main className="mx-auto max-w-lg p-4 text-gray-500">লোড হচ্ছে…</main>}>
       <ResultContent params={params} />
     </Suspense>
   );

@@ -152,6 +152,7 @@ h1 em{font-style:normal;color:var(--green);text-decoration:underline;text-decora
 .chips.open{max-height:112px;opacity:1}
 .chip{border:1.5px solid var(--edge);background:var(--card);border-radius:99px;padding:6px 13px;font-weight:600;font-size:15px;transition:transform .15s,background .2s}
 .chip:active{transform:scale(.93)}.chip.on{background:var(--mango);border-color:var(--ink)}
+.chip.over{border-style:dashed}.chip.over.on{background:color-mix(in srgb,var(--tomato) 26%,var(--card));border-color:var(--tomato);border-style:solid;color:var(--tomato-d)}
 .p-more{list-style:none;margin:2px 0 0;padding:0;display:grid;gap:4px}
 .p-more-row{display:flex;width:100%;justify-content:space-between;gap:8px;padding:6px 12px;font-size:15px;font-weight:600;background:color-mix(in srgb,var(--card) 70%,transparent);border:1px solid var(--edge);border-radius:6px}
 .p-more-row.on{background:var(--mango);border-color:var(--ink)}

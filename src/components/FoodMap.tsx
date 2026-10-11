@@ -28,8 +28,7 @@ function untasted(eaten: Set<number>) {
  */
 export default function FoodMap() {
   const { eaten, toggle, reset } = useProgress();
-  const { ratings, setRating, toggleLove } = useRatings();
-
+  const { ratings, rate, toggleLove, toggleOverrated } = useRatings();
   const [selected, setSelected] = useState<string | null>(null);
   const [modal, setModal] = useState<Modal>(null);
   const [tab, setTab] = useState<'love' | 'over'>('love');
@@ -40,7 +39,7 @@ export default function FoodMap() {
   const tier = getTier(count, totalDishes);
   const remaining = totalDishes - count;
   const loveCount = useMemo(
-    () => Object.values(ratings).filter((r) => r === 'love').length,
+    () => Object.values(ratings).filter((r) => r.rating === 'love').length,
     [ratings]
   );
   // Today's special: the first district you haven't tasted yet — stable across
@@ -117,7 +116,7 @@ export default function FoodMap() {
 
   const heart = useCallback(
     (dishId: number, el: HTMLElement | null) => {
-      if (ratings[dishId] !== 'love') burst(el);
+      if (ratings[dishId]?.rating !== 'love') burst(el);
       toggleLove(dishId);
     },
     [ratings, toggleLove, burst]
@@ -200,7 +199,8 @@ export default function FoodMap() {
               eaten={eaten}
               ratings={ratings}
               onToggle={toggleEat}
-              onRate={setRating}
+              onRate={rate}
+              onOverrate={toggleOverrated}
               onSuggest={() => showToast('ধন্যবাদ! সাজেস্ট ফর্ম শীঘ্রই আসবে।')}
             />
           </aside>

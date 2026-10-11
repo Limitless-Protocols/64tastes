@@ -1,11 +1,11 @@
 'use client';
 import type { CSSProperties } from 'react';
 import { districtById, dishesByDistrict } from '@/lib/data';
-import type { Rating } from '@/lib/useRatings';
+import type { MyRating } from '@/lib/useRatings';
 import PhotoSlot from './PhotoSlot';
 
 type Props = {
-  ratings: Record<number, Rating>;
+  ratings: Record<number, MyRating>;
   onSelect: (districtId: string) => void;
   onHeart: (dishId: number, el: HTMLElement | null) => void;
 };
@@ -20,7 +20,7 @@ export default function Polaroids({ ratings, onSelect, onHeart }: Props) {
         const dish = (dishesByDistrict[id] ?? [])[0];
         if (!dish) return null;
         const district = districtById[id];
-        const loved = ratings[dish.id] === 'love';
+        const loved = ratings[dish.id]?.rating === 'love';
         return (
           <div
             key={id}
