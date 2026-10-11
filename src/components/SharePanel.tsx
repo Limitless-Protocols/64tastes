@@ -7,51 +7,64 @@ import { getTier } from '@/lib/tiers';
 import { totalDishes } from '@/lib/data';
 import { bn } from '@/lib/format';
 
+type Shot = { url: string; blob: Blob } | { error: true };
+
+/**
+ * The share modal (prototype `#mShare`): pick a size, then share / download /
+ * copy the link. The card is rendered off-screen with html-to-image and shown
+ * as a PNG preview — each size is rendered once and cached.
+ */
 export default function SharePanel({ eaten, onClose }: { eaten: Set<number>; onClose: () => void }) {
   const [format, setFormat] = useState<Format>('landscape');
-  const [dataUrl, setDataUrl] = useState<string | null>(null);
-  const [blob, setBlob] = useState<Blob | null>(null);
-  const [error, setError] = useState(false);
+  const [shots, setShots] = useState<Partial<Record<Format, Shot>>>({});
   const [copied, setCopied] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const tier = getTier(eaten.size, totalDishes);
-  const link = `${window.location.origin}/r/${encodeProgress(eaten)}`;
+  const link = typeof window === 'undefined' ? '' : `${window.location.origin}/r/${encodeProgress(eaten)}`;
 
   useEffect(() => {
     let cancelled = false;
-    setDataUrl(null);
-    setBlob(null);
-    setError(false);
+    if (shots[format]) return;
     (async () => {
       const node = cardRef.current;
       if (!node) return;
       const { w, h } = FORMATS[format];
-      const url = await renderPng(node, w, h);
-      const b = await (await fetch(url)).blob();
-      if (!cancelled) {
-        setDataUrl(url);
-        setBlob(b);
+      try {
+        const url = await renderPng(node, w, h);
+        const blob = await (await fetch(url)).blob();
+        if (!cancelled) setShots((prev) => ({ ...prev, [format]: { url, blob } }));
+      } catch {
+        if (!cancelled) setShots((prev) => ({ ...prev, [format]: { error: true } }));
       }
-    })().catch(() => {
-      if (!cancelled) setError(true);
-    });
+    })();
     return () => {
       cancelled = true;
     };
-  }, [format, eaten]);
+  }, [format, shots]);
+
+  useEffect(
+    () => () => {
+      for (const t of timers.current) clearTimeout(t);
+    },
+    []
+  );
+
+  const shot = shots[format];
+  const ready = shot && 'url' in shot ? shot : null;
 
   function download() {
-    if (!dataUrl) return;
+    if (!ready) return;
     const a = document.createElement('a');
-    a.href = dataUrl;
-    a.download = 'bangladesh-food-map.png';
+    a.href = ready.url;
+    a.download = 'khabar-book.png';
     a.click();
   }
 
   async function share() {
-    if (!blob) return;
-    const file = new File([blob], 'bangladesh-food-map.png', { type: 'image/png' });
+    if (!ready) return;
+    const file = new File([ready.blob], 'khabar-book.png', { type: 'image/png' });
     const text = `আমি ${bn(eaten.size)}টি খাবার চেখে দেখেছি — ${tier.bn}! তুমি কতটা চেখেছ? ${link}`;
     if (navigator.canShare?.({ files: [file] })) {
       try {
@@ -67,50 +80,58 @@ export default function SharePanel({ eaten, onClose }: { eaten: Set<number>; onC
   async function copyLink() {
     await navigator.clipboard.writeText(link);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    timers.current.push(setTimeout(() => setCopied(false), 2000));
   }
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal" role="dialog" aria-modal="true" aria-label="Share your map">
-        <div className="flex items-center justify-between">
-          <h2>Share your map</h2>
-          <button onClick={onClose} aria-label="Close" className="close">×</button>
-        </div>
+    <div
+      className="mb"
+      role="dialog"
+      aria-modal="true"
+      aria-label="শেয়ার করো"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="modal">
+        <h2>
+          শেয়ার করো
+          <button className="x" onClick={onClose} aria-label="Close">✕</button>
+        </h2>
 
-        <div className="mt-2 flex flex-wrap">
+        <div className="seg">
           {(Object.keys(FORMATS) as Format[]).map((f) => (
             <button
               key={f}
-              onClick={() => setFormat(f)}
-              className="chip"
+              className={`chip${format === f ? ' on' : ''}`}
               aria-pressed={format === f}
+              onClick={() => setFormat(f)}
             >
               {FORMATS[f].label}
             </button>
           ))}
         </div>
 
-        <div className="mt-3 flex min-h-40 items-center justify-center rounded bg-brand-50">
-          {error ? (
-            <p className="p-4 caption text-error">Couldn&apos;t create the image. Please try again.</p>
-          ) : dataUrl ? (
+        <div className="preview">
+          {shot && 'error' in shot ? (
+            <p className="note">কার্ড বানানো যায়নি — আবার চেষ্টা করো।</p>
+          ) : ready ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={dataUrl} alt="Your food map card" className="max-h-[45vh] rounded" />
+            <img src={ready.url} alt="তোমার ফুড ম্যাপ কার্ড" />
           ) : (
-            <p className="caption">Preparing your card…</p>
+            <p className="note">কার্ড বানানো হচ্ছে…</p>
           )}
         </div>
 
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          <button onClick={share} disabled={!blob} className="btn btn-primary btn-sm">
-            Share
+        <div className="acts">
+          <button className="btn" onClick={share} disabled={!ready}>
+            শেয়ার
           </button>
-          <button onClick={download} disabled={!dataUrl} className="btn btn-ghost btn-sm">
-            Download
+          <button className="btn alt" onClick={download} disabled={!ready}>
+            ডাউনলোড
           </button>
-          <button onClick={copyLink} className="btn btn-ghost btn-sm">
-            {copied ? 'Copied!' : 'Copy link'}
+          <button className="btn alt" onClick={copyLink}>
+            {copied ? 'কপি হয়েছে!' : 'লিংক কপি'}
           </button>
         </div>
       </div>

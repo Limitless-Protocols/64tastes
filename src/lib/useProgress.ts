@@ -1,48 +1,41 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { dishes } from './data';
+import { createLocalStore, useHydrated, useLocalStore } from './store';
 
-const KEY = 'foodmap:progress:v1';
 const validIds = new Set(dishes.map((d) => d.id));
 
+/** Progress: the ids of the dishes you've eaten (key kept from earlier versions). */
+export const progressStore = createLocalStore<number[]>({
+  key: 'foodmap:progress:v1',
+  fallback: [],
+  parse: (raw) => {
+    try {
+      const ids: unknown = JSON.parse(raw);
+      return Array.isArray(ids)
+        ? ids.filter((id): id is number => typeof id === 'number' && validIds.has(id))
+        : [];
+    } catch {
+      return [];
+    }
+  },
+  serialize: (v) => JSON.stringify(v),
+});
+
+/** Thin hook over the progress localStorage store (see store.ts for why). */
 export function useProgress() {
-  const [eaten, setEaten] = useState<Set<number>>(new Set());
-  const [loaded, setLoaded] = useState(false);
-
-  // Read saved progress after the page loads (the server has no localStorage)
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) {
-        const ids: number[] = JSON.parse(raw);
-        setEaten(new Set(ids.filter((id) => validIds.has(id))));
-      }
-    } catch {
-      // ignore corrupted or unavailable storage
-    }
-    setLoaded(true);
-  }, []);
-
-  // Save whenever progress changes (but only after the first load)
-  useEffect(() => {
-    if (!loaded) return;
-    try {
-      localStorage.setItem(KEY, JSON.stringify([...eaten]));
-    } catch {
-      // ignore (private mode, storage full)
-    }
-  }, [eaten, loaded]);
+  const ids = useLocalStore(progressStore);
+  const hydrated = useHydrated();
+  const eaten = useMemo(() => new Set(ids), [ids]);
 
   const toggle = useCallback((id: number) => {
-    setEaten((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    const next = new Set(progressStore.read());
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    progressStore.write([...next]);
   }, []);
 
-  const reset = useCallback(() => setEaten(new Set()), []);
+  const reset = useCallback(() => progressStore.write([]), []);
 
-  return { eaten, toggle, reset, loaded };
+  return { eaten, toggle, reset, loaded: hydrated };
 }
