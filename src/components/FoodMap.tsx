@@ -60,7 +60,6 @@ export default function FoodMap() {
       <div className="book-frame">
         <header className="site-header">
           <Link className="brand-lockup" href="/" aria-label="Khabar Book home">
-            <span className="brand-mark" aria-hidden="true">🍛</span>
             <span><strong>64<span>Tastes</span></strong><small>64 Tastes · Edition 01 · Bangladesh</small></span>
           </Link>
           <nav className="site-nav" aria-label="Main navigation">
