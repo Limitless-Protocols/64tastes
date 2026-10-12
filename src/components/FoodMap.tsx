@@ -61,7 +61,7 @@ export default function FoodMap() {
         <header className="site-header">
           <Link className="brand-lockup" href="/" aria-label="Khabar Book home">
             <span className="brand-mark" aria-hidden="true">🍛</span>
-            <span><strong>Khabar<span>Book</span></strong><small>খাবার বুক · Edition 01 · Bangladesh</small></span>
+            <span><strong>64<span>Tastes</span></strong><small>64 Tastes · Edition 01 · Bangladesh</small></span>
           </Link>
           <nav className="site-nav" aria-label="Main navigation">
             <a className="nav-current" href="#map">মানচিত্র</a>
@@ -72,7 +72,7 @@ export default function FoodMap() {
 
         <main className="food-dashboard">
           <section className="intro-card">
-            <span className="eyebrow"><i /> বাংলাদেশের স্বাদের অ্যাটলাস</span>
+            <span className="eyebrow"><i /> বাংলাদেশের ঘুরি স্বাদের সন্ধানে</span>
             <h1>দেশের স্বাদ,<br /><em>তোমার গল্প।</em></h1>
             <p className="intro-english">How much of Bangladesh have you tasted?</p>
             <p>৬৪ জেলার পরিচিত স্বাদ ঘুরে দেখো। যেগুলো চেখেছ, সেগুলো যোগ করো তোমার নিজের খাবারের মানচিত্রে।</p>
@@ -90,7 +90,7 @@ export default function FoodMap() {
           <section className="map-stage" id="map" aria-label="Explore Bangladesh by district">
             <div className="map-poster">
               <div className="poster-heading">
-                <div><span>বাংলাদেশ খাবার মানচিত্র</span><strong>আমার বাংলাদেশ</strong></div>
+                <div><span>বাংলাদেশ খাবার মানচিত্র</span><strong>স্বাদের বাংলাদেশ</strong></div>
                 <div className="poster-count"><b>{bn(count)}</b><span>/{bn(totalDishes)}<small>খাবার</small></span></div>
               </div>
               <svg viewBox={viewBox} className="district-map" role="group" aria-label="Map of Bangladesh districts">
@@ -104,14 +104,14 @@ export default function FoodMap() {
                     }} />
                 ))}
               </svg>
-              <div className="poster-signature"><span>KHABAR BOOK</span><i /> <span>৬৪ জেলা · BANGLADESH</span></div>
+              <div className="poster-signature"><span>64 Tastes</span><i /> <span>৬৪ জেলা · BANGLADESH</span></div>
             </div>
-            <div className="map-legend"><span><i className="legend-dot tasted" /> চেখেছি</span><span><i className="legend-dot waiting" /> চেখার অপেক্ষায়</span><span><i className="legend-dot empty" /> আরও খাবার আসছে</span></div>
+            <div className="map-legend"><span><i className="legend-dot tasted" /> চেখেছি</span><span><i className="legend-dot waiting" /> খাওয়ার অপেক্ষায়</span><span><i className="legend-dot empty" /> অজানা</span></div>
           </section>
 
           <section className="share-banner">
             <span className="share-symbol" aria-hidden="true">➤</span>
-            <div><strong>স্বাদের গল্পটা ভাগ করো</strong><small>তোমার মানচিত্র থেকে বানাও শেয়ার করার মতো কার্ড</small></div>
+            <div><strong>স্বাদের গল্পটা শেয়ার করো</strong><small>তোমার মানচিত্র শেয়ার বন্ধুদের সাথে</small></div>
             <button onClick={() => setShowShare(true)}>কার্ড বানাও <span aria-hidden="true">→</span></button>
           </section>
 
@@ -128,7 +128,7 @@ export default function FoodMap() {
             {nextDish ? <><p>পরের স্বাদ হতে পারে <b>{nextDish.nameBn}</b>!</p><button className="primary-button" onClick={surprise}>🎲 সারপ্রাইজ দাও</button></> : <><p>দারুণ! সব খাবার চেখে দেখেছ।</p><button className="primary-button" onClick={() => { if (confirm('Reset all progress?')) reset(); }}>আবার শুরু করো</button></>}
           </aside>
 
-          <footer className="home-footer"><button onClick={() => { if (confirm('Reset all progress?')) reset(); }}>প্রগতি মুছে ফেলো</button><span>Map data: geoBoundaries</span></footer>
+          <footer className="home-footer"><span>Map data: geoBoundaries</span></footer>
         </main>
       </div>
 
