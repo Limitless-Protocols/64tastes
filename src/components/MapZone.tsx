@@ -1,9 +1,11 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { CSSProperties, MouseEvent, FocusEvent } from 'react';
+import type { CSSProperties, PointerEvent as ReactPointerEvent, FocusEvent } from 'react';
 import { districtTone } from '@/lib/colors';
 import { districtById, districts, dishesByDistrict, paths, viewBox } from '@/lib/data';
 import { districtAnchor } from '@/lib/pins';
+import MapTooltip from './MapTooltip';
+import type { MapTooltipHandle } from './MapTooltip';
 
 type Props = {
   eaten: Set<number>;
@@ -11,7 +13,12 @@ type Props = {
   onSelect: (id: string) => void;
 };
 
-type Tip = { x: number; y: number; t: string; s: string };
+/** Touch-and-hold reveals the label; a quick tap is a plain single-step select. */
+const TOUCH_HOLD_LABEL = true;
+const TOUCH_HOLD_MS = 400;
+/** Gap above the pointer (mouse/pen) or finger (touch). */
+const GAP_MOUSE = 14;
+const GAP_TOUCH = 56;
 
 /** First `y` of a path ≈ its latitude — used to ripple districts north → south. */
 function firstY(d: string) {
@@ -52,7 +59,8 @@ const NOUKA = (
 export default function MapZone({ eaten, selected, onSelect }: Props) {
   const zoneRef = useRef<HTMLElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const [tip, setTip] = useState<Tip | null>(null);
+  const tipRef = useRef<MapTooltipHandle>(null);
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // px per viewBox unit — lets the 📍 pin keep a constant on-screen size.
   const [scale, setScale] = useState(1);
 
@@ -93,50 +101,82 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  const showTip = useCallback((el: Element, t: string, s: string) => {
-    const zone = zoneRef.current;
-    if (!zone) return;
-    const zr = zone.getBoundingClientRect();
-    const r = el.getBoundingClientRect();
-    setTip({ x: r.left + r.width / 2 - zr.left, y: r.top - zr.top - 8, t, s });
+  useEffect(
+    () => () => {
+      if (holdTimer.current) clearTimeout(holdTimer.current);
+    },
+    []
+  );
+
+  const hideLabel = useCallback(() => tipRef.current?.hide(), []);
+
+  // Mouse / pen: label follows the cursor, 14px above it.
+  const onMove = useCallback(
+    (e: ReactPointerEvent<SVGPathElement>, bn: string, en: string) => {
+      if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
+      tipRef.current?.setPoint(e.clientX, e.clientY - GAP_MOUSE);
+      tipRef.current?.show(bn, en);
+    },
+    []
+  );
+
+  // Touch: a 400ms hold reveals the label above the finger; a quick tap is a
+  // plain select (the click handler), so no label and no two-step flow.
+  const onDown = useCallback(
+    (e: ReactPointerEvent<SVGPathElement>, bn: string, en: string) => {
+      if (e.pointerType !== 'touch' || !TOUCH_HOLD_LABEL) return;
+      if (holdTimer.current) clearTimeout(holdTimer.current);
+      holdTimer.current = setTimeout(() => {
+        tipRef.current?.setPoint(e.clientX, e.clientY - GAP_TOUCH);
+        tipRef.current?.show(bn, en);
+      }, TOUCH_HOLD_MS);
+    },
+    []
+  );
+
+  const cancelHold = useCallback(() => {
+    if (holdTimer.current) clearTimeout(holdTimer.current);
+    tipRef.current?.hide();
   }, []);
 
-  const hideTip = useCallback(() => setTip(null), []);
+  // Keyboard focus: pin the label just above the focused district's box.
+  const onFocus = useCallback((e: FocusEvent<SVGPathElement>, bn: string, en: string) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    tipRef.current?.setPoint(r.left + r.width / 2, r.top - GAP_MOUSE);
+    tipRef.current?.show(bn, en);
+  }, []);
 
   return (
     <section className="map-zone" ref={zoneRef} aria-label="বাংলাদেশের খাবারের মানচিত্র">
       <div className="mand-bg" aria-hidden="true">{MANDALA}</div>
 
       <svg ref={svgRef} className="map-svg" viewBox={viewBox} role="group" aria-label="Map of Bangladesh districts">
-        {cells.map((c) => {
-          const onEnter = (e: MouseEvent<SVGPathElement>) =>
-            showTip(e.currentTarget, c.bn, c.en);
-          const onFocus = (e: FocusEvent<SVGPathElement>) =>
-            showTip(e.currentTarget, c.bn, c.en);
-          return (
-            <path
-              key={c.id}
-              d={c.d}
-              className={`d ${districtTone(c.id, eaten)}${selected === c.id ? ' sel' : ''}`}
-              style={{ '--cd': c.delay } as CSSProperties}
-              role="button"
-              tabIndex={0}
-              aria-label={c.label}
-              aria-pressed={selected === c.id}
-              onClick={() => onSelect(c.id)}
-              onMouseEnter={onEnter}
-              onMouseLeave={hideTip}
-              onFocus={onFocus}
-              onBlur={hideTip}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onSelect(c.id);
-                }
-              }}
-            />
-          );
-        })}
+        {cells.map((c) => (
+          <path
+            key={c.id}
+            d={c.d}
+            className={`d ${districtTone(c.id, eaten)}${selected === c.id ? ' sel' : ''}`}
+            style={{ '--cd': c.delay } as CSSProperties}
+            role="button"
+            tabIndex={0}
+            aria-label={c.label}
+            aria-pressed={selected === c.id}
+            onClick={() => onSelect(c.id)}
+            onPointerMove={(e) => onMove(e, c.bn, c.en)}
+            onPointerDown={(e) => onDown(e, c.bn, c.en)}
+            onPointerLeave={cancelHold}
+            onPointerCancel={cancelHold}
+            onPointerUp={cancelHold}
+            onFocus={(e) => onFocus(e, c.bn, c.en)}
+            onBlur={hideLabel}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onSelect(c.id);
+              }
+            }}
+          />
+        ))}
         {/* ONE 📍 pin — separate positioning (<g>) from animation (<text>). */}
         {pin && (
           <g className="pin-layer" transform={`translate(${pin.x} ${pin.y})`} aria-hidden="true">
@@ -152,12 +192,8 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
         )}
       </svg>
 
-      {tip && (
-        <div className="tip" role="presentation">
-          <b>{tip.t}</b>
-          <small>{tip.s}</small>
-        </div>
-      )}
+      {/* single district-name label — portal + rAF, never trapped by stacking */}
+      <MapTooltip ref={tipRef} />
 
       <div className="stamp" aria-hidden="true">
         <div>খাবার বুক<strong>৬৪ জেলা</strong>EDITION 01</div>
