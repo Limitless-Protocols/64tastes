@@ -1,6 +1,6 @@
 'use client';
-import { useState } from 'react';
-import { districts, paths, viewBox, totalDishes } from '@/lib/data';
+import { useMemo, useState } from 'react';
+import { districts, paths, viewBox, totalDishes, dishes, districtById } from '@/lib/data';
 import { useProgress } from '@/lib/useProgress';
 import { getTier } from '@/lib/tiers';
 import { districtTone, type DistrictTone } from '@/lib/colors';
@@ -10,12 +10,11 @@ import Link from 'next/link';
 import { usePlacePicks } from '@/lib/usePlacePicks';
 import { useRatings } from '@/lib/useRatings';
 
-/** Base fill vs. the darker shade used to highlight the selected district. */
 const FILLS: Record<DistrictTone, { base: string; selected: string }> = {
-  empty: { base: 'fill-gray-200 hover:fill-gray-300', selected: 'fill-gray-400' },
-  new: { base: 'fill-amber-100 hover:fill-amber-300', selected: 'fill-amber-400' },
-  partial: { base: 'fill-emerald-300 hover:fill-emerald-400', selected: 'fill-emerald-500' },
-  complete: { base: 'fill-emerald-600 hover:fill-emerald-700', selected: 'fill-emerald-800' },
+  empty: { base: 'tone-empty', selected: 'tone-empty' },
+  new: { base: 'tone-new', selected: 'tone-new' },
+  partial: { base: 'tone-partial', selected: 'tone-partial' },
+  complete: { base: 'tone-complete', selected: 'tone-complete' },
 };
 
 export default function FoodMap() {
@@ -23,12 +22,12 @@ export default function FoodMap() {
   const { ratings, rate } = useRatings();
   const { picks, pick, clearLocal } = usePlacePicks();
   const [selected, setSelected] = useState<string | null>(null);
-
+  const [showShare, setShowShare] = useState(false);
   const count = eaten.size;
   const tier = getTier(count, totalDishes);
   const pct = totalDishes ? Math.round((count / totalDishes) * 100) : 0;
-
-  const [showShare, setShowShare] = useState(false);
+  const nextDish = useMemo(() => dishes.find((d) => !eaten.has(d.id)), [eaten]);
+  const spotlights = [dishes[0], dishes.find((d) => d.slug === 'cumilla-roshmalai'), dishes.find((d) => d.slug === 'moulvibazar-seven-color-tea')].filter(Boolean);
 
   function handleToggle(id: number) {
     if (eaten.has(id)) {
@@ -42,83 +41,85 @@ export default function FoodMap() {
     return FILLS[districtTone(districtId, eaten)];
   }
 
+  function surprise() {
+    const remaining = dishes.filter((d) => !eaten.has(d.id));
+    if (!remaining.length) return;
+    const dish = remaining[Math.floor(Math.random() * remaining.length)];
+    setSelected(dish.districtId);
+  }
+
   return (
-    <div className={selected ? 'pb-72' : ''}>
-      <header className="mb-4">
-        <h1 className="text-2xl font-bold">বাংলাদেশ ফুড ম্যাপ</h1>
-        <p className="text-sm text-gray-500">Bangladesh Food Map</p>
-        <div className="mt-3 flex items-baseline justify-between">
-          <span className="font-semibold">{tier.bn}</span>
-          <span className="text-sm text-gray-600">{count} / {totalDishes}</span>
-        </div>
-        <div className="mt-1 h-2 rounded-full bg-gray-200">
-          <div className="h-2 rounded-full bg-emerald-600 transition-all" style={{ width: `${pct}%` }} />
-        </div>
-        <p className="mt-1 text-xs text-gray-500">{tier.en}</p>
-        {count > 0 && (
-          <button
-            onClick={() => setShowShare(true)}
-            className="mt-3 w-full rounded-lg bg-emerald-600 py-2 font-medium text-white"
-          >
-            Share my map
-          </button>
-        )}
-        <Link href="/top" className="mt-2 inline-block text-sm text-emerald-700 underline">সেরা খাবার দেখো →</Link>
-      </header>
+    <div className="food-app">
+      <div className="book-frame">
+        <header className="site-header">
+          <Link className="brand-lockup" href="/" aria-label="Khabar Book home">
+            <span className="brand-mark" aria-hidden="true">🍛</span>
+            <span><strong>Khabar<span>Book</span></strong><small>খাবার বুক · Edition 01 · Bangladesh</small></span>
+          </Link>
+          <nav className="site-nav" aria-label="Main navigation">
+            <a className="nav-current" href="#map">মানচিত্র</a>
+            <Link href="/top">সেরা খাবার</Link>
+            <button className="nav-share" onClick={() => setShowShare(true)}><span aria-hidden="true">↗</span> শেয়ার</button>
+          </nav>
+        </header>
 
-      <svg viewBox={viewBox} className="h-auto w-full" role="group" aria-label="Map of Bangladesh districts">
-        {districts.map((d) => (
-          <path
-            key={d.id}
-            d={paths[d.id]}
-            vectorEffect="non-scaling-stroke"
-            className={`${fillOf(d.id).base} cursor-pointer stroke-white stroke-1 outline-none transition-colors`}
-            role="button"
-            tabIndex={0}
-            aria-label={d.nameEn}
-            onClick={() => setSelected(d.id)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setSelected(d.id);
-              }
-            }}
-          />
-        ))}
-        {/* Selected district filled in a darker shade of its normal colour, drawn
-            last so neighbours don't cover it */}
-        {selected && (
-          <path
-            d={paths[selected]}
-            vectorEffect="non-scaling-stroke"
-            className={`${fillOf(selected).selected} pointer-events-none stroke-white stroke-1 transition-colors`}
-          />
-        )}
-      </svg>
+        <main className="food-dashboard">
+          <section className="intro-card">
+            <span className="eyebrow"><i /> বাংলাদেশের স্বাদের অ্যাটলাস</span>
+            <h1>দেশের স্বাদ,<br /><em>তোমার গল্প।</em></h1>
+            <p className="intro-english">How much of Bangladesh have you tasted?</p>
+            <p>৬৪ জেলার পরিচিত স্বাদ ঘুরে দেখো। যেগুলো চেখেছ, সেগুলো যোগ করো তোমার নিজের খাবারের মানচিত্রে।</p>
+          </section>
 
-      <footer className="mt-6 text-xs text-gray-400">
-        <button
-          className="underline"
-          onClick={() => { if (confirm('Reset all progress?')) reset(); }}
-        >
-          Reset progress
-        </button>
-        <p className="mt-2">Map data: geoBoundaries</p>
-      </footer>
+          <aside className="passport card-piece" aria-label="Your food passport">
+            <div className="passport-title"><span className="passport-icon">✳</span><span>তোমার ফুড পাসপোর্ট</span><span className="passport-edition">খাবার বুক · ০১</span></div>
+            <div className="passport-progress">
+              <div className="progress-ring" style={{ '--progress': `${pct}%` } as React.CSSProperties}><span>{pct}<small>%</small></span></div>
+              <div><b className="passport-count">{count}<small> / {totalDishes}</small></b><strong>{tier.bn}</strong><em>{tier.en}</em></div>
+            </div>
+            <div className="passport-bar"><span style={{ width: `${pct}%` }} /></div>
+          </aside>
 
-      {selected && (
-      <DistrictSheet
-        districtId={selected}
-        eaten={eaten}
-        ratings={ratings}
-        places={picks}
-        onToggle={handleToggle}
-        onRate={rate}
-        onPlace={pick}
-        onClose={() => setSelected(null)}
-      />
-      )}
+          <section className="map-stage" id="map" aria-label="Explore Bangladesh by district">
+            <svg viewBox={viewBox} className="district-map" role="group" aria-label="Map of Bangladesh districts">
+              {districts.map((d, i) => (
+                <path key={d.id} d={paths[d.id]} vectorEffect="non-scaling-stroke"
+                  className={`district-shape ${fillOf(d.id).base} ${selected === d.id ? 'district-selected' : ''}`}
+                  style={{ '--cell-delay': `${Math.min(i * 8, 320)}ms` } as React.CSSProperties}
+                  role="button" tabIndex={0} aria-label={d.nameEn} aria-pressed={selected === d.id}
+                  onClick={() => setSelected(d.id)} onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(d.id); }
+                  }} />
+              ))}
+            </svg>
+            <div className="map-meta"><span><b>৬৪</b> জেলা</span><span>বাংলাদেশ</span></div>
+            <div className="map-legend"><i className="legend-dot tasted" /> চেখেছি <i className="legend-dot waiting" /> এখনো বাকি</div>
+          </section>
 
+          <section className="share-banner">
+            <span className="share-symbol" aria-hidden="true">↗</span>
+            <div><strong>স্বাদের গল্পটা ভাগ করো</strong><small>তোমার মানচিত্র থেকে বানাও শেয়ার করার মতো কার্ড</small></div>
+            <button onClick={() => setShowShare(true)}>কার্ড বানাও <span aria-hidden="true">→</span></button>
+          </section>
+
+          <section className="dish-postcards" aria-label="Taste of Bangladesh">
+            <div className="dish-section-heading"><div><span className="section-kicker">জেলা ধরে ঘুরে দেখো</span><h2>কোথা থেকে শুরু করবে?</h2></div><Link href="/top">র‍্যাঙ্কিং <span aria-hidden="true">↗</span></Link></div>
+            {spotlights.map((dish, i) => dish && <button className={`dish-postcard postcard-${i + 1}`} key={dish.id} onClick={() => setSelected(dish.districtId)}>
+              <span className="dish-art" aria-hidden="true">{dish.category === 'drink' ? '🍵' : dish.category === 'savory' || dish.category === 'main' ? '🍲' : '🍮'}</span>
+              <strong>{dish.nameBn}</strong><small>{districtById[dish.districtId]?.nameBn} · {dish.nameEn}</small>
+            </button>)}
+          </section>
+
+          <aside className="next-card card-piece">
+            <span className="section-kicker">তোমার পরের কামড়</span>
+            {nextDish ? <><p>পরের স্বাদ হতে পারে <b>{nextDish.nameBn}</b>!</p><button className="primary-button" onClick={surprise}>🎲 সারপ্রাইজ দাও</button></> : <><p>দারুণ! সব খাবার চেখে দেখেছ।</p><button className="primary-button" onClick={() => { if (confirm('Reset all progress?')) reset(); }}>আবার শুরু করো</button></>}
+          </aside>
+
+          <footer className="home-footer"><button onClick={() => { if (confirm('Reset all progress?')) reset(); }}>প্রগতি মুছে ফেলো</button><span>Map data: geoBoundaries</span></footer>
+        </main>
+      </div>
+
+      {selected && <DistrictSheet districtId={selected} eaten={eaten} ratings={ratings} places={picks} onToggle={handleToggle} onRate={rate} onPlace={pick} onClose={() => setSelected(null)} />}
       {showShare && <SharePanel eaten={eaten} onClose={() => setShowShare(false)} />}
     </div>
   );

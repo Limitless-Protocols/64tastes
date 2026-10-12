@@ -20,22 +20,31 @@ export default function ShareCard({ eaten, format }: { eaten: Set<number>; forma
   const mapH = story ? 1050 : 500;
 
   const header = (
-    <div style={{ fontSize: story ? 56 : 38, fontWeight: 700, color: '#047857' }}>
-      বাংলাদেশ ফুড ম্যাপ
+    <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+      <div style={{ width: story ? 16 : 12, height: story ? 64 : 48, borderRadius: 10, background: '#d4573d' }} />
+      <div>
+        <div style={{ fontSize: story ? 26 : 19, fontWeight: 800, color: '#6e786b', letterSpacing: 3 }}>
+          KHABAR BOOK · EDITION 01
+        </div>
+        <div style={{ marginTop: 5, fontSize: story ? 56 : 38, fontWeight: 800, color: '#205b3f' }}>
+          বাংলাদেশের খাবার মানচিত্র
+        </div>
+      </div>
     </div>
   );
 
   const summary = (
-    <div style={{ textAlign: story ? 'center' : 'left' }}>
-      <div style={{ fontSize: story ? 104 : 72, fontWeight: 800, lineHeight: 1.3 }}>
+    <div style={{ textAlign: story ? 'center' : 'left', color: '#20291f' }}>
+      <div style={{ fontSize: story ? 104 : 72, fontWeight: 800, lineHeight: 1.3, color: '#205b3f' }}>
         {tier.bn}
       </div>
-      <div style={{ marginTop: 16, fontSize: story ? 64 : 44, fontWeight: 600, lineHeight: 1.4 }}>
-        {bn(eaten.size)} / {bn(totalDishes)} খাবার চেখেছি
+      <div style={{ display: 'inline-block', marginTop: 16, padding: '12px 20px', borderRadius: 18, background: '#e9bf59', fontSize: story ? 64 : 44, fontWeight: 800, lineHeight: 1.3 }}>
+        {bn(eaten.size)} <span style={{ fontSize: story ? 40 : 28, fontWeight: 600 }}> / {bn(totalDishes)} খাবার চেখেছি</span>
       </div>
-      <div style={{ marginTop: story ? 40 : 28, fontSize: story ? 46 : 32, color: '#4b5563', lineHeight: 1.4 }}>
-        তুমি কতটা চেখেছ? {SITE_HOST}
+      <div style={{ marginTop: story ? 40 : 28, fontSize: story ? 46 : 32, color: '#5f6b5e', lineHeight: 1.4 }}>
+        তুমি কতটা চেখেছ?
       </div>
+      <div style={{ marginTop: 12, fontSize: story ? 28 : 20, fontWeight: 700, color: '#205b3f' }}>{SITE_HOST}</div>
     </div>
   );
 
@@ -47,14 +56,15 @@ export default function ShareCard({ eaten, format }: { eaten: Set<number>; forma
         width: w,
         height: h,
         boxSizing: 'border-box',
-        background: '#fffbeb',
-        color: '#111827',
+        background: '#faf7ef',
+        color: '#20291f',
         display: 'flex',
         flexDirection: story ? 'column' : 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: story ? 90 : 56,
         gap: 40,
+        border: '18px solid #e9e4d7',
       }}
     >
       {story ? (
