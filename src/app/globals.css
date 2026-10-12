@@ -396,11 +396,11 @@ main.pane>*{flex:0 0 auto}
 .cat-tools .link{margin-top:0;white-space:nowrap}
 .cat-chips{display:flex;gap:8px;flex-wrap:wrap}
 .cat-count{margin:0;font-size:var(--text-small);color:var(--muted);font-weight:600}
-.cat-grid{display:grid;gap:14px}
+.cat-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr));max-width:1200px}
 .cat-card{display:flex;flex-direction:column;align-items:stretch;padding:0;overflow:hidden;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);border-radius:var(--radius-paper);text-align:left;font-weight:600;font-size:var(--text-ui);transition:translate .15s,rotate .15s}
 .cat-card:hover{translate:0 -4px;rotate:-.6deg}
 .cat-card>span{min-width:0}
-.cat-card .ph{width:100%;aspect-ratio:1;border-radius:0;flex:none}
+.cat-card .ph{width:100%;aspect-ratio:4/3;border-radius:0;flex:none}
 .cat-meta{display:grid;gap:2px;padding:12px 14px;align-content:start}
 .cat-meta .dist{display:flex;align-items:center;gap:5px;font-weight:500;font-size:var(--text-small);color:var(--muted)}
 .cat-meta .dist .icon{width:14px;height:14px;flex:none}

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { SITE_URL } from '@/lib/site';
 import { Hind_Siliguri, Tiro_Bangla } from 'next/font/google';
 import './globals.css';
@@ -33,6 +33,13 @@ export const metadata: Metadata = {
     type: 'website',
   },
   twitter: { card: 'summary_large_image' },
+};
+
+export const viewport: Viewport = {
+  // Let the on-screen keyboard resize the layout instead of overlaying it.
+  interactiveWidget: 'resizes-content',
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
