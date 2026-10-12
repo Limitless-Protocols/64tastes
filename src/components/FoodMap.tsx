@@ -25,6 +25,7 @@ import MapDishPopup from './MapDishPopup';
 import SuggestForm from './SuggestForm';
 import HamburgerDrawer from './HamburgerDrawer';
 import { usePlacePicks } from '@/lib/usePlacePicks';
+import { useHydrated } from '@/lib/store';
 import { Piece, PrimaryButton, SecondaryButton } from './ui';
 import type { Dish } from '@/lib/types';
 
@@ -49,14 +50,6 @@ function viewFromPath(path: string): View {
   if (path.startsWith('/khabar')) return 'dishes';
   if (path.startsWith('/sera')) return 'top';
   return 'map';
-}
-
-/** Districts whose food you haven't finished tasting (today: one dish each). */
-function untasted(eaten: Set<number>) {
-  return districts.filter((d) => {
-    const list = dishesByDistrict[d.id] ?? [];
-    return list.length > 0 && !list.every((x) => eaten.has(x.id));
-  });
 }
 
 /**
@@ -87,9 +80,20 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
     () => Object.values(ratings).filter((r) => r.rating === 'love').length,
     [ratings]
   );
-  // Today's special: the first district you haven't tasted yet — stable across
-  // renders and identical on server and client.
-  const special = useMemo(() => untasted(eaten)[0]?.id ?? null, [eaten]);
+  // Dish of the Day: deterministic from the Asia/Dhaka calendar date, so it's
+  // the same for everyone on a given day and stable across renders. Independent
+  // of progress — the right column is a static featured card, never a popup.
+  // Gated on hydration so new Date() never runs during prerender.
+  const hydrated = useHydrated();
+  const special = useMemo(() => {
+    if (!hydrated) return null;
+    const day = Math.floor(
+      Date.parse(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' }) + 'T00:00:00Z') /
+        86400000
+    );
+    const withFood = districts.filter((d) => (dishesByDistrict[d.id] ?? []).length > 0);
+    return withFood[((day % withFood.length) + withFood.length) % withFood.length]?.id ?? null;
+  }, [hydrated]);
 
   // "% দারুণ" for the panel's dish — only from the real board, never demo data.
   const panelDishId = useMemo(() => {
