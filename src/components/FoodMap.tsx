@@ -9,6 +9,7 @@ import SharePanel from './SharePanel';
 import Link from 'next/link';
 import { usePlacePicks } from '@/lib/usePlacePicks';
 import { useRatings } from '@/lib/useRatings';
+import { bn } from '@/lib/format';
 
 const FILLS: Record<DistrictTone, { base: string; selected: string }> = {
   empty: { base: 'tone-empty', selected: 'tone-empty' },
@@ -48,6 +49,12 @@ export default function FoodMap() {
     setSelected(dish.districtId);
   }
 
+  function nextDistrict() {
+    if (!selected) return;
+    const current = districts.findIndex((district) => district.id === selected);
+    setSelected(districts[(current + 1) % districts.length].id);
+  }
+
   return (
     <div className="food-app">
       <div className="book-frame">
@@ -59,7 +66,7 @@ export default function FoodMap() {
           <nav className="site-nav" aria-label="Main navigation">
             <a className="nav-current" href="#map">মানচিত্র</a>
             <Link href="/top">সেরা খাবার</Link>
-            <button className="nav-share" onClick={() => setShowShare(true)}><span aria-hidden="true">↗</span> শেয়ার</button>
+            <button className="nav-share" onClick={() => setShowShare(true)}><span aria-hidden="true">➤</span> শেয়ার</button>
           </nav>
         </header>
 
@@ -81,23 +88,29 @@ export default function FoodMap() {
           </aside>
 
           <section className="map-stage" id="map" aria-label="Explore Bangladesh by district">
-            <svg viewBox={viewBox} className="district-map" role="group" aria-label="Map of Bangladesh districts">
-              {districts.map((d, i) => (
-                <path key={d.id} d={paths[d.id]} vectorEffect="non-scaling-stroke"
-                  className={`district-shape ${fillOf(d.id).base} ${selected === d.id ? 'district-selected' : ''}`}
-                  style={{ '--cell-delay': `${Math.min(i * 8, 320)}ms` } as React.CSSProperties}
-                  role="button" tabIndex={0} aria-label={d.nameEn} aria-pressed={selected === d.id}
-                  onClick={() => setSelected(d.id)} onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(d.id); }
-                  }} />
-              ))}
-            </svg>
-            <div className="map-meta"><span><b>৬৪</b> জেলা</span><span>বাংলাদেশ</span></div>
-            <div className="map-legend"><i className="legend-dot tasted" /> চেখেছি <i className="legend-dot waiting" /> এখনো বাকি</div>
+            <div className="map-poster">
+              <div className="poster-heading">
+                <div><span>বাংলাদেশ খাবার মানচিত্র</span><strong>আমার বাংলাদেশ</strong></div>
+                <div className="poster-count"><b>{bn(count)}</b><span>/{bn(totalDishes)}<small>খাবার</small></span></div>
+              </div>
+              <svg viewBox={viewBox} className="district-map" role="group" aria-label="Map of Bangladesh districts">
+                {districts.map((d, i) => (
+                  <path key={d.id} d={paths[d.id]} vectorEffect="non-scaling-stroke"
+                    className={`district-shape ${fillOf(d.id).base} ${selected === d.id ? 'district-selected' : ''}`}
+                    style={{ '--cell-delay': `${Math.min(i * 8, 320)}ms` } as React.CSSProperties}
+                    role="button" tabIndex={0} aria-label={d.nameEn} aria-pressed={selected === d.id}
+                    onClick={() => setSelected(d.id)} onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(d.id); }
+                    }} />
+                ))}
+              </svg>
+              <div className="poster-signature"><span>KHABAR BOOK</span><i /> <span>৬৪ জেলা · BANGLADESH</span></div>
+            </div>
+            <div className="map-legend"><span><i className="legend-dot tasted" /> চেখেছি</span><span><i className="legend-dot waiting" /> চেখার অপেক্ষায়</span><span><i className="legend-dot empty" /> আরও খাবার আসছে</span></div>
           </section>
 
           <section className="share-banner">
-            <span className="share-symbol" aria-hidden="true">↗</span>
+            <span className="share-symbol" aria-hidden="true">➤</span>
             <div><strong>স্বাদের গল্পটা ভাগ করো</strong><small>তোমার মানচিত্র থেকে বানাও শেয়ার করার মতো কার্ড</small></div>
             <button onClick={() => setShowShare(true)}>কার্ড বানাও <span aria-hidden="true">→</span></button>
           </section>
@@ -119,7 +132,7 @@ export default function FoodMap() {
         </main>
       </div>
 
-      {selected && <DistrictSheet districtId={selected} eaten={eaten} ratings={ratings} places={picks} onToggle={handleToggle} onRate={rate} onPlace={pick} onClose={() => setSelected(null)} />}
+      {selected && <DistrictSheet districtId={selected} eaten={eaten} ratings={ratings} places={picks} onToggle={handleToggle} onRate={rate} onPlace={pick} onNext={nextDistrict} onClose={() => setSelected(null)} />}
       {showShare && <SharePanel eaten={eaten} onClose={() => setShowShare(false)} />}
     </div>
   );

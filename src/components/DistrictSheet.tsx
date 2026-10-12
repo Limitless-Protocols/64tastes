@@ -1,5 +1,6 @@
 'use client';
-import { districtById, dishesByDistrict } from '@/lib/data';
+import { districtById, dishesByDistrict, districts } from '@/lib/data';
+import { bn } from '@/lib/format';
 import type { MyRating, Rating } from '@/lib/useRatings';
 import PlaceRow from './PlaceRow';
 import SuggestForm from './SuggestForm';
@@ -18,14 +19,16 @@ type Props = {
   onToggle: (id: number) => void;
   onRate: (id: number, value: MyRating | null) => void;
   onPlace: (id: number, placeId: string | null) => void;
+  onNext: () => void;
   onClose: () => void;
 };
 
 export default function DistrictSheet({
-  districtId, eaten, ratings, places, onToggle, onRate, onPlace, onClose,
+  districtId, eaten, ratings, places, onToggle, onRate, onPlace, onNext, onClose,
 }: Props) {
   const district = districtById[districtId];
   const list = dishesByDistrict[districtId] ?? [];
+  const districtNumber = districts.findIndex((item) => item.id === districtId) + 1;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-10 mx-auto max-h-[70vh] max-w-lg overflow-y-auto rounded-t-2xl border-t border-gray-200 bg-white p-4 text-gray-900 shadow-2xl">
@@ -35,6 +38,13 @@ export default function DistrictSheet({
           <p className="text-sm text-gray-500">{district.nameEn}</p>
         </div>
         <button onClick={onClose} aria-label="Close" className="p-2 text-2xl leading-none">×</button>
+      </div>
+
+      <div className="district-pager">
+        <span>{bn(districtNumber)} / {bn(districts.length)} জেলা</span>
+        <button type="button" onClick={onNext} aria-label={`Next district after ${district.nameEn}`}>
+          পরের জেলা <span aria-hidden="true">→</span>
+        </button>
       </div>
 
       {list.length === 0 ? (
