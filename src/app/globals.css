@@ -1,23 +1,23 @@
 ﻿@import "tailwindcss";
 
-/* ==== THE KHABAR BOOK Â· paper-on-desk, single screen ====
+/* ==== THE KHABAR BOOK · paper-on-desk, single screen ====
    Single source of truth: the @theme block below holds the five palette
    colours, the derived tints, fonts, radii, shadows and the type scale.
    Everything else (hand-written component rules in @layer components and
-   Tailwind utilities alike) consumes those tokens â€” no raw hex in markup.
+   Tailwind utilities alike) consumes those tokens — no raw hex in markup.
 
-   Palette: Cream #F8F2E8 Â· Tomato #E94D2E Â· Mango #F6C94C Â· Leaf #47764A Â·
+   Palette: Cream #F8F2E8 · Tomato #E94D2E · Mango #F6C94C · Leaf #47764A ·
    Ink #24231F; every other colour is a color-mix of those five
-   (docs/Khabar Book â€” Style Guide v4.1.md). */
+   (docs/Khabar Book — Style Guide v4.1.md). */
 
 @theme {
-  /* Â§ palette â€” the only five hues */
+  /* § palette — the only five hues */
   --color-cream: #f8f2e8;
   --color-tomato: #e94d2e;
   --color-mango: #f6c94c;
   --color-leaf: #47764a;
   --color-ink: #24231f;
-  /* derived tints/shades (color-mix â€” no new hues) */
+  /* derived tints/shades (color-mix — no new hues) */
   --color-paper: var(--color-cream);
   --color-card: color-mix(in srgb, var(--color-cream) 45%, #fff);
   --color-sand: color-mix(in srgb, var(--color-cream) 82%, var(--color-ink));
@@ -29,13 +29,13 @@
   --color-tomato-d: color-mix(in srgb, var(--color-tomato) 72%, #000);
   --color-line: rgb(36 35 31 / 0.16);
 
-  /* Â§ fonts â€” Tiro Bangla (serif, italics for English asides) + Hind Siliguri (UI) */
+  /* § fonts — Tiro Bangla (serif, italics for English asides) + Hind Siliguri (UI) */
   --font-serif: var(--font-tiro), "Tiro Bangla", Georgia, serif;
   --font-sans: var(--font-hind), "Hind Siliguri", "Trebuchet MS", system-ui, sans-serif;
 
-  /* Â§ type scale â€” rem so it rides the clamped root size
-     (html{font-size:clamp(17px,.55vw + 10px,21px)}): ~15â†’18, ~17â†’21,
-     ~19â†’23, ~18â†’22, ~23â†’28, ~36â†’56, ~43â†’64px. 14px hard floor. */
+  /* § type scale — rem so it rides the clamped root size
+     (html{font-size:clamp(17px,.55vw + 10px,21px)}): ~15→18, ~17→21,
+     ~19→23, ~18→22, ~23→28, ~36→56, ~43→64px. 14px hard floor. */
   --text-micro: 0.875rem;         /* 14px — meta / micro (hard floor) */
   --text-micro--line-height: 1.5;
   --text-meta: 0.9375rem;         /* 15px — secondary */
@@ -58,7 +58,7 @@
   --text-label: var(--text-micro);
   --text-small: var(--text-body);
 
-  /* Â§ shape */
+  /* § shape */
   --radius-paper: 10px;
   --radius-chip: 99px;
   --shadow-paper: 0 8px 20px rgb(36 35 31 / 0.16);
@@ -87,7 +87,7 @@
 }
 
 :root {
-  /* legacy token names â†’ theme vars (old rules keep working, one source) */
+  /* legacy token names → theme vars (old rules keep working, one source) */
   --cream: var(--color-cream);
   --tomato: var(--color-tomato);
   --mango: var(--color-mango);
@@ -120,7 +120,7 @@
 
 @layer base {
   *, *::before, *::after { box-sizing: border-box }
-  /* the whole type scale rides this clamped root â€” one knob for every size */
+  /* the whole type scale rides this clamped root — one knob for every size */
   html { font-size: 100% }
   html, body { margin: 0; width: 100%; height: 100%; overflow: hidden }
   /* the shared-result page may be taller than one screen */
@@ -129,11 +129,11 @@
     color: var(--ink);
     background: var(--desk-a);
     font: 500 1rem/1.55 var(--sans);
-    font-synthesis: none; /* Tiro Bangla has no bold â€” never fake one */
+    font-synthesis: none; /* Tiro Bangla has no bold — never fake one */
     display: grid;
     place-items: center;
   }
-  /* 44px tap floor for everything tappable (spec Â§ tap targets) */
+  /* 44px tap floor for everything tappable (spec § tap targets) */
   button { font: inherit; color: inherit; cursor: pointer; min-height: 44px }
   h1, h2, h3 { line-height: 1.25; margin: 0; color: inherit; font-weight: 400 }
   :focus-visible { outline: 3px solid var(--tomato); outline-offset: 2px }
@@ -184,7 +184,7 @@ header .mobile-actions{display:none}
 .icon-btn{display:inline-grid;place-items:center;background:none;border:0;color:var(--muted);border-radius:8px;padding:0;transition:color .15s,background .15s}
 .icon-btn:hover{color:var(--ink);background:color-mix(in srgb,var(--card) 70%,transparent)}
 
-/* layout: map is the hero (~56% on desktop) â€” nothing overlaps, nothing scrolls */
+/* layout: map is the hero (~56% on desktop) — nothing overlaps, nothing scrolls */
 main{position:relative;z-index:var(--z-content-1);min-height:0;display:grid;gap:clamp(8px,1.4dvh,16px) clamp(10px,1.6vw,24px);padding:clamp(8px,1.6dvh,20px) 3.6%;
   grid-template-columns:minmax(200px,21%) minmax(0,1fr) minmax(250px,23%);grid-template-rows:auto minmax(0,1fr) auto;
   grid-template-areas:"intro map pass" "cards map panel" "next top panel"}
@@ -198,7 +198,7 @@ h1 em{font-style:normal;color:var(--leaf);text-decoration:underline;text-decorat
 .sub{font:italic var(--text-small) var(--serif);color:var(--leaf);margin:0 0 6px}
 .intro p{font-size:var(--text-small);color:var(--body);max-width:32ch;margin:0}
 
-/* district combobox (à¦œà§‡à¦²à¦¾ à¦–à§à¦à¦œà§à¦¨) */
+/* district combobox (জেলা খুঁজুন) */
 .combo{position:relative;margin-top:8px;max-width:300px}
 .combo input{width:100%;height:48px;border:1.5px solid var(--edge);background:var(--card);color:var(--ink);border-radius:var(--radius-paper);padding:0 12px 0 40px;font:500 var(--text-small) var(--sans)}
 .combo input:focus{border-color:var(--leaf);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--leaf) 25%,transparent)}
@@ -236,7 +236,7 @@ h1 em{font-style:normal;color:var(--leaf);text-decoration:underline;text-decorat
 .stat b{display:block;font-size:var(--text-title)}
 .stat span{display:inline-flex;align-items:center;gap:4px;font-size:var(--text-label);color:var(--muted)}
 
-/* map â€” the real geoBoundaries districts, styled with the five tokens */
+/* map — the real geoBoundaries districts, styled with the five tokens */
 .map-zone{grid-area:map;position:relative;display:grid;place-items:center;z-index:var(--z-content-2);padding:clamp(4px,1dvh,14px) clamp(4px,1.2vw,24px)}
 .mand-bg{position:absolute;inset:2%;display:grid;place-items:center;color:var(--line);opacity:.9;animation:spin 140s linear infinite;pointer-events:none}
 .mand-bg svg{height:100%;max-width:100%;aspect-ratio:1}
@@ -258,7 +258,10 @@ h1 em{font-style:normal;color:var(--leaf);text-decoration:underline;text-decorat
   font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",var(--sans)}
 /* single district-name label — portal on body, rAF translate3d, never trapped */
 .map-label{position:fixed;left:0;top:0;z-index:var(--z-map-label);pointer-events:none;opacity:0;transition:opacity .12s ease;will-change:transform}
-.ml-card{transform:translate(-50%,-100%);background:var(--ink);color:var(--card);border-radius:8px;padding:6px 12px;box-shadow:var(--shadow-lift);white-space:nowrap;text-align:center}
+.ml-card{background:var(--ink);color:var(--card);border-radius:8px;padding:6px 12px;box-shadow:var(--shadow-lift);white-space:nowrap;text-align:center}
+/* offset per pointer type: right of the cursor (mouse/pen), above the finger (touch) */
+.map-label[data-pt="mouse"] .ml-card,.map-label[data-pt="pen"] .ml-card{transform:translate(14px,-50%)}
+.map-label[data-pt="touch"] .ml-card{transform:translate(-50%,calc(-100% - 56px))}
 .ml-bn{display:block;font:600 var(--text-ui)/1.3 var(--sans)}
 .ml-en{display:block;font:italic var(--text-label)/1.3 var(--serif);color:var(--sand)}
 .stamp{position:absolute;right:0;top:1%;width:clamp(96px,7.5vw,128px);aspect-ratio:1;border:3px double var(--tomato);color:var(--tomato);border-radius:50%;display:grid;place-items:center;text-align:center;rotate:13deg;font-weight:700;font-size:var(--text-label);letter-spacing:0;pointer-events:none;line-height:1.25}
@@ -268,7 +271,7 @@ h1 em{font-style:normal;color:var(--leaf);text-decoration:underline;text-decorat
 .waves{font-size:22px;letter-spacing:4px;animation:wave 6s ease-in-out infinite}
 .compass{font:40px/1 var(--serif);color:var(--muted);text-align:center;rotate:-12deg;animation:sway 7s ease-in-out infinite}.compass small{display:block;font-size:var(--text-label);letter-spacing:2px}
 
-/* polaroids â€” a tidy scattered group, no dead zone */
+/* polaroids — a tidy scattered group, no dead zone */
 .cards{grid-area:cards;display:flex;flex-direction:row;justify-content:flex-start;align-items:flex-start;gap:0;z-index:var(--z-content-4);padding-left:2%}
 .pola{position:relative;width:clamp(124px,9.5vw,176px);padding:8px 8px 12px;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);rotate:var(--r);cursor:pointer;transition:rotate .25s,scale .25s}
 .pola:nth-child(2){align-self:flex-end;margin-left:-18px}
@@ -302,7 +305,7 @@ h1 em{font-style:normal;color:var(--leaf);text-decoration:underline;text-decorat
 .rank .ph{width:56px;height:56px;border-radius:50%;border:2px solid #fff;flex:none}
 .rank b{display:block;font-size:var(--text-ui);line-height:1.3}.rank small{display:block;color:var(--tomato-d);font-size:var(--text-label);font-weight:700}.rank em{font-style:normal;font-size:var(--text-label);color:var(--muted)}
 
-/* dish panel (today's special / selected district) â€” structured, no dead gap */
+/* dish panel (today's special / selected district) — structured, no dead gap */
 .panel{grid-area:panel;display:flex;flex-direction:column;gap:8px;padding:16px 18px;rotate:1.5deg;overflow:hidden;z-index:var(--z-content-4)}
 .p-label{font-size:var(--text-label);color:var(--tomato-d);font-weight:700;letter-spacing:0}
 .p-body{display:flex;flex-direction:column;gap:5px;flex:1;min-height:0;overflow-y:auto}
@@ -334,7 +337,7 @@ h1 em{font-style:normal;color:var(--leaf);text-decoration:underline;text-decorat
 .link{background:none;border:0;color:var(--leaf);font-weight:700;font-size:var(--text-label);text-decoration:underline;margin-top:6px;padding:0;min-height:44px}
 
 /* photo slot: a real <img> covers the gradient+letter; if the dish has no
-   photo (or it fails) the placeholder stays â€” a big Bangla first letter on the
+   photo (or it fails) the placeholder stays — a big Bangla first letter on the
    category tint. Never a broken icon. */
 .ph{position:relative;overflow:hidden;display:grid;place-items:center;background:linear-gradient(135deg,var(--a,#e9b96a),var(--b,#c9742f))}
 .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.92)}
@@ -367,10 +370,10 @@ h1 em{font-style:normal;color:var(--leaf);text-decoration:underline;text-decorat
 .mlist .rank{padding:8px 10px}.mlist .bb{height:6px;background:var(--sand);border-radius:9px;margin-top:4px;overflow:hidden}.mlist .bb i{display:block;height:100%;background:var(--tomato);width:var(--p)}
 .bit{position:fixed;width:8px;height:12px;border-radius:50% 0;z-index:var(--z-toast);pointer-events:none;animation:fly .8s ease-out forwards}
 
-/* ---------- tab panes (à¦–à¦¾à¦¬à¦¾à¦° / à¦¸à§‡à¦°à¦¾), mobile sheet, suggest form ---------- */
+/* ---------- tab panes (খাবার / সেরা), mobile sheet, suggest form ---------- */
 main.off{display:none}
 main.pane{display:flex;flex-direction:column;gap:14px;overflow-y:auto;padding:clamp(14px,3dvh,26px) 3.6% 30px;animation:rise .5s cubic-bezier(.2,1.1,.4,1) backwards}
-/* main>* sets min-height:0 â€” in the pane's column flex that would let tall
+/* main>* sets min-height:0 — in the pane's column flex that would let tall
    content (the catalog grid) flex-shrink to nothing; scroll instead */
 main.pane>*{flex:0 0 auto}
 .pane h1{font-size:var(--text-h1)}
@@ -384,7 +387,7 @@ main.pane>*{flex:0 0 auto}
 .spot-row a{color:var(--leaf);font-weight:700}
 .spot-row span{color:var(--muted);font-size:var(--text-label);white-space:nowrap}
 
-/* à¦–à¦¾à¦¬à¦¾à¦° catalog: sticky filter bar + vertical dish-card grid */
+/* খাবার catalog: sticky filter bar + vertical dish-card grid */
 .cat-h{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
 .cat-h h1{margin-bottom:0}
 .cat-tools{position:sticky;top:0;z-index:var(--z-sticky);display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;background:var(--paper)}
@@ -417,14 +420,24 @@ main.pane>*{flex:0 0 auto}
 .sheet-empty{color:var(--muted);font-size:var(--text-small);margin:10px 0 0}
 .sheet .chips{max-height:none;opacity:1;overflow:visible}
 
-/* MapDishPopup dish list */
-.mp-list{display:grid;gap:8px;margin:12px 0;max-height:52dvh;overflow-y:auto}
-.mp-row{display:flex;align-items:center;gap:10px;padding:6px;border:1px solid var(--edge);border-radius:var(--radius-paper);background:var(--card)}
-.mp-open{display:flex;align-items:center;gap:10px;flex:1;min-width:0;background:none;border:0;padding:0;text-align:left;cursor:pointer;color:var(--ink)}
-.mp-names{display:grid;min-width:0}
+/* MapDishPopup — the district popup (modal): header, brief, dish list, and the
+   swiped-in recipe card. Distinct from DishDetailModal (the surprise card). */
+.dish-popup{display:flex;flex-direction:column;gap:6px;max-width:520px;width:min(94vw,520px);max-height:86dvh;overflow-y:auto}
+.dish-popup .dish-loc{display:flex;align-items:center;gap:5px;font-size:var(--text-label);font-weight:600;color:var(--body);margin-top:2px}
+.mp-back{display:inline-flex;align-items:center;gap:2px;align-self:flex-start;background:none;border:0;padding:0;margin-bottom:4px;color:var(--accent);font:600 var(--text-ui)/1.3 var(--sans);cursor:pointer}
+.mp-list{display:grid;gap:8px;margin:10px 0 4px}
+.mp-row{display:flex;align-items:center;gap:10px;padding:6px;border:1px solid var(--edge);border-radius:var(--radius-paper);background:var(--card);cursor:pointer;text-align:left;color:var(--ink);transition:border-color .16s ease,transform .16s ease}
+.mp-row:hover{border-color:var(--accent);transform:translateX(2px)}
+.mp-names{display:grid;gap:2px;flex:1;min-width:0}
 .mp-names b{font-size:var(--text-ui);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mp-ph{width:44px;height:44px;flex:none;border-width:2px}
 .mp-ph .ph-letter{font-size:20px}
+.mp-state{display:flex;align-items:center;justify-content:center;width:26px;height:26px;flex:none;border-radius:50%;border:1px solid var(--edge);color:var(--muted)}
+.mp-state.on{background:var(--leaf-tint,#47764A);border-color:transparent;color:#fff}
+.mp-state .rot{transform:rotate(180deg)}
+/* swipe motion: the recipe card slides in from the right when a dish is picked */
+.swipe-in{animation:swipeIn .3s cubic-bezier(.22,.61,.36,1) both}
+@media (prefers-reduced-motion:reduce){.swipe-in{animation:none}}
 
 /* suggest form (paper) */
 .sf{display:grid;gap:10px;margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
@@ -438,7 +451,7 @@ main.pane>*{flex:0 0 auto}
 .sf-ok{margin:0;font-size:var(--text-small);color:var(--leaf);font-weight:700}
 .sf-err{margin:0;font-size:var(--text-small);color:var(--tomato-d);font-weight:700}
 
-/* dish detail modal (opened from à¦–à¦¾à¦¬à¦¾à¦° / à¦¸à§‡à¦°à¦¾) */
+/* dish detail modal (opened from খাবার / সেরা) */
 .dish-modal .ph{width:100%;aspect-ratio:16/10;border:1px solid var(--edge);border-radius:8px;flex:none}
 .dish-en{font:italic var(--text-small) var(--serif);color:var(--muted);margin-top:-6px}
 .dish-loc{display:flex;align-items:center;gap:6px;font-weight:700;font-size:var(--text-small);color:var(--tomato-d)}
@@ -455,7 +468,7 @@ main.pane>*{flex:0 0 auto}
 .place-add{margin-top:2px;border:1.5px dashed var(--edge);background:none;border-radius:var(--radius-chip);padding:6px 14px;font-size:var(--text-small);font-weight:600;color:var(--body);align-self:start;display:inline-flex;align-items:center;gap:6px}
 .place-add:hover{border-color:var(--leaf);color:var(--leaf)}
 
-/* à¦¸à§‡à¦°à¦¾ pane: podium + grid rows + sections */
+/* সেরা pane: podium + grid rows + sections */
 .podium{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
 .pod{display:flex;flex-direction:column;gap:8px;padding:14px 16px;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);border-radius:var(--radius-paper);cursor:pointer;transition:translate .15s}
 .pod:hover{translate:0 -4px}
@@ -479,7 +492,7 @@ main.pane>*{flex:0 0 auto}
 .pane-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(430px,100%),1fr));gap:20px}
 .board-h{font:400 var(--text-title) var(--serif);margin:0 0 10px}
 
-/* shared result page (/r/â€¦) â€” one piece on the same desk */
+/* shared result page (/r/…) — one piece on the same desk */
 .book.result{display:block;width:min(680px,100vw);height:auto;min-height:100dvh;padding:clamp(16px,4vw,40px);border-width:6px}
 .result-card{display:flex;flex-direction:column;gap:8px;padding:clamp(18px,4vw,34px);rotate:-.6deg;max-width:560px;margin-inline:auto}
 .result-card h1{font:400 clamp(26px,5vw,38px)/1.3 var(--serif);color:var(--leaf);margin:6px 0 0;rotate:0deg}
@@ -563,6 +576,7 @@ header{animation:rise .6s .05s backwards}
 @keyframes popin{from{opacity:0;scale:.2;translate:0 -14px}}
 @keyframes pinDrop{from{opacity:0;translate:0 -10px}}
 @keyframes swap{from{opacity:0;translate:14px 0}}
+@keyframes swipeIn{from{opacity:0;translate:44px 0}}
 @keyframes float{50%{translate:0 -5px}}
 @keyframes bob{50%{translate:0 -4px}}
 @keyframes sway{50%{rotate:6deg}}

@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, PointerEvent as ReactPointerEvent, FocusEvent } from 'react';
 import { districtTone } from '@/lib/colors';
-import { districtById, districts, dishesByDistrict, paths, viewBox } from '@/lib/data';
+import { districts, paths, viewBox } from '@/lib/data';
 import { districtAnchor } from '@/lib/pins';
 import MapTooltip from './MapTooltip';
 import type { MapTooltipHandle } from './MapTooltip';
@@ -16,9 +16,6 @@ type Props = {
 /** Touch-and-hold reveals the label; a quick tap is a plain single-step select. */
 const TOUCH_HOLD_LABEL = true;
 const TOUCH_HOLD_MS = 400;
-/** Gap above the pointer (mouse/pen) or finger (touch). */
-const GAP_MOUSE = 14;
-const GAP_TOUCH = 56;
 
 /** First `y` of a path ≈ its latitude — used to ripple districts north → south. */
 function firstY(d: string) {
@@ -77,15 +74,17 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
     []
   );
 
-  // ONE 📍 pin: only on the selected district, and only once its food is eaten.
-  // Anchored by the pole of inaccessibility (polylabel).
-  const pin = useMemo(() => {
-    if (!selected) return null;
-    const hasEaten = (dishesByDistrict[selected] ?? []).some((x) => eaten.has(x.id));
-    if (!hasEaten || !paths[selected] || !districtById[selected]) return null;
-    const [x, y] = districtAnchor(paths[selected]);
-    return { x, y, name: districtById[selected].nameBn };
-  }, [selected, eaten]);
+  // A 📍 pin on every green (eaten) district, anchored by the pole of
+  // inaccessibility (polylabel).
+  const pins = useMemo(
+    () =>
+      districts.flatMap((d) => {
+        if (districtTone(d.id, eaten) !== 'done' || !paths[d.id]) return [];
+        const [x, y] = districtAnchor(paths[d.id]);
+        return [{ id: d.id, x, y }];
+      }),
+    [eaten]
+  );
 
   // Measure the SVG scale so the pin stays 28–32px regardless of zoom.
   useEffect(() => {
@@ -110,12 +109,12 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
 
   const hideLabel = useCallback(() => tipRef.current?.hide(), []);
 
-  // Mouse / pen: label follows the cursor, 14px above it.
+  // Mouse / pen: label sits to the RIGHT of the cursor, vertically centred.
   const onMove = useCallback(
     (e: ReactPointerEvent<SVGPathElement>, bn: string, en: string) => {
       if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
-      tipRef.current?.setPoint(e.clientX, e.clientY - GAP_MOUSE);
-      tipRef.current?.show(bn, en);
+      tipRef.current?.setPoint(e.clientX, e.clientY);
+      tipRef.current?.show(bn, en, e.pointerType);
     },
     []
   );
@@ -127,8 +126,8 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
       if (e.pointerType !== 'touch' || !TOUCH_HOLD_LABEL) return;
       if (holdTimer.current) clearTimeout(holdTimer.current);
       holdTimer.current = setTimeout(() => {
-        tipRef.current?.setPoint(e.clientX, e.clientY - GAP_TOUCH);
-        tipRef.current?.show(bn, en);
+        tipRef.current?.setPoint(e.clientX, e.clientY);
+        tipRef.current?.show(bn, en, 'touch');
       }, TOUCH_HOLD_MS);
     },
     []
@@ -139,11 +138,11 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
     tipRef.current?.hide();
   }, []);
 
-  // Keyboard focus: pin the label just above the focused district's box.
+  // Keyboard focus: pin the label just to the right of the focused district.
   const onFocus = useCallback((e: FocusEvent<SVGPathElement>, bn: string, en: string) => {
     const r = e.currentTarget.getBoundingClientRect();
-    tipRef.current?.setPoint(r.left + r.width / 2, r.top - GAP_MOUSE);
-    tipRef.current?.show(bn, en);
+    tipRef.current?.setPoint(r.right, r.top + r.height / 2);
+    tipRef.current?.show(bn, en, 'mouse');
   }, []);
 
   return (
@@ -177,9 +176,10 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
             }}
           />
         ))}
-        {/* ONE 📍 pin — separate positioning (<g>) from animation (<text>). */}
-        {pin && (
-          <g className="pin-layer" transform={`translate(${pin.x} ${pin.y})`} aria-hidden="true">
+        {/* 📍 pin on every green (eaten) district — positioning (<g>) separate
+            from animation (<text>). */}
+        {pins.map((p) => (
+          <g key={p.id} className="pin-layer" transform={`translate(${p.x} ${p.y})`} aria-hidden="true">
             <text
               className="pin-drop"
               textAnchor="middle"
@@ -189,7 +189,7 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
               📍
             </text>
           </g>
-        )}
+        ))}
       </svg>
 
       {/* single district-name label — portal + rAF, never trapped by stacking */}

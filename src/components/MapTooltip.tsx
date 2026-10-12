@@ -4,8 +4,8 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { useHydrated } from '@/lib/store';
 
 export type MapTooltipHandle = {
-  /** Show the label for a district and begin following the pointer. */
-  show: (bn: string, en: string) => void;
+  /** Show the label for a district; `pt` picks the offset (right for mouse/pen). */
+  show: (bn: string, en: string, pt?: 'mouse' | 'pen' | 'touch') => void;
   /** Hide and stop following. */
   hide: () => void;
   /** Feed the latest client coords (called on pointermove; no re-render). */
@@ -26,11 +26,12 @@ const MapTooltip = forwardRef<MapTooltipHandle>(function MapTooltip(_props, ref)
   const raf = useRef<number | null>(null);
 
   useImperativeHandle(ref, () => ({
-    show(bn, en) {
+    show(bn, en, pt = 'mouse') {
       const el = elRef.current;
       if (!el) return;
       el.querySelector<HTMLElement>('.ml-bn')!.textContent = bn;
       el.querySelector<HTMLElement>('.ml-en')!.textContent = en;
+      el.dataset.pt = pt;
       el.style.opacity = '1';
     },
     hide() {

@@ -179,17 +179,12 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
     }
   }, []);
 
-  const select = useCallback(
-    (id: string) => {
-      const next = selected === id ? null : id;
-      setSelected(next);
-      // phones: tapping a district opens the single-step MapDishPopup sheet
-      if (next && typeof window !== 'undefined' && window.matchMedia('(max-width:767px)').matches) {
-        setOverlay({ kind: 'map', districtId: next });
-      }
-    },
-    [selected]
-  );
+  // Tapping/clicking a district opens the district popup on every breakpoint;
+  // the right panel stays the static Dish of the Day.
+  const select = useCallback((id: string) => {
+    setSelected(id);
+    setOverlay({ kind: 'map', districtId: id });
+  }, []);
 
   const toggleEat = useCallback(
     (dishId: number, el?: HTMLElement | null) => {
@@ -230,7 +225,6 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
     [ratings, toggleLove, burst]
   );
 
-  const selectedDistrict = selected ? districtById[selected] : null;
   const overlayKind = overlay?.kind ?? null;
 
   return (
@@ -355,13 +349,9 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
           <TopStrip onOpen={() => goTo('top')} />
 
           <Piece className="panel" tilt="1.5deg">
-            <div className="p-label">
-              {selectedDistrict
-                ? `📍 ${selectedDistrict.nameBn} · ${selectedDistrict.nameEn}`
-                : 'আজকের স্পেশাল'}
-            </div>
+            <div className="p-label">আজকের স্পেশাল</div>
             <DistrictPanel
-              districtId={selected ?? special}
+              districtId={special}
               eaten={eaten}
               ratings={ratings}
               places={picks}
@@ -370,7 +360,7 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
               onRate={rate}
               onOverrate={toggleOverrated}
               onPlace={pick}
-              onSuggest={() => setOverlay({ kind: 'suggest', districtId: selected ?? special })}
+              onSuggest={() => setOverlay({ kind: 'suggest', districtId: special })}
             />
           </Piece>
         </main>
@@ -435,8 +425,13 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
           <MapDishPopup
             districtId={overlay.districtId}
             eaten={eaten}
+            ratings={ratings}
+            places={picks}
             onToggle={toggleEat}
-            onOpenDish={(d) => setOverlay({ kind: 'detail', dish: d })}
+            onRate={rate}
+            onOverrate={toggleOverrated}
+            onPlace={pick}
+            onSuggest={() => setOverlay({ kind: 'suggest', districtId: overlay.districtId })}
             onClose={closeOverlay}
           />
         )}
