@@ -1,12 +1,15 @@
 type Pt = [number, number];
 
+import polylabel from 'polylabel';
+
 /**
  * A point near the middle of a district, where its pin sits.
  *
  * The geoBoundaries paths in districtPaths.json only use absolute `M … Z`
  * subpaths, so parsing them into polygons is a small job. The anchor is the
- * area-weighted centroid of the largest subpath; if that lands outside a
- * concave district, we fall back to the deepest point on a coarse grid.
+ * pole of inaccessibility (polylabel) of the largest subpath — the deepest
+ * interior point, which never lands on a concave district's edge. If that
+ * somehow falls outside, we fall back to the deepest point on a coarse grid.
  */
 
 function polygons(d: string): Pt[][] {
@@ -38,29 +41,6 @@ function area(poly: Pt[]): number {
     a += poly[j][0] * poly[i][1] - poly[i][0] * poly[j][1];
   }
   return a / 2;
-}
-
-function centroid(poly: Pt[]): Pt {
-  let cx = 0;
-  let cy = 0;
-  let a = 0;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const f = poly[j][0] * poly[i][1] - poly[i][0] * poly[j][1];
-    a += f;
-    cx += (poly[j][0] + poly[i][0]) * f;
-    cy += (poly[j][1] + poly[i][1]) * f;
-  }
-  a /= 2;
-  if (Math.abs(a) < 1e-6) {
-    // Degenerate ring: the bbox centre will do.
-    const xs = poly.map((p) => p[0]);
-    const ys = poly.map((p) => p[1]);
-    return [
-      (Math.min(...xs) + Math.max(...xs)) / 2,
-      (Math.min(...ys) + Math.max(...ys)) / 2,
-    ];
-  }
-  return [cx / (6 * a), cy / (6 * a)];
 }
 
 function inside(x: number, y: number, poly: Pt[]): boolean {
@@ -100,9 +80,12 @@ export function districtAnchor(d: string): Pt {
   let best: Pt = [0, 0];
   if (polys.length) {
     const main = polys.reduce((a, b) => (Math.abs(area(a)) >= Math.abs(area(b)) ? a : b));
-    best = centroid(main);
 
     const anyInside = (x: number, y: number) => polys.some((p) => inside(x, y, p));
+    // Pole of inaccessibility — the deepest interior point.
+    const pole = polylabel([main], 0.5) as unknown as Pt;
+    best = [pole[0], pole[1]];
+
     if (!anyInside(best[0], best[1])) {
       // Concave district (or a hole): take the deepest interior grid point.
       const pts = polys.flat();

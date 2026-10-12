@@ -1,9 +1,8 @@
 'use client';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, MouseEvent, FocusEvent } from 'react';
-import { artFor } from '@/lib/art';
 import { districtTone } from '@/lib/colors';
-import { districts, dishesByDistrict, paths, viewBox } from '@/lib/data';
+import { districtById, districts, dishesByDistrict, paths, viewBox } from '@/lib/data';
 import { districtAnchor } from '@/lib/pins';
 
 type Props = {
@@ -52,7 +51,10 @@ const NOUKA = (
  */
 export default function MapZone({ eaten, selected, onSelect }: Props) {
   const zoneRef = useRef<HTMLElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   const [tip, setTip] = useState<Tip | null>(null);
+  // px per viewBox unit — lets the 📍 pin keep a constant on-screen size.
+  const [scale, setScale] = useState(1);
 
   const cells = useMemo(
     () =>
@@ -67,17 +69,29 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
     []
   );
 
-  // Pins appear on eaten districts — computed lazily, only for those.
-  const pins = useMemo(
-    () =>
-      districts.flatMap((d) => {
-        const dish = (dishesByDistrict[d.id] ?? []).find((x) => eaten.has(x.id));
-        if (!dish || !paths[d.id]) return [];
-        const [x, y] = districtAnchor(paths[d.id]);
-        return [{ id: d.id, x, y, e: artFor(dish).e }];
-      }),
-    [eaten]
-  );
+  // ONE 📍 pin: only on the selected district, and only once its food is eaten.
+  // Anchored by the pole of inaccessibility (polylabel).
+  const pin = useMemo(() => {
+    if (!selected) return null;
+    const hasEaten = (dishesByDistrict[selected] ?? []).some((x) => eaten.has(x.id));
+    if (!hasEaten || !paths[selected] || !districtById[selected]) return null;
+    const [x, y] = districtAnchor(paths[selected]);
+    return { x, y, name: districtById[selected].nameBn };
+  }, [selected, eaten]);
+
+  // Measure the SVG scale so the pin stays 28–32px regardless of zoom.
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const apply = () => {
+      const ctm = svg.getScreenCTM();
+      if (ctm && ctm.a) setScale(ctm.a);
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(svg);
+    return () => ro.disconnect();
+  }, []);
 
   const showTip = useCallback((el: Element, t: string, s: string) => {
     const zone = zoneRef.current;
@@ -93,7 +107,7 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
     <section className="map-zone" ref={zoneRef} aria-label="বাংলাদেশের খাবারের মানচিত্র">
       <div className="mand-bg" aria-hidden="true">{MANDALA}</div>
 
-      <svg className="map-svg" viewBox={viewBox} role="group" aria-label="Map of Bangladesh districts">
+      <svg ref={svgRef} className="map-svg" viewBox={viewBox} role="group" aria-label="Map of Bangladesh districts">
         {cells.map((c) => {
           const onEnter = (e: MouseEvent<SVGPathElement>) =>
             showTip(e.currentTarget, c.bn, c.en);
@@ -123,13 +137,19 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
             />
           );
         })}
-        <g aria-hidden="true">
-          {pins.map((p) => (
-            <text key={p.id} className="pin" x={p.x} y={p.y} fontSize={30} textAnchor="middle" dominantBaseline="central">
-              {p.e}
+        {/* ONE 📍 pin — separate positioning (<g>) from animation (<text>). */}
+        {pin && (
+          <g className="pin-layer" transform={`translate(${pin.x} ${pin.y})`} aria-hidden="true">
+            <text
+              className="pin-drop"
+              textAnchor="middle"
+              dominantBaseline="central"
+              style={{ fontSize: `${30 / (scale || 1)}px` }}
+            >
+              📍
             </text>
-          ))}
-        </g>
+          </g>
+        )}
       </svg>
 
       {tip && (

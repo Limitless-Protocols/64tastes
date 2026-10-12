@@ -243,7 +243,10 @@ h1 em{font-style:normal;color:var(--leaf);text-decoration:underline;text-decorat
 .d.no.sel{fill:color-mix(in srgb,var(--sand) 62%,var(--ink))}
 .d.has.sel{fill:color-mix(in srgb,var(--mango) 68%,#000)}
 .d.done.sel{fill:color-mix(in srgb,var(--leaf) 68%,#000)}
-.pin{transform-box:fill-box;transform-origin:center;animation:popin .6s cubic-bezier(.2,1.8,.4,1) both;pointer-events:none;filter:drop-shadow(1px 2px 0 rgb(36 35 31 / .35));
+/* ONE 📍 pin — positioning handled by the <g translate>, animation by the <text>.
+   Quiet 280ms drop (no overshoot); constant on-screen size via inline font-size. */
+.pin-layer{pointer-events:none}
+.pin-drop{transform-box:fill-box;transform-origin:center;animation:pinDrop .28s cubic-bezier(.22,1,.36,1) both;pointer-events:none;filter:drop-shadow(1px 2px 0 rgb(36 35 31 / .35));
   font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",var(--sans)}
 /* styled tooltip on hover + focus (replaces the native title) */
 .tip{position:absolute;z-index:var(--z-map-label);pointer-events:none;translate:-50% -100%;background:var(--ink);color:var(--card);border-radius:8px;padding:6px 12px;box-shadow:var(--shadow-lift);white-space:nowrap;animation:mbIn .15s ease}
@@ -549,6 +552,7 @@ header{animation:rise .6s .05s backwards}
 @keyframes cell{from{opacity:0;scale:.35}}
 @keyframes slam{from{opacity:0;scale:2.4;rotate:-18deg}}
 @keyframes popin{from{opacity:0;scale:.2;translate:0 -14px}}
+@keyframes pinDrop{from{opacity:0;translate:0 -10px}}
 @keyframes swap{from{opacity:0;translate:14px 0}}
 @keyframes float{50%{translate:0 -5px}}
 @keyframes bob{50%{translate:0 -4px}}
