@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { getDishStats } from '@/lib/stats';
 import { buildRankings, MIN_VOTES } from '@/lib/ranking';
 import { bn } from '@/lib/format';
@@ -21,6 +22,9 @@ export default function TopPage() {
 const pct = (part: number, total: number) => bn(Math.round((part / total) * 100));
 
 async function Rankings() {
+  // Defer the leaderboard query to request time so `next build` doesn't try to
+  // hit Neon with no DATABASE_URL. <Suspense> above holds the shell.
+  await connection();
   const { mostLoved, mostOverrated, districtRows } = buildRankings(await getDishStats());
 
   if (mostLoved.length === 0 && districtRows.length === 0) {

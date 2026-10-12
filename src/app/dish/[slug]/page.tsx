@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
 import { dishes, districtById } from '@/lib/data';
 import { getDishStats } from '@/lib/stats';
 import { MIN_VOTES } from '@/lib/ranking';
@@ -54,6 +55,9 @@ async function DishContent({ params }: Props) {
   if (!dish) notFound();
 
   const district = districtById[dish.districtId];
+  // Defer the vote-stats query to request time so `next build` never opens a
+  // Neon connection. <Suspense> above holds the static shell.
+  await connection();
   const stat = (await getDishStats()).find((s) => s.id === dish.id);
   const votes = stat?.votes ?? 0;
   const pct = (n: number) => (votes ? Math.round((n / votes) * 100) : 0);

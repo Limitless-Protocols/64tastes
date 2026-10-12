@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { connection, NextResponse } from 'next/server';
 
 // Note: with nextConfig.cacheComponents, `export const dynamic` is not
 // allowed — a handler without 'use cache' is simply dynamic (uncached).
@@ -16,6 +16,12 @@ const pct = (part: number, total: number) => (total ? Math.round((part / total) 
  * turn into a raw 500 before this route can answer.
  */
 export async function GET() {
+  // Defer to request time so `next build` never runs this handler (and its
+  // 'use cache' DB queries) against a build environment without DATABASE_URL.
+  // Without it the prerender throws, and the try/catch below would swallow
+  // that bail-out and statically bake a 503 into the route.
+  await connection();
+
   try {
     const { getDishStats } = await import('@/lib/stats');
     const { buildRankings } = await import('@/lib/ranking');
