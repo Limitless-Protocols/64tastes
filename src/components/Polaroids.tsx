@@ -1,5 +1,6 @@
 'use client';
 import type { CSSProperties } from 'react';
+import { Heart, MapPin } from 'lucide-react';
 import { districtById, dishesByDistrict } from '@/lib/data';
 import type { MyRating } from '@/lib/useRatings';
 import PhotoSlot from './PhotoSlot';
@@ -26,21 +27,19 @@ export default function Polaroids({ ratings, onSelect, onHeart }: Props) {
             key={id}
             className="pola"
             style={{ '--r': i ? '5deg' : '-6deg' } as CSSProperties}
-            role="button"
-            tabIndex={0}
-            aria-label={`${dish.nameBn} — ${district.nameBn}`}
-            onClick={() => onSelect(id)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onSelect(id);
-              }
-            }}
           >
             <PhotoSlot dish={dish} />
             <b>{dish.nameBn}</b>
             <small className="en">{dish.nameEn}</small>
-            <small>📍 {district.nameBn}</small>
+            <small>
+              <MapPin className="icon" aria-hidden="true" style={{ width: 13, height: 13 }} />{' '}
+              {district.nameBn}
+            </small>
+            <button
+              className="pola-hit"
+              aria-label={`${dish.nameBn} — ${district.nameBn}`}
+              onClick={() => onSelect(id)}
+            />
             <button
               className={`heart${loved ? ' on' : ''}`}
               aria-label="দারুণ"
@@ -50,7 +49,7 @@ export default function Polaroids({ ratings, onSelect, onHeart }: Props) {
                 onHeart(dish.id, e.currentTarget);
               }}
             >
-              {loved ? '♥' : '♡'}
+              <Heart className="icon" aria-hidden="true" fill={loved ? 'currentColor' : 'none'} style={{ width: 22, height: 22 }} />
             </button>
           </div>
         );

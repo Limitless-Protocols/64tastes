@@ -6,17 +6,19 @@ import { bn } from '@/lib/format';
 import { SITE_HOST } from '@/lib/site';
 
 export const FORMATS = {
-  landscape: { w: 1200, h: 630, label: 'Facebook post' },
-  story: { w: 1080, h: 1920, label: 'Story' },
-  square: { w: 1080, h: 1080, label: 'Square' },
+  landscape: { w: 1200, h: 630, label: 'ফেসবুক পোস্ট' },
+  story: { w: 1080, h: 1920, label: 'স্টোরি' },
+  square: { w: 1080, h: 1080, label: 'স্কোয়ার' },
 } as const;
 export type Format = keyof typeof FORMATS;
 
 /**
- * The share card from the prototype (`.sharecard`), in all three sizes.
- * All sizes are expressed in cqmin — the prototype's container-query unit —
- * so one component covers post, story and square. Inline styles only: the
- * PNG renderer clones this node outside the page's stylesheets.
+ * The share card in all three sizes. Sizes are expressed in cqmin — one
+ * min-side-relative unit (1cqmin = min(w,h)/100) so the type scales across
+ * formats: the Bangla tier name sits at ~17% of the short side (17% of the
+ * height for post + square), the count is ~7%. Inline styles only: the PNG
+ * renderer clones this node outside the page's stylesheets, and Bangla is
+ * never letter-spaced (conjunct shaping).
  */
 export default function ShareCard({ eaten, format }: { eaten: Set<number>; format: Format }) {
   const { w, h } = FORMATS[format];
@@ -32,36 +34,35 @@ export default function ShareCard({ eaten, format }: { eaten: Set<number>; forma
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        gap: 1.5 * c,
+        gap: 2 * c,
+        position: 'relative',
       }}
     >
-      <small
+      <span
         style={{
           fontWeight: 700,
-          fontSize: 3.8 * c,
+          fontSize: 4 * c,
           color: TOKENS.tomatoD,
-          letterSpacing: '.14em',
-          textTransform: 'uppercase',
         }}
       >
         খাবার বুক · বাংলাদেশ
-      </small>
-      <b style={{ fontWeight: 700, fontSize: 11 * c, lineHeight: 1.3, color: TOKENS.leaf }}>
+      </span>
+      <b style={{ fontWeight: 700, fontSize: 17 * c, lineHeight: 1.15, color: TOKENS.leaf }}>
         {tier.bn}
       </b>
-      <span style={{ fontWeight: 600, fontSize: 5 * c }}>
+      <span style={{ fontWeight: 700, fontSize: 7 * c, lineHeight: 1.3 }}>
         {bn(eaten.size)} / {bn(totalDishes)} খাবার চেখেছি
       </span>
-      <i style={{ fontStyle: 'italic', fontSize: 3.6 * c, color: TOKENS.muted }}>
+      <span style={{ fontStyle: 'italic', fontSize: 4 * c, color: TOKENS.muted }}>
         তুমি কতটা চেখেছ? {SITE_HOST}
-      </i>
+      </span>
     </div>
   );
 
   const mapCard = (
     <div
       style={{
-        flex: tall ? 1.4 : 1,
+        flex: 1,
         minWidth: 0,
         minHeight: 0,
         background: TOKENS.card,
@@ -75,12 +76,13 @@ export default function ShareCard({ eaten, format }: { eaten: Set<number>; forma
     </div>
   );
 
+  /* the stamp hugs a corner the map never reaches: bottom-left on the post
+     (map on the right), top-right on story/square (map below) */
   const stamp = (
     <div
       style={{
         position: 'absolute',
-        right: 4 * c,
-        bottom: 4 * c,
+        ...(tall ? { top: 5 * c, right: 5 * c } : { bottom: 5 * c, left: 5 * c }),
         border: `${0.8 * c}px double ${TOKENS.tomato}`,
         color: TOKENS.tomato,
         borderRadius: '50%',
@@ -89,7 +91,7 @@ export default function ShareCard({ eaten, format }: { eaten: Set<number>; forma
         display: 'grid',
         placeItems: 'center',
         fontWeight: 700,
-        fontSize: 2.4 * c,
+        fontSize: 3 * c,
         lineHeight: 1.2,
         textAlign: 'center',
         rotate: '-12deg',

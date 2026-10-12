@@ -1,9 +1,11 @@
 'use client';
 import type { CSSProperties } from 'react';
+import { Heart, PackageOpen, Utensils } from 'lucide-react';
 import { bn } from '@/lib/format';
 import type { Tier } from '@/lib/tiers';
+import { Piece, StatTile } from './ui';
 
-/** The Food Passport piece: ring, tier, bar and the three counters. */
+/** The Food Passport piece: ring with the Bangla count inside, tier, bar, counters. */
 export default function Passport({
   count,
   total,
@@ -18,14 +20,18 @@ export default function Passport({
   const pct = total ? (count / total) * 100 : 0;
 
   return (
-    <aside className="piece passport">
+    <Piece className="passport" tilt="2deg">
       <div className="pass-head">
-        <span className="pass-icon" aria-hidden="true">✦</span>
+        <span className="pass-icon" aria-hidden="true">
+          <Heart />
+        </span>
         <span>তোমার ফুড পাসপোর্ট</span>
       </div>
 
       <div className="prow">
-        <div className="ring" style={{ '--done': `${pct}%` } as CSSProperties} aria-hidden="true" />
+        <div className="ring" style={{ '--done': `${pct}%` } as CSSProperties}>
+          <span className="ring-num">{bn(count)}</span>
+        </div>
         <div>
           <div className="num">
             {bn(count)} <small>/ {bn(total)}</small>
@@ -38,15 +44,15 @@ export default function Passport({
         </div>
       </div>
 
-      <div className="bar">
+      <div className="bar" role="progressbar" aria-valuenow={count} aria-valuemin={0} aria-valuemax={total} aria-label="অগ্রগতি">
         <span style={{ '--w': `${pct}%` } as CSSProperties} />
       </div>
 
       <div className="stats">
-        <div className="stat"><b>{bn(count)}</b><span>🍴 চেখেছি</span></div>
-        <div className="stat"><b>{bn(total - count)}</b><span>🥡 বাকি</span></div>
-        <div className="stat"><b>{bn(love)}</b><span>😍 দারুণ</span></div>
+        <StatTile value={bn(count)} label="চেখেছি" icon={<Utensils aria-hidden="true" />} />
+        <StatTile value={bn(total - count)} label="বাকি" icon={<PackageOpen aria-hidden="true" />} />
+        <StatTile value={bn(love)} label="দারুণ" icon={<Heart aria-hidden="true" />} />
       </div>
-    </aside>
+    </Piece>
   );
 }

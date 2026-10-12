@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { MapPin } from 'lucide-react';
 
 type Props = {
   name?: string;
@@ -44,7 +45,9 @@ export default function PlaceRow({ name, onSave, onClear }: Props) {
   if (name) {
     return (
       <div className="place-view">
-        <span>📍 {name}</span>
+        <span>
+          <MapPin className="icon" aria-hidden="true" style={{ width: 15, height: 15 }} /> {name}
+        </span>
         <button
           onClick={() => {
             setValue(name);
@@ -66,7 +69,8 @@ export default function PlaceRow({ name, onSave, onClear }: Props) {
         setEditing(true);
       }}
     >
-      📍 কোথায় সেরাটা খেয়েছ? (ঐচ্ছিক)
+      <MapPin className="icon" aria-hidden="true" style={{ width: 15, height: 15 }} />
+      কোথায় পাবেন? — জানলে লিখো
     </button>
   );
 }

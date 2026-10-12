@@ -1,4 +1,5 @@
 'use client';
+import { X } from 'lucide-react';
 import { districtById, dishesByDistrict } from '@/lib/data';
 import type { MyRating } from '@/lib/useRatings';
 import { RATING_OPTIONS } from '@/lib/useRatings';
@@ -35,7 +36,7 @@ export default function DistrictSheet({
           <h2>{district.nameBn}</h2>
           <p className="caption">{district.nameEn}</p>
         </div>
-        <button onClick={onClose} aria-label="বন্ধ করো" className="x">✕</button>
+        <button onClick={onClose} aria-label="বন্ধ করো" className="x"><X className="icon" aria-hidden="true" /></button>
       </div>
 
       {list.length === 0 ? (
@@ -56,9 +57,7 @@ export default function DistrictSheet({
                 >
                   <span>
                     {dish.nameBn}
-                    <small style={{ display: 'block', fontWeight: 400, fontSize: 13, color: 'var(--muted)' }}>
-                      {dish.nameEn}
-                    </small>
+                    <small className="sheet-en">{dish.nameEn}</small>
                   </span>
                   <span>{has ? '✅' : '⬜'}</span>
                 </button>
