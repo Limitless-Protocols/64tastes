@@ -166,6 +166,7 @@ header nav button{border:0;background:none;padding:6px 4px;border-bottom:2px sol
 header nav button:hover{transform:translateY(-1px)} header nav button.active{border-color:var(--leaf);color:var(--leaf)}
 header nav .cta{background:var(--tomato);color:#fff;border-radius:var(--radius-chip);padding:6px 18px;border:0;box-shadow:0 3px 0 var(--tomato-d);font-weight:700;font-size:var(--text-body)}
 header nav .cta:active{transform:translateY(2px);box-shadow:none}
+header .mobile-actions{display:none}
 
 /* mobile header overrides */
 @media (max-width: 767px) {
@@ -500,6 +501,7 @@ main.pane>*{flex:0 0 auto}
 @media (max-width: 767px) {
   html, body { overflow: auto; height: auto; }
   .book { width: 100%; height: auto; min-height: 100dvh; border: 0; overflow: visible; }
+  main{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;grid-template-areas:"pass" "map" "panel";padding:12px;gap:12px}
   .intro,.cards,.next,.top,.stamp,.compass,.leaf{display:none}
   .passport{rotate:0;clip-path:none;padding:0}
   .passport .stats,.passport .pass-head{display:none}

@@ -1,13 +1,17 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, Map as MapIcon, MoreVertical, RotateCcw, Share2, Shuffle, Sprout, Trophy, X } from 'lucide-react';
-import { districts, dishesByDistrict, districtById, totalDishes } from '@/lib/data';
+import {
+  BookOpen, Map as MapIcon, Menu as MenuIcon, MoreVertical, RotateCcw,
+  Search, Share2, Shuffle, Sprout, Trophy, X,
+} from 'lucide-react';
+import { districts, dishes, dishesByDistrict, districtById, totalDishes } from '@/lib/data';
 import { bn } from '@/lib/format';
 import { DERIVED, PALETTE } from '@/lib/palette';
 import { useProgress } from '@/lib/useProgress';
 import { useRatings } from '@/lib/useRatings';
 import { useTopData } from '@/lib/useTopData';
 import { getTier } from '@/lib/tiers';
+import { useMedia, BREAKPOINTS } from '@/lib/hooks';
 import DistrictPanel from './DistrictPanel';
 import MapZone from './MapZone';
 import Passport from './Passport';
@@ -17,14 +21,26 @@ import { TopStrip, TopPane } from './TopBoard';
 import DishCatalog from './DishCatalog';
 import DishModal from './DishModal';
 import DistrictCombo from './DistrictCombo';
-import DistrictSheet from './DistrictSheet';
 import SuggestForm from './SuggestForm';
+import HamburgerDrawer from './HamburgerDrawer';
 import { usePlacePicks } from '@/lib/usePlacePicks';
 import { Piece, PrimaryButton, SecondaryButton } from './ui';
 import type { Dish } from '@/lib/types';
 
-type Modal = null | 'share' | 'suggest';
 type View = 'map' | 'dishes' | 'top';
+
+/**
+ * ONE overlay owner — at most one [role="dialog"] in the DOM at a time.
+ * `menu` is a popover (role=menu), not a dialog, but still exclusive.
+ */
+type Overlay =
+  | null
+  | { kind: 'menu' }
+  | { kind: 'share' }
+  | { kind: 'suggest'; districtId: string | null }
+  | { kind: 'reset' }
+  | { kind: 'detail'; dish: Dish }
+  | { kind: 'map'; districtId: string };
 
 /** One URL per tab — refreshing lands you back on the tab you were on. */
 const PATHS: Record<View, string> = { map: '/', dishes: '/khabar', top: '/sera' };
@@ -44,8 +60,9 @@ function untasted(eaten: Set<number>) {
 
 /**
  * The Khabar Book — the whole app on one screen (style guide §1):
- * a paper book on a wooden desk, never scrolling, Bangla first.
- * The map is the hero (~56% of the width); short actions are modals.
+ * a paper book on a wooden desk, Bangla first.
+ * The map is the hero; short actions are overlays. Desktop (≥1024px & tall
+ * enough) never scrolls; below that the page scrolls normally.
  */
 export default function FoodMap({ initialView = 'map' }: { initialView?: View }) {
   const { eaten, toggle, reset } = useProgress();
@@ -54,17 +71,13 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
   const top = useTopData();
   const [selected, setSelected] = useState<string | null>(null);
   const [view, setView] = useState<View>(initialView);
-  const [modal, setModal] = useState<Modal>(null);
-  const [dish, setDish] = useState<Dish | null>(null);
-  const [sheet, setSheet] = useState<string | null>(null);
-  const [menu, setMenu] = useState(false);
-  const [confirmReset, setConfirmReset] = useState(false);
-  // suggest modal target: null = unlocked (district dropdown, catalog entry);
-  // a district id = locked (map panel entry, defaults to today's special)
-  const [suggestFrom, setSuggestFrom] = useState<string | null>(null);
+  const [overlay, setOverlay] = useState<Overlay>(null);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuBtnRef = useRef<HTMLSpanElement>(null);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const isMobile = useMedia(BREAKPOINTS.mobile);
+  const closeOverlay = useCallback(() => setOverlay(null), []);
 
   const count = eaten.size;
   const tier = getTier(count, totalDishes);
@@ -100,29 +113,31 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
     []
   );
 
-  // Escape closes any open modal (prototype behaviour).
+  // Escape closes the single open overlay.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setModal(null);
-        setDish(null);
-        setMenu(false);
-        setConfirmReset(false);
-      }
+      if (e.key === 'Escape') setOverlay(null);
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
+  // body scroll lock while a blocking overlay is open
+  useEffect(() => {
+    const blocking = overlay && overlay.kind !== 'menu';
+    document.body.style.overflow = blocking ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [overlay]);
+
   // the ⋯ menu closes on any outside press
   useEffect(() => {
-    if (!menu) return;
+    if (overlay?.kind !== 'menu') return;
     const onDown = (e: MouseEvent) => {
-      if (!menuRef.current?.contains(e.target as Node)) setMenu(false);
+      if (!menuBtnRef.current?.contains(e.target as Node)) setOverlay(null);
     };
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
-  }, [menu]);
+  }, [overlay]);
 
   /** Shallow tab switch: update the URL without a page navigation, so the
    *  mounted map keeps its state. Back/forward walk through the tabs. */
@@ -163,8 +178,6 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
     (id: string) => {
       const next = selected === id ? null : id;
       setSelected(next);
-      // phones: tapping a district also opens the slide-up sheet
-      if (window.matchMedia('(max-width:760px)').matches) setSheet(next);
     },
     [selected]
   );
@@ -182,14 +195,13 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
   );
 
   const surprise = useCallback(() => {
-    const pool = untasted(eaten);
+    const pool = dishes.filter((d) => !eaten.has(d.id));
     if (!pool.length) {
       showToast('সব খাবার চেখে ফেলেছ! 🎉');
       return;
     }
-    setModal(null);
-    select(pool[Math.floor(Math.random() * pool.length)].id);
-  }, [eaten, select, showToast]);
+    setOverlay({ kind: 'detail', dish: pool[Math.floor(Math.random() * pool.length)] });
+  }, [eaten, showToast]);
 
   const heart = useCallback(
     (dishId: number, el: HTMLElement | null) => {
@@ -200,6 +212,7 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
   );
 
   const selectedDistrict = selected ? districtById[selected] : null;
+  const overlayKind = overlay?.kind ?? null;
 
   return (
     <>
@@ -215,6 +228,8 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
               <div className="tagline">খাবার বুক · Edition 01 · Bangladesh</div>
             </div>
           </div>
+
+          {/* desktop nav */}
           <nav aria-label="Main navigation">
             <button
               className={view === 'map' ? 'active' : ''}
@@ -237,11 +252,39 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
             >
               <Trophy className="icon" aria-hidden="true" /> সেরা
             </button>
-            <button className="cta" aria-label="শেয়ার" onClick={() => setModal('share')}>
+            <button className="cta" aria-label="শেয়ার" onClick={() => setOverlay({ kind: 'share' })}>
               <Share2 className="icon" aria-hidden="true" />{' '}
               <span className="cta-txt">শেয়ার</span>
             </button>
           </nav>
+
+          {/* mobile actions: search + share + hamburger */}
+          <div className="mobile-actions" role="group" aria-label="অ্যাকশন">
+            <button
+              className="icon-btn"
+              aria-label="জেলা খুঁজুন"
+              onClick={() => goTo('dishes')}
+            >
+              <Search className="icon" aria-hidden="true" />
+            </button>
+            <button
+              className="icon-btn"
+              aria-label="শেয়ার"
+              onClick={() => setOverlay({ kind: 'share' })}
+            >
+              <Share2 className="icon" aria-hidden="true" />
+            </button>
+            <button
+              ref={hamburgerRef}
+              className="icon-btn"
+              aria-label="মেনু"
+              aria-haspopup="dialog"
+              aria-expanded={overlayKind === 'menu'}
+              onClick={() => setOverlay({ kind: 'menu' })}
+            >
+              <MenuIcon className="icon" aria-hidden="true" />
+            </button>
+          </div>
         </header>
 
         <main className={view === 'map' ? undefined : 'off'}>
@@ -262,24 +305,21 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
           <Piece className="next" tilt="-2deg">
             <div className="next-h">
               <h2>এরপর কী?</h2>
-              <span ref={menuRef} style={{ position: 'relative', display: 'inline-flex' }}>
+              <span ref={menuBtnRef} style={{ position: 'relative', display: 'inline-flex' }}>
                 <button
                   className="icon-btn"
                   aria-label="আরও অপশন"
                   aria-haspopup="menu"
-                  aria-expanded={menu}
-                  onClick={() => setMenu((m) => !m)}
+                  aria-expanded={overlayKind === 'menu'}
+                  onClick={() => setOverlay(overlayKind === 'menu' ? null : { kind: 'menu' })}
                 >
                   <MoreVertical className="icon" aria-hidden="true" />
                 </button>
-                {menu && (
+                {overlayKind === 'menu' && (
                   <div className="menu" role="menu">
                     <button
                       role="menuitem"
-                      onClick={() => {
-                        setMenu(false);
-                        setConfirmReset(true);
-                      }}
+                      onClick={() => setOverlay({ kind: 'reset' })}
                     >
                       <RotateCcw className="icon" aria-hidden="true" /> অগ্রগতি রিসেট
                     </button>
@@ -311,10 +351,7 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
               onRate={rate}
               onOverrate={toggleOverrated}
               onPlace={pick}
-              onSuggest={() => {
-                setSuggestFrom(selected ?? special);
-                setModal('suggest');
-              }}
+              onSuggest={() => setOverlay({ kind: 'suggest', districtId: selected ?? special })}
             />
           </Piece>
         </main>
@@ -322,11 +359,8 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
         {view === 'dishes' && (
           <main className="pane">
             <DishCatalog
-              onOpenDish={setDish}
-              onSuggest={() => {
-                setSuggestFrom(null);
-                setModal('suggest');
-              }}
+              onOpenDish={(d) => setOverlay({ kind: 'detail', dish: d })}
+              onSuggest={() => setOverlay({ kind: 'suggest', districtId: null })}
             />
           </main>
         )}
@@ -334,7 +368,7 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
         {view === 'top' && (
           <main className="pane">
             <TopPane
-              onOpenDish={setDish}
+              onOpenDish={(d) => setOverlay({ kind: 'detail', dish: d })}
               onSelect={(id) => {
                 select(id);
                 goTo('map');
@@ -343,65 +377,81 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
           </main>
         )}
 
-        {/* toast + modals sit at book level so they work from every tab */}
+        {/* toast sits at book level so it works from every tab */}
         <div className={`toast${toast ? ' show' : ''}`} role="status">
           {toast}
         </div>
 
-        {dish && (
+        {/* one overlay at a time */}
+        {overlay?.kind === 'menu' && isMobile && (
+          <HamburgerDrawer
+            open
+            onClose={closeOverlay}
+            items={[
+              { label: 'মানচিত্র', icon: <MapIcon className="icon" />, onClick: () => goTo('map') },
+              { label: 'খাবার', icon: <BookOpen className="icon" />, onClick: () => goTo('dishes') },
+              { label: 'সেরা', icon: <Trophy className="icon" />, onClick: () => goTo('top') },
+              { label: 'শেয়ার', icon: <Share2 className="icon" />, onClick: () => setOverlay({ kind: 'share' }) },
+              { label: 'অগ্রগতি রিসেট', icon: <RotateCcw className="icon" />, onClick: () => setOverlay({ kind: 'reset' }), danger: true },
+            ]}
+          />
+        )}
+
+        {overlay?.kind === 'detail' && (
           <DishModal
-            dish={dish}
-            onClose={() => setDish(null)}
+            dish={overlay.dish}
+            onClose={closeOverlay}
             onShowOnMap={(id) => {
-              setDish(null);
+              setOverlay(null);
               select(id);
               goTo('map');
             }}
           />
         )}
 
-        {modal === 'share' && <SharePanel eaten={eaten} onClose={() => setModal(null)} />}
-        {modal === 'suggest' && (
+        {overlay?.kind === 'share' && <SharePanel eaten={eaten} onClose={closeOverlay} />}
+
+        {overlay?.kind === 'suggest' && (
           <div
             className="mb"
             role="dialog"
             aria-modal="true"
             aria-label="খাবার পরামর্শ দাও"
-            onMouseDown={(e) => {
-              if (e.target === e.currentTarget) setModal(null);
-            }}
+            onMouseDown={(e) => { if (e.target === e.currentTarget) closeOverlay(); }}
           >
             <div className="modal">
               <h2>
                 খাবার পরামর্শ দাও
-                <button className="x" onClick={() => setModal(null)} aria-label="বন্ধ করো">
+                <button className="x" onClick={closeOverlay} aria-label="বন্ধ করো">
                   <X className="icon" aria-hidden="true" />
                 </button>
               </h2>
               <p className="note">
-                {suggestFrom
-                  ? `${districtById[suggestFrom]?.nameBn} জেলার জন্য`
+                {overlay.districtId
+                  ? `${districtById[overlay.districtId]?.nameBn} জেলার জন্য`
                   : 'বইয়ের যেকোনো জেলার জন্য'}
               </p>
-              <SuggestForm key={suggestFrom ?? 'any'} districtId={suggestFrom ?? undefined} standalone />
+              <SuggestForm
+                key={overlay.districtId ?? 'any'}
+                districtId={overlay.districtId ?? undefined}
+                standalone
+              />
             </div>
           </div>
         )}
 
-        {confirmReset && (
+        {overlay?.kind === 'reset' && (
           <div
             className="mb"
             role="dialog"
             aria-modal="true"
             aria-label="অগ্রগতি রিসেট করবে?"
-            onMouseDown={(e) => {
-              if (e.target === e.currentTarget) setConfirmReset(false);
-            }}
+            onMouseDown={(e) => { if (e.target === e.currentTarget) closeOverlay(); }}
           >
             <div className="modal">
               <h2>
                 অগ্রগতি মুছে ফেলবে?
-                <button className="x" onClick={() => setConfirmReset(false)} aria-label="বন্ধ করো">
+                <button className="x" onClick={closeOverlay} aria-label="বন্ধ করো">
                   <X className="icon" aria-hidden="true" />
                 </button>
               </h2>
@@ -411,30 +461,17 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
               <div className="acts">
                 <PrimaryButton
                   onClick={() => {
-                    setConfirmReset(false);
+                    closeOverlay();
                     reset();
                     showToast('অগ্রগতি মুছে ফেলা হয়েছ');
                   }}
                 >
                   হ্যাঁ, মুছে ফেলো
                 </PrimaryButton>
-                <SecondaryButton onClick={() => setConfirmReset(false)}>না, থাক</SecondaryButton>
+                <SecondaryButton onClick={closeOverlay}>না, থাক</SecondaryButton>
               </div>
             </div>
           </div>
-        )}
-
-        {sheet && (
-          <DistrictSheet
-            districtId={sheet}
-            eaten={eaten}
-            ratings={ratings}
-            places={picks}
-            onToggle={toggleEat}
-            onRate={rate}
-            onPlace={pick}
-            onClose={() => setSheet(null)}
-          />
         )}
       </div>
     </>
