@@ -1,9 +1,12 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BookOpen, Map as MapIcon, MoreVertical, RotateCcw, Share2, Shuffle, Sprout, Trophy, X } from 'lucide-react';
 import { districts, dishesByDistrict, districtById, totalDishes } from '@/lib/data';
 import { bn } from '@/lib/format';
+import { DERIVED, PALETTE } from '@/lib/palette';
 import { useProgress } from '@/lib/useProgress';
 import { useRatings } from '@/lib/useRatings';
+import { useTopData } from '@/lib/useTopData';
 import { getTier } from '@/lib/tiers';
 import DistrictPanel from './DistrictPanel';
 import MapZone from './MapZone';
@@ -13,9 +16,11 @@ import SharePanel from './SharePanel';
 import { TopStrip, TopPane } from './TopBoard';
 import DishCatalog from './DishCatalog';
 import DishModal from './DishModal';
+import DistrictCombo from './DistrictCombo';
 import DistrictSheet from './DistrictSheet';
 import SuggestForm from './SuggestForm';
 import { usePlacePicks } from '@/lib/usePlacePicks';
+import { Piece, PrimaryButton, SecondaryButton } from './ui';
 import type { Dish } from '@/lib/types';
 
 type Modal = null | 'share' | 'suggest';
@@ -40,21 +45,26 @@ function untasted(eaten: Set<number>) {
 /**
  * The Khabar Book — the whole app on one screen (style guide §1):
  * a paper book on a wooden desk, never scrolling, Bangla first.
+ * The map is the hero (~56% of the width); short actions are modals.
  */
 export default function FoodMap({ initialView = 'map' }: { initialView?: View }) {
   const { eaten, toggle, reset } = useProgress();
   const { ratings, rate, toggleLove, toggleOverrated } = useRatings();
   const { picks, pick } = usePlacePicks();
+  const top = useTopData();
   const [selected, setSelected] = useState<string | null>(null);
   const [view, setView] = useState<View>(initialView);
   const [modal, setModal] = useState<Modal>(null);
   const [dish, setDish] = useState<Dish | null>(null);
   const [sheet, setSheet] = useState<string | null>(null);
+  const [menu, setMenu] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
   // suggest modal target: null = unlocked (district dropdown, catalog entry);
   // a district id = locked (map panel entry, defaults to today's special)
   const [suggestFrom, setSuggestFrom] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const count = eaten.size;
   const tier = getTier(count, totalDishes);
@@ -66,6 +76,16 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
   // Today's special: the first district you haven't tasted yet — stable across
   // renders and identical on server and client.
   const special = useMemo(() => untasted(eaten)[0]?.id ?? null, [eaten]);
+
+  // "% দারুণ" for the panel's dish — only from the real board, never demo data.
+  const panelDishId = useMemo(() => {
+    const id = selected ?? special;
+    return id ? (dishesByDistrict[id] ?? [])[0]?.id : undefined;
+  }, [selected, special]);
+  const lovePct = useMemo(() => {
+    if (panelDishId == null || !top || top.empty) return null;
+    return top.mostLoved.find((r) => r.id === panelDishId)?.pct ?? null;
+  }, [top, panelDishId]);
 
   const showToast = useCallback((m: string) => {
     setToast(m);
@@ -86,11 +106,23 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
       if (e.key === 'Escape') {
         setModal(null);
         setDish(null);
+        setMenu(false);
+        setConfirmReset(false);
       }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, []);
+
+  // the ⋯ menu closes on any outside press
+  useEffect(() => {
+    if (!menu) return;
+    const onDown = (e: MouseEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenu(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [menu]);
 
   /** Shallow tab switch: update the URL without a page navigation, so the
    *  mounted map keeps its state. Back/forward walk through the tabs. */
@@ -111,7 +143,7 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
   const burst = useCallback((el: HTMLElement | null) => {
     if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const r = el.getBoundingClientRect();
-    const colors = ['#E94D2E', '#F6C94C', '#47764A', '#86A889'];
+    const colors = [PALETTE.tomato, PALETTE.mango, PALETTE.leaf, DERIVED.leaf2];
     for (let i = 0; i < 14; i++) {
       const p = document.createElement('i');
       const a = (i / 14) * Math.PI * 2;
@@ -173,8 +205,7 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
     <>
       <div className="desk" aria-hidden="true" />
       <div className="book">
-        <span className="leaf one" aria-hidden="true">🌿</span>
-        <span className="leaf two" aria-hidden="true">🌱</span>
+        <span className="leaf one" aria-hidden="true"><Sprout /></span>
 
         <header>
           <div className="brand">
@@ -190,24 +221,25 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
               aria-current={view === 'map'}
               onClick={() => goTo('map')}
             >
-              🗺️ মানচিত্র
+              <MapIcon className="icon" aria-hidden="true" /> মানচিত্র
             </button>
             <button
               className={view === 'dishes' ? 'active' : ''}
               aria-current={view === 'dishes'}
               onClick={() => goTo('dishes')}
             >
-              📖 খাবার
+              <BookOpen className="icon" aria-hidden="true" /> খাবার
             </button>
             <button
               className={view === 'top' ? 'active' : ''}
               aria-current={view === 'top'}
               onClick={() => goTo('top')}
             >
-              🏆 সেরা
+              <Trophy className="icon" aria-hidden="true" /> সেরা
             </button>
-            <button className="cta" onClick={() => setModal('share')}>
-              📤 শেয়ার
+            <button className="cta" aria-label="শেয়ার" onClick={() => setModal('share')}>
+              <Share2 className="icon" aria-hidden="true" />{' '}
+              <span className="cta-txt">শেয়ার</span>
             </button>
           </nav>
         </header>
@@ -218,6 +250,7 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
             <h1>তুমি <em>বাংলাদেশের</em> কতটা চেখেছ?</h1>
             <div className="sub">How much of Bangladesh have you tasted?</div>
             <p>প্রতিটি জেলার স্বাদ খুঁজে নাও, রেটিং দাও, আর দেখো তোমার ম্যাপ কতটা ভরল।</p>
+            <DistrictCombo onPick={select} />
           </section>
 
           <Passport count={count} total={totalDishes} tier={tier} love={loveCount} />
@@ -226,41 +259,64 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
 
           <Polaroids ratings={ratings} onSelect={select} onHeart={heart} />
 
-          <aside className="piece next">
-            <h3>📍 এরপর কী?</h3>
+          <Piece className="next" tilt="-2deg">
+            <div className="next-h">
+              <h2>এরপর কী?</h2>
+              <span ref={menuRef} style={{ position: 'relative', display: 'inline-flex' }}>
+                <button
+                  className="icon-btn"
+                  aria-label="আরও অপশন"
+                  aria-haspopup="menu"
+                  aria-expanded={menu}
+                  onClick={() => setMenu((m) => !m)}
+                >
+                  <MoreVertical className="icon" aria-hidden="true" />
+                </button>
+                {menu && (
+                  <div className="menu" role="menu">
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        setMenu(false);
+                        setConfirmReset(true);
+                      }}
+                    >
+                      <RotateCcw className="icon" aria-hidden="true" /> অগ্রগতি রিসেট
+                    </button>
+                  </div>
+                )}
+              </span>
+            </div>
             <p>আরও <b>{bn(remaining)}</b>টি খাবার চেখে ম্যাপ ভরে ফেলো!</p>
-            <button className="btn" onClick={surprise}>🎲 সারপ্রাইজ</button>
-            <button
-              className="link"
-              onClick={() => {
-                if (window.confirm('সব অগ্রগতি মুছে ফেলবে?')) reset();
-              }}
-            >
-              অগ্রগতি রিসেট
-            </button>
-          </aside>
+            <PrimaryButton onClick={surprise}>
+              <Shuffle className="icon" aria-hidden="true" /> সারপ্রাইজ
+            </PrimaryButton>
+          </Piece>
 
           <TopStrip onOpen={() => goTo('top')} />
 
-          <aside className="piece panel">
+          <Piece className="panel" tilt="1.5deg">
             <div className="p-label">
               {selectedDistrict
                 ? `📍 ${selectedDistrict.nameBn} · ${selectedDistrict.nameEn}`
-                : '🔥 আজকের স্পেশাল'}
+                : 'আজকের স্পেশাল'}
             </div>
             <DistrictPanel
               districtId={selected ?? special}
               eaten={eaten}
               ratings={ratings}
+              places={picks}
+              lovePct={lovePct}
               onToggle={toggleEat}
               onRate={rate}
               onOverrate={toggleOverrated}
+              onPlace={pick}
               onSuggest={() => {
                 setSuggestFrom(selected ?? special);
                 setModal('suggest');
               }}
             />
-          </aside>
+          </Piece>
         </main>
 
         {view === 'dishes' && (
@@ -318,7 +374,9 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
             <div className="modal">
               <h2>
                 খাবার পরামর্শ দাও
-                <button className="x" onClick={() => setModal(null)} aria-label="বন্ধ">✕</button>
+                <button className="x" onClick={() => setModal(null)} aria-label="বন্ধ করো">
+                  <X className="icon" aria-hidden="true" />
+                </button>
               </h2>
               <p className="note">
                 {suggestFrom
@@ -326,6 +384,42 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
                   : 'বইয়ের যেকোনো জেলার জন্য'}
               </p>
               <SuggestForm key={suggestFrom ?? 'any'} districtId={suggestFrom ?? undefined} standalone />
+            </div>
+          </div>
+        )}
+
+        {confirmReset && (
+          <div
+            className="mb"
+            role="dialog"
+            aria-modal="true"
+            aria-label="অগ্রগতি রিসেট করবে?"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setConfirmReset(false);
+            }}
+          >
+            <div className="modal">
+              <h2>
+                অগ্রগতি মুছে ফেলবে?
+                <button className="x" onClick={() => setConfirmReset(false)} aria-label="বন্ধ করো">
+                  <X className="icon" aria-hidden="true" />
+                </button>
+              </h2>
+              <p className="note big">
+                তোমার {bn(count)}টি চেখে ফেওয়ার খাবার আর রেটিং মুছে যাবে। এটা ফেরানো যাবে না।
+              </p>
+              <div className="acts">
+                <PrimaryButton
+                  onClick={() => {
+                    setConfirmReset(false);
+                    reset();
+                    showToast('অগ্রগতি মুছে ফেলা হয়েছ');
+                  }}
+                >
+                  হ্যাঁ, মুছে ফেলো
+                </PrimaryButton>
+                <SecondaryButton onClick={() => setConfirmReset(false)}>না, থাক</SecondaryButton>
+              </div>
             </div>
           </div>
         )}

@@ -1,5 +1,5 @@
 'use client';
-import { useState, type CSSProperties } from 'react';
+import { ArrowUpRight, MapPin, Trophy } from 'lucide-react';
 import { districtById, dishById } from '@/lib/data';
 import { bn } from '@/lib/format';
 import { leaders, type Leader } from '@/lib/leaders';
@@ -12,6 +12,57 @@ function toLeaders(rows: { id: number; pct: number }[]): Leader[] {
     .filter((l): l is Leader => Boolean(l.dish));
 }
 
+/** One podium card — the top three of the most-loved board. */
+function PodiumCard({ l, i, onOpenDish }: { l: Leader; i: number; onOpenDish: (d: Leader['dish']) => void }) {
+  const d = districtById[l.dish.districtId];
+  return (
+    <div
+      className="pod rank-btn"
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpenDish(l.dish)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onOpenDish(l.dish);
+        }
+      }}
+    >
+      <div className="pod-top">
+        <span className="pod-rank">#{bn(i + 1)}</span>
+        <PhotoSlot dish={l.dish} />
+        <div>
+          <div className="pod-name">{l.dish.nameBn}</div>
+          <div className="pod-dist">
+            <MapPin className="icon" aria-hidden="true" /> {d?.nameBn}
+          </div>
+        </div>
+      </div>
+      <span className="srow-bar"><i style={{ width: `${l.pct}%` }} /></span>
+      <div className="pod-pct">{bn(l.pct)}% দারুণ</div>
+    </div>
+  );
+}
+
+/** One leaderboard row: rank | photo | name+district | bar | bold percentage. */
+function BoardRow({ l, i, onOpenDish }: { l: Leader; i: number; onOpenDish: (d: Leader['dish']) => void }) {
+  const d = districtById[l.dish.districtId];
+  return (
+    <button className="srow" onClick={() => onOpenDish(l.dish)}>
+      <span className="srow-rank">{bn(i + 1)}</span>
+      <PhotoSlot dish={l.dish} />
+      <span>
+        <span className="srow-name">{l.dish.nameBn}</span>
+        <span className="srow-dist">
+          <MapPin className="icon" aria-hidden="true" /> {d?.nameBn}
+        </span>
+      </span>
+      <span className="srow-bar"><i style={{ width: `${l.pct}%` }} /></span>
+      <span className="srow-pct">{bn(l.pct)}%</span>
+    </button>
+  );
+}
+
 /** The "most-loved" strip on the bottom of the centre column. */
 export function TopStrip({ onOpen }: { onOpen: () => void }) {
   const data = useTopData();
@@ -21,8 +72,10 @@ export function TopStrip({ onOpen }: { onOpen: () => void }) {
   return (
     <section className="piece top">
       <div className="top-h">
-        <h3>🏆 সবচেয়ে প্রিয় খাবার</h3>
-        <button onClick={onOpen}>সব দেখো ↗</button>
+        <h3><Trophy className="icon" aria-hidden="true" /> সবচেয়ে প্রিয় খাবার</h3>
+        <button onClick={onOpen}>
+          সব দেখো <ArrowUpRight className="icon" aria-hidden="true" />
+        </button>
       </div>
       {data && data.empty ? (
         <p className="note">রেটিং জমা হচ্ছে — প্রথম তালিকা আসবে অন্তত {bn(20)}টি ভোটের পর।</p>
@@ -48,6 +101,8 @@ export function TopStrip({ onOpen }: { onOpen: () => void }) {
  * The সেরা view: real backend boards (loved / overrated / best districts /
  * popular spots) when GET /api/top answers, the demo boards otherwise, and
  * the honest empty state when the API works but nothing is ranked yet.
+ * Top three get podium cards; both boards stay visible so the page never
+ * ends half empty.
  */
 export function TopPane({
   onSelect,
@@ -59,12 +114,9 @@ export function TopPane({
   onOpenDish: (dish: Leader['dish']) => void;
 }) {
   const data = useTopData();
-  const [tab, setTab] = useState<'love' | 'over'>('love');
 
-  const rows: Leader[] =
-    data && !data.empty
-      ? toLeaders(tab === 'love' ? data.mostLoved : data.mostOverrated)
-      : leaders[tab];
+  const loved: Leader[] = data && !data.empty ? toLeaders(data.mostLoved) : leaders.love;
+  const over: Leader[] = data && !data.empty ? toLeaders(data.mostOverrated) : leaders.over;
 
   const spots = data?.spots ?? [];
   const spotDish = data?.spotsDishId != null ? dishById[data.spotsDishId] : null;
@@ -77,100 +129,91 @@ export function TopPane({
         <div className="sub">Bangladesh&apos;s most-loved dishes</div>
       </div>
 
-      <div className="seg">
-        <button
-          className={`chip${tab === 'love' ? ' on' : ''}`}
-          aria-pressed={tab === 'love'}
-          onClick={() => setTab('love')}
-        >
-          😍 সবচেয়ে প্রিয়
-        </button>
-        <button
-          className={`chip${tab === 'over' ? ' on' : ''}`}
-          aria-pressed={tab === 'over'}
-          onClick={() => setTab('over')}
-        >
-          🙄 ওভাররেটেড
-        </button>
-      </div>
-
       {data && data.empty ? (
         <div className="piece pane-note">
-          <p className="note">
+          <p className="note big">
             এখনও কোনো খাবার র‍্যাংক পায়নি — প্রতি খাবারে অন্তত{' '}
             {bn(20)}টি ভোট লাগে। তুমিই প্রথম ভোটার হতে পারো!
           </p>
         </div>
       ) : (
         <>
-          <div className="mlist">
-            {rows.map((l, i) => (
-              <button
-                className="rank rank-btn"
-                key={l.dish.slug}
-                onClick={() => onOpenDish(l.dish)}
-                title={`${l.dish.nameBn} — ${districtById[l.dish.districtId]?.nameBn}`}
-              >
-                <PhotoSlot dish={l.dish} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <b>{bn(i + 1)}. {l.dish.nameBn}</b>
-                  <em> · {districtById[l.dish.districtId]?.nameBn}</em>
-                  <div className="bb"><i style={{ '--p': `${l.pct}%` } as CSSProperties} /></div>
-                </div>
-                <b>{bn(l.pct)}%</b>
-              </button>
-            ))}
+          <section>
+            <h2 className="board-h">😍 সবচেয়ে প্রিয়</h2>
+            <div className="podium">
+              {loved.slice(0, 3).map((l, i) => (
+                <PodiumCard key={l.dish.slug} l={l} i={i} onOpenDish={onOpenDish} />
+              ))}
+            </div>
+            {loved.length > 3 && (
+              <div className="mlist">
+                {loved.slice(3).map((l, i) => (
+                  <BoardRow key={l.dish.slug} l={l} i={i + 3} onOpenDish={onOpenDish} />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <div className="pane-cols">
+            <section className="pane-sec">
+              <h3>🙄 ওভাররেটেড</h3>
+              <div className="mlist">
+                {over.map((l, i) => (
+                  <BoardRow key={l.dish.slug} l={l} i={i + 1} onOpenDish={onOpenDish} />
+                ))}
+              </div>
+            </section>
+
+            {data && data.districtRows.length > 0 && (
+              <section className="pane-sec">
+                <h3>🏆 সেরা খাবারের জেলা</h3>
+                <ol className="mlist">
+                  {data.districtRows.map((r, i) => {
+                    const d = districtById[r.id];
+                    if (!d) return null;
+                    return (
+                      <li key={r.id}>
+                        <button className="p-more-row" onClick={() => onSelect(r.id)}>
+                          <span>{bn(i + 1)}. {d.nameBn}</span>
+                          <span>{bn(r.pct)}% দারুণ</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </section>
+            )}
           </div>
 
+          {spots.length > 0 && (
+            <section className="pane-sec">
+              <h3>📍 জনপ্রিয় জায়গা{spotDish ? ` — ${spotDish.nameBn}` : ''}</h3>
+              <ul className="mlist">
+                {spots
+                  .filter((s) => s.name)
+                  .map((s) => (
+                    <li key={s.id} className="spot-row">
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name + ' Bangladesh')}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {s.name}
+                      </a>
+                      <span>{bn(s.picks)} জন</span>
+                    </li>
+                  ))}
+              </ul>
+              <p className="note">ব্যবহারকারীদের দেওয়া তথ্য</p>
+            </section>
+          )}
+
           {!data && (
-            <p className="note">
-              ডেমো ডেটা। আসল তালিকার জন্য প্রতি খাবারে {bn(20)}+ ভোট দরকার।
+            <p className="note big">
+              ডেমো ডেটা দেখানো হচ্ছে। আসল তালিকার জন্য প্রতি খাবারে {bn(20)}+ ভোট দরকার।
             </p>
           )}
         </>
-      )}
-
-      {data && data.districtRows.length > 0 && (
-        <section className="pane-sec">
-          <h3>🏆 সেরা খাবারের জেলা</h3>
-          <ol className="mlist">
-            {data.districtRows.map((r, i) => {
-              const d = districtById[r.id];
-              if (!d) return null;
-              return (
-                <li key={r.id}>
-                  <button className="p-more-row" onClick={() => onSelect(r.id)}>
-                    <span>{bn(i + 1)}. {d.nameBn}</span>
-                    <span>{bn(r.pct)}% দারুণ</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
-        </section>
-      )}
-
-      {spots.length > 0 && (
-        <section className="pane-sec">
-          <h3>📍 জনপ্রিয় জায়গা{spotDish ? ` — ${spotDish.nameBn}` : ''}</h3>
-          <ul className="mlist">
-            {spots
-              .filter((s) => s.name)
-              .map((s) => (
-                <li key={s.id} className="spot-row">
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name + ' Bangladesh')}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {s.name}
-                  </a>
-                  <span>{bn(s.picks)} জন</span>
-                </li>
-              ))}
-          </ul>
-          <p className="note">ব্যবহারকারীদের দেওয়া তথ্য</p>
-        </section>
       )}
     </>
   );
@@ -218,7 +261,7 @@ export function TopModal({
               <div style={{ flex: 1 }}>
                 <b>{bn(i + 1)}. {l.dish.nameBn}</b>
                 <em> · {districtById[l.dish.districtId]?.nameBn}</em>
-                <div className="bb"><i style={{ '--p': `${l.pct}%` } as CSSProperties} /></div>
+                <div className="bb"><i style={{ '--p': `${l.pct}%` } as React.CSSProperties} /></div>
               </div>
               <b>{bn(l.pct)}%</b>
             </div>

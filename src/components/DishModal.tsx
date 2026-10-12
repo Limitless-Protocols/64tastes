@@ -1,8 +1,10 @@
 'use client';
+import { Map, MapPin, X } from 'lucide-react';
 import { districtById } from '@/lib/data';
 import type { Dish } from '@/lib/types';
 import { stories, FALLBACK_STORY } from '@/lib/stories';
 import PhotoSlot from './PhotoSlot';
+import { PrimaryButton } from './ui';
 
 type Props = {
   dish: Dish;
@@ -30,17 +32,21 @@ export default function DishModal({ dish, onShowOnMap, onClose }: Props) {
       }}
     >
       <div className="modal dish-modal">
-        <PhotoSlot dish={dish} />
+        <PhotoSlot dish={dish} tag />
         <h2>
           {dish.nameBn}
-          <button className="x" onClick={onClose} aria-label="বন্ধ করো">✕</button>
+          <button className="x" onClick={onClose} aria-label="বন্ধ করো">
+            <X className="icon" aria-hidden="true" />
+          </button>
         </h2>
         <div className="dish-en">{dish.nameEn}</div>
-        <div className="dish-loc">📍 {d?.nameBn} · {d?.nameEn}</div>
+        <div className="dish-loc">
+          <MapPin className="icon" aria-hidden="true" /> {d?.nameBn} · {d?.nameEn}
+        </div>
         <p className="dish-story">{stories[dish.slug] ?? FALLBACK_STORY}</p>
-        <button className="btn" onClick={() => onShowOnMap(dish.districtId)}>
-          🗺️ মানচিত্রে দেখো
-        </button>
+        <PrimaryButton onClick={() => onShowOnMap(dish.districtId)}>
+          <Map className="icon" aria-hidden="true" /> মানচিত্রে দেখো
+        </PrimaryButton>
       </div>
     </div>
   );

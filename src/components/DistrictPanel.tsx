@@ -1,15 +1,24 @@
 'use client';
+import { Check, MapPin } from 'lucide-react';
 import { districtById, dishesByDistrict } from '@/lib/data';
+import { bn } from '@/lib/format';
+import { stories, FALLBACK_STORY } from '@/lib/stories';
 import { RATING_OPTIONS, type MyRating } from '@/lib/useRatings';
 import PhotoSlot from './PhotoSlot';
+import PlaceRow from './PlaceRow';
+import { Chip, PrimaryButton } from './ui';
 
 type Props = {
   districtId: string | null;
   eaten: Set<number>;
   ratings: Record<number, MyRating>;
+  places: Record<number, string>;
+  /** "% দারুণ" from the leader board, when this dish has one. */
+  lovePct: number | null;
   onToggle: (dishId: number, el: HTMLElement | null) => void;
   onRate: (dishId: number, r: MyRating | null) => void;
   onOverrate: (dishId: number) => void;
+  onPlace: (dishId: number, name: string | null) => void;
   onSuggest: () => void;
 };
 
@@ -17,15 +26,20 @@ type Props = {
  * The dish panel piece: the selected district's food, or — when nothing is
  * selected — today's special. Not a modal: it lives in the right column on
  * desktop and below the map on phones, and repaints (with a slide) whenever
- * the selection changes.
+ * the selection changes. Top to bottom: photo (16:10), name + English, a
+ * district · loved meta row, a one-line story, the big চেখেছি button with the
+ * reaction chips right under it, then the "কোথায় পাবেন" place pick.
  */
 export default function DistrictPanel({
   districtId,
   eaten,
   ratings,
+  places,
+  lovePct,
   onToggle,
   onRate,
   onOverrate,
+  onPlace,
   onSuggest,
 }: Props) {
   const list = districtId ? dishesByDistrict[districtId] ?? [] : [];
@@ -54,28 +68,39 @@ export default function DistrictPanel({
         <PhotoSlot dish={dish} />
         <div className="p-info">
           <div className="p-name">{dish.nameBn}</div>
-          <div className="p-en">{dish.nameEn} · {district.nameBn}</div>
+          <div className="p-en">{dish.nameEn}</div>
         </div>
       </div>
 
-      <div className="p-row">
-        <span className="p-state">{on ? 'চেখে ফেলেছ!' : 'চেখেছ কি?'}</span>
-        <button
-          className={`check${on ? ' on' : ''}`}
-          aria-pressed={on}
-          onClick={(e) => onToggle(dish.id, e.currentTarget)}
-        >
-          {on ? 'চেখেছি ✓' : 'চেখেছি?'}
-        </button>
+      <div className="p-meta">
+        <span>
+          <MapPin className="icon" aria-hidden="true" /> {district.nameBn}
+        </span>
+        {lovePct != null && <span>· {bn(lovePct)}% দারুণ</span>}
       </div>
+
+      <p className="p-desc">{stories[dish.slug] ?? FALLBACK_STORY}</p>
+
+      <PrimaryButton
+        className={`check${on ? ' on' : ''}`}
+        aria-pressed={on}
+        onClick={(e) => onToggle(dish.id, e.currentTarget)}
+      >
+        {on ? (
+          <>
+            <Check className="icon" aria-hidden="true" /> চেখেছি
+          </>
+        ) : (
+          'চেখেছি?'
+        )}
+      </PrimaryButton>
 
       {/* rating chips unfold only once the dish is marked eaten */}
       <div className={`chips${on ? ' open' : ''}`}>
         {RATING_OPTIONS.map((r) => (
-          <button
+          <Chip
             key={r.v}
-            className={`chip${rating?.rating === r.v ? ' on' : ''}`}
-            aria-pressed={rating?.rating === r.v}
+            on={rating?.rating === r.v}
             onClick={() =>
               onRate(
                 dish.id,
@@ -86,17 +111,18 @@ export default function DistrictPanel({
             }
           >
             {r.e} {r.bn}
-          </button>
+          </Chip>
         ))}
-        <button
-          className={`chip over${rating?.overrated ? ' on' : ''}`}
-          disabled={!rating}
-          aria-pressed={!!rating?.overrated}
-          onClick={() => onOverrate(dish.id)}
-        >
+        <Chip over on={!!rating?.overrated} disabled={!rating} onClick={() => onOverrate(dish.id)}>
           🙄 ওভাররেটেড
-        </button>
+        </Chip>
       </div>
+
+      <PlaceRow
+        name={places[dish.id]}
+        onSave={(n) => onPlace(dish.id, n)}
+        onClear={() => onPlace(dish.id, null)}
+      />
 
       {list.length > 1 && (
         <ul className="p-more">

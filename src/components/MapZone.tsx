@@ -1,6 +1,6 @@
 'use client';
-import { useMemo } from 'react';
-import type { CSSProperties } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, MouseEvent, FocusEvent } from 'react';
 import { artFor } from '@/lib/art';
 import { districtTone } from '@/lib/colors';
 import { districts, dishesByDistrict, paths, viewBox } from '@/lib/data';
@@ -11,6 +11,8 @@ type Props = {
   selected: string | null;
   onSelect: (id: string) => void;
 };
+
+type Tip = { x: number; y: number; t: string; s: string };
 
 /** First `y` of a path ≈ its latitude — used to ripple districts north → south. */
 function firstY(d: string) {
@@ -32,25 +34,34 @@ const MANDALA = (
   </svg>
 );
 
-/** The nouka on the Bay of Bengal (prototype symbol `#nouka`). */
+/** The nouka on the Bay of Bengal (prototype symbol `#nouka`) — token colours. */
 const NOUKA = (
   <svg className="boat" viewBox="0 0 100 100" aria-hidden="true">
-    <path d="M52 12v52" stroke="#24231F" strokeWidth="3" />
-    <path d="M55 14c22 8 28 26 24 44H55z" fill="#F6C94C" />
-    <path d="M49 20c-16 6-22 20-22 38h22z" fill="#E94D2E" />
-    <path d="M6 62c22 24 66 24 88 0z" fill="#47764A" />
-    <path d="M12 68c20 14 56 14 76 0" stroke="#F6C94C" strokeWidth="4" fill="none" />
+    <path d="M52 12v52" stroke="var(--ink)" strokeWidth="3" />
+    <path d="M55 14c22 8 28 26 24 44H55z" fill="var(--mango)" />
+    <path d="M49 20c-16 6-22 20-22 38h22z" fill="var(--tomato)" />
+    <path d="M6 62c22 24 66 24 88 0z" fill="var(--leaf)" />
+    <path d="M12 68c20 14 56 14 76 0" stroke="var(--mango)" strokeWidth="4" fill="none" />
   </svg>
 );
 
+/**
+ * The map zone: real geoBoundaries districts, alpona mandala, the stamp and
+ * the Bay of Bengal. Districts carry a styled tooltip on hover AND focus
+ * (replacing the native `title`); keyboard focus gets a visible ink ring.
+ */
 export default function MapZone({ eaten, selected, onSelect }: Props) {
+  const zoneRef = useRef<HTMLElement>(null);
+  const [tip, setTip] = useState<Tip | null>(null);
+
   const cells = useMemo(
     () =>
       districts.map((d, i) => ({
         id: d.id,
         d: paths[d.id],
         label: `${d.nameBn} ${d.nameEn}`,
-        title: `${d.nameBn} · ${d.nameEn}`,
+        bn: d.nameBn,
+        en: d.nameEn,
         delay: `${(0.4 + (firstY(paths[d.id]) / 1026) * 0.8 + (i % 4) * 0.04).toFixed(2)}s`,
       })),
     []
@@ -68,32 +79,50 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
     [eaten]
   );
 
+  const showTip = useCallback((el: Element, t: string, s: string) => {
+    const zone = zoneRef.current;
+    if (!zone) return;
+    const zr = zone.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    setTip({ x: r.left + r.width / 2 - zr.left, y: r.top - zr.top - 8, t, s });
+  }, []);
+
+  const hideTip = useCallback(() => setTip(null), []);
+
   return (
-    <section className="map-zone" aria-label="বাংলাদেশের খাবারের মানচিত্র">
+    <section className="map-zone" ref={zoneRef} aria-label="বাংলাদেশের খাবারের মানচিত্র">
       <div className="mand-bg" aria-hidden="true">{MANDALA}</div>
 
       <svg className="map-svg" viewBox={viewBox} role="group" aria-label="Map of Bangladesh districts">
-        {cells.map((c) => (
-          <path
-            key={c.id}
-            d={c.d}
-            className={`d ${districtTone(c.id, eaten)}${selected === c.id ? ' sel' : ''}`}
-            style={{ '--cd': c.delay } as CSSProperties}
-            role="button"
-            tabIndex={0}
-            aria-label={c.label}
-            aria-pressed={selected === c.id}
-            onClick={() => onSelect(c.id)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onSelect(c.id);
-              }
-            }}
-          >
-            <title>{c.title}</title>
-          </path>
-        ))}
+        {cells.map((c) => {
+          const onEnter = (e: MouseEvent<SVGPathElement>) =>
+            showTip(e.currentTarget, c.bn, c.en);
+          const onFocus = (e: FocusEvent<SVGPathElement>) =>
+            showTip(e.currentTarget, c.bn, c.en);
+          return (
+            <path
+              key={c.id}
+              d={c.d}
+              className={`d ${districtTone(c.id, eaten)}${selected === c.id ? ' sel' : ''}`}
+              style={{ '--cd': c.delay } as CSSProperties}
+              role="button"
+              tabIndex={0}
+              aria-label={c.label}
+              aria-pressed={selected === c.id}
+              onClick={() => onSelect(c.id)}
+              onMouseEnter={onEnter}
+              onMouseLeave={hideTip}
+              onFocus={onFocus}
+              onBlur={hideTip}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelect(c.id);
+                }
+              }}
+            />
+          );
+        })}
         <g aria-hidden="true">
           {pins.map((p) => (
             <text key={p.id} className="pin" x={p.x} y={p.y} fontSize={30} textAnchor="middle" dominantBaseline="central">
@@ -102,6 +131,13 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
           ))}
         </g>
       </svg>
+
+      {tip && (
+        <div className="tip" role="presentation">
+          <b>{tip.t}</b>
+          <small>{tip.s}</small>
+        </div>
+      )}
 
       <div className="stamp" aria-hidden="true">
         <div>খাবার বুক<strong>৬৪ জেলা</strong>EDITION 01</div>

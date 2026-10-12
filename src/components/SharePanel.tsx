@@ -1,18 +1,22 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { ClipboardCheck, Download, Link2, Share2, X } from 'lucide-react';
 import ShareCard, { FORMATS, type Format } from './ShareCard';
 import { renderPng } from '@/lib/shareImage';
 import { encodeProgress } from '@/lib/share';
 import { getTier } from '@/lib/tiers';
 import { totalDishes } from '@/lib/data';
 import { bn } from '@/lib/format';
+import { PrimaryButton, SecondaryButton } from './ui';
 
 type Shot = { url: string; blob: Blob } | { error: true };
 
 /**
- * The share modal (prototype `#mShare`): pick a size, then share / download /
- * copy the link. The card is rendered off-screen with html-to-image and shown
- * as a PNG preview — each size is rendered once and cached.
+ * The share modal: pick a size (Bangla tabs), then share / download / copy
+ * the link. The card is rendered off-screen with html-to-image and shown as a
+ * PNG preview — each size is rendered once and cached. Download produces the
+ * real PNG for all three sizes; Share uses the Web Share API with the file and
+ * falls back to download + copy link.
  */
 export default function SharePanel({ eaten, onClose }: { eaten: Set<number>; onClose: () => void }) {
   const [format, setFormat] = useState<Format>('landscape');
@@ -58,7 +62,7 @@ export default function SharePanel({ eaten, onClose }: { eaten: Set<number>; onC
     if (!ready) return;
     const a = document.createElement('a');
     a.href = ready.url;
-    a.download = 'khabar-book.png';
+    a.download = `khabar-book-${format}.png`;
     a.click();
   }
 
@@ -73,7 +77,9 @@ export default function SharePanel({ eaten, onClose }: { eaten: Set<number>; onC
         // user closed the share sheet
       }
     } else {
+      // no file-share support: download the PNG, then copy the link
       download();
+      copyLink();
     }
   }
 
@@ -93,10 +99,12 @@ export default function SharePanel({ eaten, onClose }: { eaten: Set<number>; onC
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="modal">
+      <div className="modal share">
         <h2>
           শেয়ার করো
-          <button className="x" onClick={onClose} aria-label="Close">✕</button>
+          <button className="x" onClick={onClose} aria-label="বন্ধ করো">
+            <X className="icon" aria-hidden="true" />
+          </button>
         </h2>
 
         <div className="seg">
@@ -117,22 +125,30 @@ export default function SharePanel({ eaten, onClose }: { eaten: Set<number>; onC
             <p className="note">কার্ড বানানো যায়নি — আবার চেষ্টা করো।</p>
           ) : ready ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={ready.url} alt="তোমার ফুড ম্যাপ কার্ড" />
+            <img src={ready.url} alt={`তোমার ফুড ম্যাপ কার্ড — ${FORMATS[format].label}`} />
           ) : (
             <p className="note">কার্ড বানানো হচ্ছে…</p>
           )}
         </div>
 
         <div className="acts">
-          <button className="btn" onClick={share} disabled={!ready}>
-            শেয়ার
-          </button>
-          <button className="btn alt" onClick={download} disabled={!ready}>
-            ডাউনলোড
-          </button>
-          <button className="btn alt" onClick={copyLink}>
-            {copied ? 'কপি হয়েছে!' : 'লিংক কপি'}
-          </button>
+          <PrimaryButton onClick={share} disabled={!ready}>
+            <Share2 className="icon" aria-hidden="true" /> শেয়ার
+          </PrimaryButton>
+          <SecondaryButton onClick={download} disabled={!ready}>
+            <Download className="icon" aria-hidden="true" /> ডাউনলোড
+          </SecondaryButton>
+          <SecondaryButton onClick={copyLink}>
+            {copied ? (
+              <>
+                <ClipboardCheck className="icon" aria-hidden="true" /> কপি হয়েছে!
+              </>
+            ) : (
+              <>
+                <Link2 className="icon" aria-hidden="true" /> লিংক কপি
+              </>
+            )}
+          </SecondaryButton>
         </div>
       </div>
 
