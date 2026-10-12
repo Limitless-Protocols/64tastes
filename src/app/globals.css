@@ -405,6 +405,15 @@ main.pane>*{flex:0 0 auto}
 .sheet-empty{color:var(--muted);font-size:var(--text-small);margin:10px 0 0}
 .sheet .chips{max-height:none;opacity:1;overflow:visible}
 
+/* MapDishPopup dish list */
+.mp-list{display:grid;gap:8px;margin:12px 0;max-height:52dvh;overflow-y:auto}
+.mp-row{display:flex;align-items:center;gap:10px;padding:6px;border:1px solid var(--edge);border-radius:var(--radius-paper);background:var(--card)}
+.mp-open{display:flex;align-items:center;gap:10px;flex:1;min-width:0;background:none;border:0;padding:0;text-align:left;cursor:pointer;color:var(--ink)}
+.mp-names{display:grid;min-width:0}
+.mp-names b{font-size:var(--text-ui);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp-ph{width:44px;height:44px;flex:none;border-width:2px}
+.mp-ph .ph-letter{font-size:20px}
+
 /* suggest form (paper) */
 .sf{display:grid;gap:10px;margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
 .sf-l{display:grid;gap:4px;font-size:var(--text-small);font-weight:600;color:var(--body)}

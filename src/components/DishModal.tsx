@@ -1,5 +1,5 @@
 'use client';
-import { Map, MapPin, X } from 'lucide-react';
+import { Map, MapPin, Shuffle, X } from 'lucide-react';
 import { districtById } from '@/lib/data';
 import type { Dish } from '@/lib/types';
 import { stories, FALLBACK_STORY } from '@/lib/stories';
@@ -11,14 +11,16 @@ type Props = {
   /** "মানচিত্রে দেখো" — jump to the map tab with this district selected. */
   onShowOnMap: (districtId: string) => void;
   onClose: () => void;
+  /** Surprise variant: show a re-roll button that picks another dish. */
+  onReroll?: () => void;
 };
 
 /**
- * Dish detail modal — opened from the খাবার catalog and the সেরা boards
- * instead of jumping to the map. Photo on top, names + district + a short
- * (currently temporary — see lib/stories.ts) history line underneath.
+ * DishDetailModal — opened from the খাবার catalog, the সেরা boards, the
+ * highlight polaroids, and Surprise. Photo on top, names + district + a short
+ * history line. Distinct from MapDishPopup (district entry).
  */
-export default function DishModal({ dish, onShowOnMap, onClose }: Props) {
+export default function DishDetailModal({ dish, onShowOnMap, onClose, onReroll }: Props) {
   const d = districtById[dish.districtId];
 
   return (
@@ -27,6 +29,7 @@ export default function DishModal({ dish, onShowOnMap, onClose }: Props) {
       role="dialog"
       aria-modal="true"
       aria-label={dish.nameBn}
+      data-testid="dish-detail-modal"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -44,9 +47,16 @@ export default function DishModal({ dish, onShowOnMap, onClose }: Props) {
           <MapPin className="icon" aria-hidden="true" /> {d?.nameBn} · {d?.nameEn}
         </div>
         <p className="dish-story">{stories[dish.slug] ?? FALLBACK_STORY}</p>
-        <PrimaryButton onClick={() => onShowOnMap(dish.districtId)}>
-          <Map className="icon" aria-hidden="true" /> মানচিত্রে দেখো
-        </PrimaryButton>
+        <div className="acts">
+          <PrimaryButton onClick={() => onShowOnMap(dish.districtId)}>
+            <Map className="icon" aria-hidden="true" /> মানচিত্রে দেখো
+          </PrimaryButton>
+          {onReroll && (
+            <PrimaryButton onClick={onReroll}>
+              <Shuffle className="icon" aria-hidden="true" /> অন্য খাবার দেখাও
+            </PrimaryButton>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -21,6 +21,7 @@ import { TopStrip, TopPane } from './TopBoard';
 import DishCatalog from './DishCatalog';
 import DishModal from './DishModal';
 import DistrictCombo from './DistrictCombo';
+import MapDishPopup from './MapDishPopup';
 import SuggestForm from './SuggestForm';
 import HamburgerDrawer from './HamburgerDrawer';
 import { usePlacePicks } from '@/lib/usePlacePicks';
@@ -39,7 +40,7 @@ type Overlay =
   | { kind: 'share' }
   | { kind: 'suggest'; districtId: string | null }
   | { kind: 'reset' }
-  | { kind: 'detail'; dish: Dish }
+  | { kind: 'detail'; dish: Dish; source?: 'surprise' }
   | { kind: 'map'; districtId: string };
 
 /** One URL per tab — refreshing lands you back on the tab you were on. */
@@ -178,6 +179,10 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
     (id: string) => {
       const next = selected === id ? null : id;
       setSelected(next);
+      // phones: tapping a district opens the single-step MapDishPopup sheet
+      if (next && typeof window !== 'undefined' && window.matchMedia('(max-width:767px)').matches) {
+        setOverlay({ kind: 'map', districtId: next });
+      }
     },
     [selected]
   );
@@ -200,8 +205,18 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
       showToast('সব খাবার চেখে ফেলেছ! 🎉');
       return;
     }
-    setOverlay({ kind: 'detail', dish: pool[Math.floor(Math.random() * pool.length)] });
+    setOverlay({ kind: 'detail', dish: pool[Math.floor(Math.random() * pool.length)], source: 'surprise' });
   }, [eaten, showToast]);
+
+  // Re-roll inside an open surprise modal — never touches Dish of the Day.
+  const reroll = useCallback(() => {
+    setOverlay((cur) => {
+      if (cur?.kind !== 'detail' || cur.source !== 'surprise') return cur;
+      const pool = dishes.filter((d) => !eaten.has(d.id) && d.id !== cur.dish.id);
+      if (!pool.length) return cur;
+      return { kind: 'detail', dish: pool[Math.floor(Math.random() * pool.length)], source: 'surprise' };
+    });
+  }, [eaten]);
 
   const heart = useCallback(
     (dishId: number, el: HTMLElement | null) => {
@@ -406,10 +421,21 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
               select(id);
               goTo('map');
             }}
+            onReroll={overlay.source === 'surprise' ? reroll : undefined}
           />
         )}
 
         {overlay?.kind === 'share' && <SharePanel eaten={eaten} onClose={closeOverlay} />}
+
+        {overlay?.kind === 'map' && (
+          <MapDishPopup
+            districtId={overlay.districtId}
+            eaten={eaten}
+            onToggle={toggleEat}
+            onOpenDish={(d) => setOverlay({ kind: 'detail', dish: d })}
+            onClose={closeOverlay}
+          />
+        )}
 
         {overlay?.kind === 'suggest' && (
           <div
