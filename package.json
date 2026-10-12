@@ -10,11 +10,14 @@
     "check:design": "node scripts/check-design.mjs"
   },
   "dependencies": {
+    "@floating-ui/react-dom": "^2.1.9",
     "@neondatabase/serverless": "^1.2.0",
+    "@types/polylabel": "^2.0.0",
     "html-to-image": "^1.11.13",
     "jose": "^6.2.12",
     "lucide-react": "^1.55.0",
     "next": "16.4.0",
+    "polylabel": "^2.1.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },

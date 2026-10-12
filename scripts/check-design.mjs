@@ -10,6 +10,8 @@
  *      the clamped root, so they must also be >= 14px)
  *   4. no `letter-spacing` with a nonzero value on Bangla text (tracked Bangla
  *      conjuncts break shaping) — only Latin-only strings may track
+ *   5. no raw z-index values outside the scale in globals.css or components —
+ *      the scale lives in @theme (--z-*) and is the only allowed set
  *
  * Scope: the one-page surface (/, /khabar, /sera, share/modals, /r result).
  * The legacy origin/main pages kept for the backend (/admin, /top,
@@ -33,6 +35,11 @@ const EXCLUDE = [
 const HEX_ALLOWED = ['src/lib/palette.ts'];
 
 const problems = [];
+
+/** The z-index scale — the only allowed values (globals.css @theme --z-*). */
+const Z_ALLOWED = new Set([
+  -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 30, 40, 45, 50, 60, 70, 80,
+]);
 
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
@@ -85,6 +92,18 @@ for (const abs of files) {
       const bangla = stripped.match(/[ঀ-৿]/u);
       if (bangla) at(); // Bangla text tracked — banned
     }
+
+    // 5. raw z-index values outside the scale (CSS + TSX). var(--z-*) is fine.
+    if (!isCss) {
+      for (const m of line.matchAll(/\bz-(\d+)\b/g)) {
+        if (!Z_ALLOWED.has(Number(m[1]))) at();
+      }
+      for (const m of line.matchAll(/z-\[(-?\d+)\]/g)) {
+        if (!Z_ALLOWED.has(Number(m[1]))) at();
+      }
+    }
+    const zi = line.match(/z-index:\s*(-?\d+)/);
+    if (zi && !Z_ALLOWED.has(Number(zi[1]))) at();
   });
 }
 
@@ -93,4 +112,4 @@ if (problems.length) {
   for (const p of problems) console.error('  ' + p);
   process.exit(1);
 }
-console.log('✓ design check passed: no sub-floor text, no raw hex, no tracked Bangla');
+console.log('✓ design check passed: no sub-floor text, no raw hex, no tracked Bangla, z-index on scale');
