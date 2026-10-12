@@ -203,11 +203,19 @@ h1 em{font-style:normal;color:var(--leaf);text-decoration:underline;text-decorat
 .combo input{width:100%;height:48px;border:1.5px solid var(--edge);background:var(--card);color:var(--ink);border-radius:var(--radius-paper);padding:0 12px 0 40px;font:500 var(--text-small) var(--sans)}
 .combo input:focus{border-color:var(--leaf);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--leaf) 25%,transparent)}
 .combo .icon{position:absolute;left:12px;top:50%;translate:0 -50%;color:var(--muted);pointer-events:none}
-.combo-list{position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:46dvh;overflow-y:auto;z-index:var(--z-popover);background:var(--card);border:1.5px solid var(--ink);border-radius:var(--radius-paper);box-shadow:var(--shadow-lift);padding:4px;list-style:none;margin:0}
+/* portaled listbox — positioning is handled by floating-ui (inline styles) */
+.combo-list{max-height:360px;overflow-y:auto;z-index:var(--z-popover);background:var(--card);border:1.5px solid var(--ink);border-radius:var(--radius-paper);box-shadow:var(--shadow-lift);padding:4px;list-style:none;margin:0;min-width:220px}
 .combo-opt{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:8px 10px;font-size:var(--text-small);font-weight:500;min-height:44px}
 .combo-opt small{color:var(--muted);font-size:var(--text-label);font-weight:500;align-self:center}
 .combo-opt:hover,.combo-opt.hi{background:var(--mango)}
 .combo-empty{padding:8px 10px;color:var(--muted);font-size:var(--text-label)}
+
+/* mobile full-screen search sheet */
+.search-sheet{position:fixed;inset:0;z-index:var(--z-modal);background:var(--paper);display:flex;flex-direction:column}
+.search-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px dashed var(--line)}
+.search-bar input{flex:1;height:48px;border:1.5px solid var(--edge);background:#fff;color:var(--ink);border-radius:var(--radius-paper);padding:0 14px;font:500 var(--text-body) var(--sans)}
+.search-bar input:focus{border-color:var(--leaf);outline:none}
+.search-results{flex:1;overflow-y:auto;padding:8px 12px}
 
 /* passport */
 .passport{grid-area:pass;align-self:start;padding:14px 16px;rotate:2deg;clip-path:polygon(1% 0,100% 2%,98% 100%,0 97%);z-index:var(--z-content-4)}

@@ -312,7 +312,7 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
             <h1>তুমি <em>বাংলাদেশের</em> কতটা চেখেছ?</h1>
             <div className="sub">How much of Bangladesh have you tasted?</div>
             <p>প্রতিটি জেলার স্বাদ খুঁজে নাও, রেটিং দাও, আর দেখো তোমার ম্যাপ কতটা ভরল।</p>
-            <DistrictCombo onPick={select} />
+            <DistrictCombo onPick={select} onOpenDish={(d) => setOverlay({ kind: 'detail', dish: d })} />
           </section>
 
           <Passport count={count} total={totalDishes} tier={tier} love={loveCount} />
