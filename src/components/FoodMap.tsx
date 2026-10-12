@@ -313,7 +313,7 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
 
           <MapZone eaten={eaten} selected={selected} onSelect={select} />
 
-          <Polaroids ratings={ratings} onSelect={select} onHeart={heart} />
+          <Polaroids ratings={ratings} onOpenDish={(d) => setOverlay({ kind: 'detail', dish: d })} onHeart={heart} />
 
           <Piece className="next" tilt="-2deg">
             <div className="next-h">

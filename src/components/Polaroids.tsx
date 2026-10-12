@@ -1,30 +1,53 @@
 'use client';
+import { useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import { Heart, MapPin } from 'lucide-react';
-import { districtById, dishesByDistrict } from '@/lib/data';
+import { districts, dishesByDistrict } from '@/lib/data';
+import { useHydrated } from '@/lib/store';
 import type { MyRating } from '@/lib/useRatings';
+import type { Dish } from '@/lib/types';
 import PhotoSlot from './PhotoSlot';
 
 type Props = {
   ratings: Record<number, MyRating>;
-  onSelect: (districtId: string) => void;
+  /** Clicking a polaroid opens that dish's recipe card directly. */
+  onOpenDish: (dish: Dish) => void;
   onHeart: (dishId: number, el: HTMLElement | null) => void;
 };
 
 /** Two tilted polaroids on the left; the heart marks a dish "দারুণ". */
-const FEATURED = ['dhaka', 'cumilla'];
+const COUNT = 2;
 
-export default function Polaroids({ ratings, onSelect, onHeart }: Props) {
+// Per-load entropy for the rotation. Evaluated once when the module loads (i.e.
+// on every reload), outside of render, so React stays pure — the pick below is
+// a deterministic function of this seed. The server always renders the opening
+// pair, then the client re-picks once it owns the DOM (no hydration mismatch).
+const ROTATE_SEED = Math.floor(Math.random() * 1_000_000);
+
+export default function Polaroids({ ratings, onOpenDish, onHeart }: Props) {
+  const hydrated = useHydrated();
+
+  // Rotate through the districts that actually have a dish: a fresh pair on
+  // every reload.
+  const featured = useMemo(() => {
+    const pool = districts.filter((d) => (dishesByDistrict[d.id] ?? []).length > 0);
+    if (pool.length <= COUNT) return pool;
+    if (!hydrated) return pool.slice(0, COUNT);
+    const a = ROTATE_SEED % pool.length;
+    const step = 1 + ((ROTATE_SEED >> 8) % (pool.length - 1));
+    const b = (a + step) % pool.length;
+    return a === b ? pool.slice(0, COUNT) : [pool[a], pool[b]];
+  }, [hydrated]);
+
   return (
     <section className="cards" aria-label="প্রিয় খাবার">
-      {FEATURED.map((id, i) => {
-        const dish = (dishesByDistrict[id] ?? [])[0];
+      {featured.map((district, i) => {
+        const dish = (dishesByDistrict[district.id] ?? [])[0];
         if (!dish) return null;
-        const district = districtById[id];
         const loved = ratings[dish.id]?.rating === 'love';
         return (
           <div
-            key={id}
+            key={district.id}
             className="pola"
             style={{ '--r': i ? '5deg' : '-6deg' } as CSSProperties}
           >
@@ -38,7 +61,7 @@ export default function Polaroids({ ratings, onSelect, onHeart }: Props) {
             <button
               className="pola-hit"
               aria-label={`${dish.nameBn} — ${district.nameBn}`}
-              onClick={() => onSelect(id)}
+              onClick={() => onOpenDish(dish)}
             />
             <button
               className={`heart${loved ? ' on' : ''}`}

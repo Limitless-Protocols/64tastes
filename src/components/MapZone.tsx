@@ -74,17 +74,14 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
     []
   );
 
-  // A 📍 pin on every green (eaten) district, anchored by the pole of
-  // inaccessibility (polylabel).
-  const pins = useMemo(
-    () =>
-      districts.flatMap((d) => {
-        if (districtTone(d.id, eaten) !== 'done' || !paths[d.id]) return [];
-        const [x, y] = districtAnchor(paths[d.id]);
-        return [{ id: d.id, x, y }];
-      }),
-    [eaten]
-  );
+  // ONE 📌 pin: drops onto the selected district (not tied to eaten). Anchored
+  // by the pole of inaccessibility (polylabel). Keyed by district so it re-drops
+  // whenever the selection changes.
+  const pin = useMemo(() => {
+    if (!selected || !paths[selected]) return null;
+    const [x, y] = districtAnchor(paths[selected]);
+    return { id: selected, x, y };
+  }, [selected]);
 
   // Measure the SVG scale so the pin stays 28–32px regardless of zoom.
   useEffect(() => {
@@ -176,20 +173,19 @@ export default function MapZone({ eaten, selected, onSelect }: Props) {
             }}
           />
         ))}
-        {/* 📍 pin on every green (eaten) district — positioning (<g>) separate
-            from animation (<text>). */}
-        {pins.map((p) => (
-          <g key={p.id} className="pin-layer" transform={`translate(${p.x} ${p.y})`} aria-hidden="true">
+        {/* ONE 📌 pin — separate positioning (<g>) from animation (<text>). */}
+        {pin && (
+          <g key={pin.id} className="pin-layer" transform={`translate(${pin.x} ${pin.y})`} aria-hidden="true">
             <text
               className="pin-drop"
               textAnchor="middle"
               dominantBaseline="central"
               style={{ fontSize: `${30 / (scale || 1)}px` }}
             >
-              📍
+              📌
             </text>
           </g>
-        ))}
+        )}
       </svg>
 
       {/* single district-name label — portal + rAF, never trapped by stacking */}
