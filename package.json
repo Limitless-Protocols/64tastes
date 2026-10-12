@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check:design": "node scripts/check-design.mjs"
+    "check:design": "node scripts/check-design.mjs",
+    "shots": "node scripts/shots.mjs"
   },
   "dependencies": {
     "@floating-ui/react-dom": "^2.1.9",
@@ -29,6 +30,7 @@
     "axe-core": "^4.14.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
+    "playwright": "^1.64.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
