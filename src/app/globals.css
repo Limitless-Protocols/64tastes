@@ -105,8 +105,11 @@ button{font:inherit;cursor:pointer}
 .next-card p{margin:7px 0 11px;color:#535c52;font-size:12px;line-height:1.55}
 .primary-button{border:0;border-radius:9px;padding:9px 13px;background:var(--vermilion);color:#fff;font-size:11px;font-weight:800;box-shadow:0 3px 0 #a9271c}
 .primary-button:hover{transform:translateY(-1px)}
-.home-footer{grid-area:footer;display:flex;justify-content:space-between;padding:11px 10px 0;border-top:1px solid #E1C714;border-radius:8px;background:transparent;color:#fff;font-size:9px}
+.home-footer{grid-area:footer;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:11px 10px 0;border-top:1px solid #E1C714;border-radius:8px;background:transparent;color:#fff;font-size:9px}
 .home-footer button{border:0;padding:0;background:none;color:inherit;text-decoration:underline}
+.creator-links{display:flex;align-items:center;gap:7px;color:#fff;font-size:10px;font-weight:700}
+.creator-links a{display:block;width:30px;height:30px;overflow:hidden;border:1px solid #E1C714;border-radius:50%;background:var(--surface)}
+.creator-links img{display:block;width:100%;height:100%;object-fit:cover}
 
 /* District and social share sheets */
 body:has(.food-app) .fixed.inset-x-0.bottom-0{z-index:20;max-width:560px;max-height:78vh;border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;background:var(--surface);box-shadow:0 -12px 50px #17231c38;padding:19px 20px calc(20px + env(safe-area-inset-bottom))}
@@ -122,6 +125,9 @@ body:has(.food-app) .fixed.inset-x-0.bottom-0 li>button[aria-pressed="true"]{bor
 body:has(.food-app) .fixed.inset-x-0.bottom-0 button.rounded-full{border-color:#d5ddce}
 .district-dish-card{min-height:92px;gap:4px;transition:border-color .18s,background-color .18s,transform .18s}
 .district-dish-card:active{transform:scale(.99)}
+.district-dish-toggle{gap:0;border:0;background:transparent;color:inherit}
+.dish-detail-button{display:grid;flex:none;width:34px;height:34px;place-items:center;border:1px solid var(--leaf);border-radius:10px;background:var(--surface);color:var(--leaf-deep);font-size:19px;font-weight:800;text-decoration:none}
+.dish-detail-button:focus-visible{outline:3px solid var(--sunshine);outline-offset:2px}
 .dish-thumb{position:relative;display:grid;flex:none;width:70px;height:70px;place-items:center;overflow:hidden;border-radius:11px;background:#f6ddb8}
 .dish-thumb-fallback{display:grid;width:100%;height:100%;place-items:center;font-size:29px}
 .dish-thumb-image{width:100%;height:100%;object-fit:cover}

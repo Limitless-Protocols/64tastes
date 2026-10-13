@@ -137,7 +137,27 @@ export default function FoodMap() {
             {nextDish ? <><p>পরের স্বাদ হতে পারে <b>{nextDish.nameBn}</b>!</p><button className="primary-button" onClick={surprise}>🎲 সারপ্রাইজ দাও</button></> : <><p>দারুণ! সব খাবার চেখে দেখেছ।</p><button className="primary-button" onClick={() => { if (confirm('Reset all progress?')) reset(); }}>আবার শুরু করো</button></>}
           </aside>
 
-          <footer className="home-footer"><span>Map data: geoBoundaries</span></footer>
+          <footer className="home-footer">
+            <span>Map data: geoBoundaries</span>
+            <div className="creator-links">
+              <span>Created by:</span>
+              {Array.from({ length: 6 }, (_, index) => {
+                const number = index + 1;
+                return (
+                  <a
+                    key={number}
+                    href={`https://example.com/creator-${number}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`Creator ${number} social profile`}
+                    title={`Creator ${number}`}
+                  >
+                    <img src={`/creators/creator-${number}.jpg`} alt="" />
+                  </a>
+                );
+              })}
+            </div>
+          </footer>
         </main>
       </div>
 

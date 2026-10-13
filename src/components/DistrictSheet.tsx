@@ -1,5 +1,6 @@
 'use client';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 import { districtById, dishesByDistrict, districts } from '@/lib/data';
 import { bn } from '@/lib/format';
@@ -78,20 +79,29 @@ export default function DistrictSheet({
             const mine = ratings[dish.id];
             return (
               <li key={dish.id}>
-                <button
-                  onClick={() => onToggle(dish.id)}
-                  aria-pressed={has}
-                  className={`district-dish-card flex w-full items-center justify-between rounded-xl border p-2.5 text-left ${
+                <div
+                  className={`district-dish-card flex w-full items-center gap-2 rounded-xl border p-2.5 text-left ${
                     has ? 'border-emerald-600 bg-emerald-50' : 'border-gray-200'
                   }`}
                 >
-                  <DishPhoto slug={dish.slug} />
-                  <span className="min-w-0 flex-1 px-3">
-                    <span className="block font-semibold leading-snug">{dish.nameBn}</span>
-                    <span className="mt-1 block truncate text-sm text-gray-500">{dish.nameEn}</span>
-                  </span>
-                  <span className={`dish-check ${has ? 'is-eaten' : ''}`} aria-hidden="true">{has ? '✓' : '+'}</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => onToggle(dish.id)}
+                    aria-pressed={has}
+                    aria-label={`${dish.nameBn} — ${has ? 'খাওয়া হয়েছে' : 'খেয়েছি চিহ্নিত করো'}`}
+                    className="district-dish-toggle flex min-w-0 flex-1 items-center text-left"
+                  >
+                    <DishPhoto slug={dish.slug} />
+                    <span className="min-w-0 flex-1 px-3">
+                      <span className="block font-semibold leading-snug">{dish.nameBn}</span>
+                      <span className="mt-1 block truncate text-sm text-gray-500">{dish.nameEn}</span>
+                    </span>
+                    <span className={`dish-check ${has ? 'is-eaten' : ''}`} aria-hidden="true">{has ? '✓' : '+'}</span>
+                  </button>
+                  <Link className="dish-detail-button" href={`/dish/${dish.slug}`} aria-label={`${dish.nameBn} খাবারের পাতা দেখুন`} title="খাবারের পাতা দেখুন">
+                    <span aria-hidden="true">↗</span>
+                  </Link>
+                </div>
 
                 {has && (
                   <>
