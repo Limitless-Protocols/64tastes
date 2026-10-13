@@ -61,7 +61,7 @@ export default function FoodMap() {
       <div className="book-frame">
         <header className="site-header bg-[#827148]">
           <Link className="brand-lockup" href="/" aria-label="Khabar Book home">
-            <span><strong>64<span>Tastes</span></strong><small>64 Tastes · Edition 01 · Bangladesh</small></span>
+            <span><strong>64<span>Tastes</span></strong><small>One Bangladesh, 64 different tastes</small></span>
           </Link>
           <nav className="site-nav" aria-label="Main navigation">
             <a className="nav-current" href="#map">মানচিত্র</a>
@@ -72,7 +72,7 @@ export default function FoodMap() {
 
         <main className="food-dashboard">
           <section className="intro-card">
-            <span className="eyebrow"><i /> বাংলাদেশ ঘুরি স্বাদের সন্ধানে</span>
+            <span className="eyebrow"><i/> বাংলাদেশ ঘুরি স্বাদের সন্ধানে</span>
             <h1>দেশের স্বাদ,<br /><em>তোমার গল্প।</em></h1>
             <p className="intro-english">How much of Bangladesh have you tasted?</p>
             <p>৬৪ জেলার পরিচিত স্বাদ ঘুরে দেখো। যেগুলো চেখেছ, সেগুলো যোগ করো তোমার নিজের খাবারের মানচিত্রে।</p>
@@ -120,8 +120,8 @@ export default function FoodMap() {
 
           <section className="share-banner">
             <span className="share-symbol" aria-hidden="true">➤</span>
-            <div><strong>স্বাদের গল্পটা শেয়ার করো</strong><small>তোমার মানচিত্র শেয়ার বন্ধুদের সাথে</small></div>
-            <button onClick={() => setShowShare(true)}>কার্ড বানাও <span aria-hidden="true">→</span></button>
+            <div><strong>স্বাদের গল্পটা শেয়ার করো</strong><small>তোমার মানচিত্র শেয়ার করো বন্ধুদের সাথে</small></div>
+            <button onClick={() => setShowShare(true)}>কার্ড <span aria-hidden="true">→</span></button>
           </section>
 
           <section className="dish-postcards" aria-label="Taste of Bangladesh">

@@ -24,7 +24,7 @@ export default function ShareCard({ eaten, format }: { eaten: Set<number>; forma
       <div style={{ width: story ? 16 : 12, height: story ? 64 : 48, borderRadius: 10, background: '#D23021' }} />
       <div>
         <div style={{ fontSize: story ? 26 : 19, fontWeight: 800, color: '#596653', letterSpacing: 3 }}>
-          KHABAR BOOK · EDITION 01
+          KHABAR Passport · EDITION 01
         </div>
         <div style={{ marginTop: 5, fontSize: story ? 56 : 38, fontWeight: 800, color: '#3D852D' }}>
           বাংলাদেশের খাবার মানচিত্র

@@ -20,21 +20,21 @@ button{font:inherit;cursor:pointer}
 /* Mobile-first, editorial food atlas */
 .food-app{min-height:100vh;background:transparent}
 .book-frame{width:100%;min-height:100vh;margin:auto;background:transparent}
-.site-header{position:sticky;top:0;z-index:8;display:flex;align-items:center;justify-content:space-between;min-height:62px;padding:9px 17px;border-bottom:1px solid var(--line);background:#e9eee0f2;backdrop-filter:blur(12px)}
+.site-header{position:sticky;top:0;z-index:8;display:flex;align-items:center;justify-content:space-between;min-height:62px;padding:9px 17px;border-bottom:1px solid #ffffff24;background:#285c20f2;color:#fff;backdrop-filter:blur(12px)}
 .brand-lockup{display:flex;align-items:center;gap:9px;color:inherit;text-decoration:none}
-.brand-mark{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:var(--leaf);color:#fff;font-size:19px}
-.brand-lockup strong{display:block;font-size:18px;font-weight:800;letter-spacing:-.6px;line-height:1;color:var(--leaf-deep)}
-.brand-lockup strong span{color:var(--vermilion)}
-.brand-lockup small{display:block;margin-top:3px;color:var(--muted);font-size:9px;letter-spacing:.03em}
+.brand-mark{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:#E1C714;color:#20291f;font-size:19px}
+.brand-lockup strong{display:block;font-size:18px;font-weight:800;letter-spacing:-.6px;line-height:1;color:#fff}
+.brand-lockup strong span{color:#E1C714}
+.brand-lockup small{display:block;margin-top:3px;color:#e9eee0;font-size:9px;letter-spacing:.03em}
 .site-nav{display:flex;align-items:center;gap:13px;font-size:12px;font-weight:700}
-.site-nav a,.site-nav button{border:0;color:var(--ink);background:none;text-decoration:none}
+.site-nav a,.site-nav button{border:0;color:#fff;background:none;text-decoration:none}
 .site-nav .nav-current{display:none}
-.site-nav .nav-share{padding:8px 11px;border-radius:9px;background:var(--leaf);color:white}
+.site-nav .nav-share{padding:8px 11px;border-radius:9px;background:#E1C714;color:#20291f}
 .nav-share span{font-size:15px}
 .food-dashboard{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"intro" "passport" "map" "share" "postcards" "next" "footer";gap:14px;padding:19px 15px 28px}
 .food-dashboard>*{min-width:0}
 .intro-card{grid-area:intro;padding:4px 2px 0}
-.intro-card .eyebrow{color:#E1C714}
+.intro-card .eyebrow{color:#fff}
 .eyebrow,.section-kicker{display:inline-flex;align-items:center;gap:7px;color:var(--leaf);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 .eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--vermilion);box-shadow:0 0 0 3px color-mix(in srgb,var(--vermilion) 12%,transparent)}
 .intro-card h1{margin:10px 0 4px;color:#fff;font-size:clamp(31px,9vw,43px);font-weight:800;letter-spacing:-1.5px;line-height:1.1}
@@ -145,7 +145,7 @@ body:has(.food-app) .fixed.inset-0.z-20.flex.items-end>div:first-child>div:nth-c
  .brand-lockup strong{font-size:22px}
  .brand-lockup small{font-size:10px}
  .site-nav{gap:24px;font-size:13px}
- .site-nav .nav-current{display:block;color:var(--leaf)}
+ .site-nav .nav-current{display:block;color:#E1C714}
  .site-nav .nav-share{padding:9px 14px}
  .food-dashboard{grid-template-columns:minmax(0,.82fr) minmax(0,1.35fr);grid-template-rows:auto auto auto auto;grid-template-areas:"intro map" "passport map" "share map" "footer footer";gap:18px clamp(16px,2.5vw,28px);padding:28px clamp(24px,4vw,48px) 22px;max-width:1340px;margin:auto}
  .dish-postcards,.next-card{display:none}
