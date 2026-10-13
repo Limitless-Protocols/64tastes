@@ -1,50 +1,55 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { SITE_URL } from '@/lib/site';
 import { Hind_Siliguri, Tiro_Bangla } from 'next/font/google';
 import './globals.css';
 import VerifierHost from '@/components/VerifierHost';
 
-const sans = Hind_Siliguri({
+// Style guide §3: Tiro Bangla is the serif (italics for English asides),
+// Hind Siliguri the UI family — Bangla first, English second.
+// The variables feed --serif / --sans in globals.css.
+const hind = Hind_Siliguri({
   subsets: ['bengali', 'latin'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-sans',
   display: 'swap',
+  variable: '--font-hind',
 });
-const serif = Tiro_Bangla({
+const tiro = Tiro_Bangla({
   subsets: ['bengali', 'latin'],
   weight: '400',
   style: ['normal', 'italic'],
-  variable: '--font-serif',
   display: 'swap',
+  variable: '--font-tiro',
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'Bangladesh Food Map',
-  description: 'তুমি বাংলাদেশের কতটা চেখেছ?',
+  title: 'খাবার বুক · The Khabar Book',
+  description: 'তুমি বাংলাদেশের কতটা চেখেছ? ৬৪ জেলার খাবারের মানচিত্র।',
   openGraph: {
-    title: 'বাংলাদেশ ফুড ম্যাপ',
-    description: 'তুমি বাংলাদেশের কতটা চেখেছ?',
-    images: ['/og/default.png'],
+    title: 'খাবার বুক · The Khabar Book',
+    description: 'তুমি বাংলাদেশের কতটা চেখেছ? ৬৪ জেলার খাবারের মানচিত্র।',
+    images: ['/og/bangladesh-food-map-post.png'],
     locale: 'bn_BD',
     type: 'website',
   },
   twitter: { card: 'summary_large_image' },
 };
 
+export const viewport: Viewport = {
+  // Let the on-screen keyboard resize the layout instead of overlaying it.
+  interactiveWidget: 'resizes-content',
+  // Draw under the notch/status bar — the safe-area insets in globals.css
+  // keep header and dock clear of it (design pass § phones).
+  viewportFit: 'cover',
+  width: 'device-width',
+  initialScale: 1,
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="bn">
-      <body className={`${sans.className} antialiased`}>
-        <div className="botanical-backdrop" aria-hidden="true">
-          <span className="banana-leaf banana-leaf-one" />
-          <span className="banana-leaf banana-leaf-two" />
-          <span className="banana-leaf banana-leaf-three" />
-          <span className="banana-leaf banana-leaf-four" />
-          <span className="banana-leaf banana-leaf-five" />
-          <span className="banana-leaf banana-leaf-six" />
-        </div>
-        <div className="site-content">{children}</div>
+    <html lang="bn" className={`${hind.variable} ${tiro.variable}`}>
+      <body>
+        {children}
         <VerifierHost />
       </body>
     </html>

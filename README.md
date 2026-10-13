@@ -39,8 +39,10 @@ DATABASE_URL="postgresql://user:pass@host/db?sslmode=require" npm run build
 
 ```
 src/
-  app/            Next.js App Router: page.tsx (the whole UI), api/health, api/og-test
-  components/     FoodMap.tsx (SVG map + progress), DistrictSheet.tsx (dish list)
+  app/            Next.js App Router: page.tsx (map tab), dishes/ (catalog + dish pages),
+                  top/ (সেরা tab), api/ (session, rate, place, suggest, health, og-test, admin/*)
+  components/     FoodMap.tsx (tab shell + SVG map + progress), MapDishPopup.tsx (district sheet),
+                  DishCatalog.tsx, DishActions.tsx (dish page controls), …
   lib/            data.ts (single data access point), useProgress.ts, tiers.ts, types.ts
   data/           districts.json, dishes.json, districtPaths.json (SVG geometry)
   assets/         NotoSansBengali-Bold.ttf (used by the OG image route)

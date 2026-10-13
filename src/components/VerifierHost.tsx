@@ -41,11 +41,19 @@ export default function VerifierHost() {
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-30 grid place-items-center bg-black/40 p-4">
-      <div className="rounded-xl bg-white p-4 text-center text-gray-900">
-        <p className="mb-2 text-sm">একটু যাচাই করছি…</p>
+    <div
+      className="mb fix"
+      role="dialog"
+      aria-modal="true"
+      aria-label="যাচাই"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) finish(false);
+      }}
+    >
+      <div className="modal" style={{ textAlign: 'center' }}>
+        <p className="note">একটু যাচাই করছি…</p>
         <Verifier onToken={onToken} />
-        <button onClick={() => finish(false)} className="mt-2 text-xs text-gray-500 underline">
+        <button onClick={() => finish(false)} className="link">
           বাতিল
         </button>
       </div>

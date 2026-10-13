@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { MapPin } from 'lucide-react';
 
 type Props = {
   name?: string;
@@ -7,6 +8,7 @@ type Props = {
   onClear: () => void;
 };
 
+/** Where did you eat this best? A tiny optional place pick (paper style). */
 export default function PlaceRow({ name, onSave, onClear }: Props) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState('');
@@ -21,7 +23,7 @@ export default function PlaceRow({ name, onSave, onClear }: Props) {
   if (editing) {
     return (
       <form
-        className="mt-2 flex items-center gap-2"
+        className="place-edit"
         onSubmit={(e) => {
           e.preventDefault();
           save();
@@ -33,41 +35,42 @@ export default function PlaceRow({ name, onSave, onClear }: Props) {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="দোকানের নাম, এলাকা"
-          className="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
         />
-        <button type="submit" className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white">সেভ</button>
-        <button type="button" onClick={() => setEditing(false)} className="text-sm text-gray-500 underline">বাতিল</button>
+        <button type="submit" className="btn">সেভ</button>
+        <button type="button" onClick={() => setEditing(false)} className="link">বাতিল</button>
       </form>
     );
   }
 
   if (name) {
     return (
-      <div className="mt-2 flex flex-wrap items-center gap-2 px-1 text-sm text-gray-900">
-        <span>📍 {name}</span>
+      <div className="place-view">
+        <span>
+          <MapPin className="icon" aria-hidden="true" style={{ width: 15, height: 15 }} /> {name}
+        </span>
         <button
           onClick={() => {
             setValue(name);
             setEditing(true);
           }}
-          className="text-gray-500 underline"
         >
           বদলাও
         </button>
-        <button onClick={onClear} className="text-gray-500 underline">মুছো</button>
+        <button onClick={onClear}>মুছো</button>
       </div>
     );
   }
 
   return (
     <button
+      className="place-add"
       onClick={() => {
         setValue('');
         setEditing(true);
       }}
-      className="mt-2 rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-700"
     >
-      📍 কোথায় সেরাটা খেয়েছ? (ঐচ্ছিক)
+      <MapPin className="icon" aria-hidden="true" style={{ width: 15, height: 15 }} />
+      কোথায় পাবেন? — জানলে লিখো
     </button>
   );
 }

@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     robots: { index: false },
-    openGraph: { title, description, images: ['/og/default.png'], locale: 'bn_BD', type: 'website' },
-    twitter: { card: 'summary_large_image', title, description, images: ['/og/default.png'] },
+    openGraph: { title, description, images: ['/og/bangladesh-food-map-post.png'], locale: 'bn_BD', type: 'website' },
+    twitter: { card: 'summary_large_image', title, description, images: ['/og/bangladesh-food-map-post.png'] },
   };
 }
 

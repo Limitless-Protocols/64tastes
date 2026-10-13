@@ -1,48 +1,54 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { postJson } from './api';
+import { ratingsStore, RATING_OPTIONS, type MyRating, type Rating } from './ratings';
+import { useLocalStore } from './store';
 
-export type Rating = 'loved' | 'okay' | 'not_for_me';
-export type MyRating = { rating: Rating; overrated: boolean };
+export { RATING_OPTIONS, type MyRating, type Rating };
 
-const KEY = 'foodmap:ratings:v1';
+/** Client short names → the wire names api/rate expects. */
+const WIRE: Record<Rating, string> = { love: 'loved', ok: 'okay', skip: 'not_for_me' };
 
+/**
+ * Ratings hook. The store underneath handles SSR, persistence and cross-tab
+ * sync (see store.ts for why); every change is additionally best-effort
+ * synced to the server so the সেরা boards aggregate real votes.
+ * No DATABASE_URL / offline / rate-limited → the local value still updates
+ * and the POST fails silently, so the UI never breaks over the network.
+ */
 export function useRatings() {
-  const [ratings, setRatings] = useState<Record<number, MyRating>>({});
-  const [loaded, setLoaded] = useState(false);
+  const ratings = useLocalStore(ratingsStore);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) setRatings(JSON.parse(raw));
-    } catch {
-      // ignore corrupted storage
-    }
-    setLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
-    try {
-      localStorage.setItem(KEY, JSON.stringify(ratings));
-    } catch {
-      // ignore
-    }
-  }, [ratings, loaded]);
-
-  const rate = useCallback((dishId: number, value: MyRating | null) => {
-    setRatings((prev) => {
-      const next = { ...prev };
-      if (value) next[dishId] = value;
-      else delete next[dishId];
-      return next;
-    });
+  const rate = useCallback((id: number, value: MyRating | null) => {
+    const next = { ...ratingsStore.read() };
+    if (value) next[id] = value;
+    else delete next[id];
+    ratingsStore.write(next);
     postJson('/api/rate', {
-      dishId,
-      rating: value?.rating ?? null,
+      dishId: id,
+      rating: value ? WIRE[value.rating] : null,
       overrated: value?.overrated ?? false,
     }).catch(() => {});
   }, []);
 
-  return { ratings, rate };
+  /** Polaroid heart: toggle the "love" reaction. */
+  const toggleLove = useCallback(
+    (id: number) => {
+      const cur = ratingsStore.read()[id];
+      rate(id, cur?.rating === 'love' ? null : { rating: 'love', overrated: cur?.overrated ?? false });
+    },
+    [rate]
+  );
+
+  /** The 🙄 chip: flip the overrated flag on the current reaction. */
+  const toggleOverrated = useCallback(
+    (id: number) => {
+      const cur = ratingsStore.read()[id];
+      if (!cur) return rate(id, { rating: 'ok', overrated: true });
+      rate(id, { ...cur, overrated: !cur.overrated });
+    },
+    [rate]
+  );
+
+  return { ratings, rate, toggleLove, toggleOverrated };
 }

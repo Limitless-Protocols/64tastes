@@ -1,217 +1,861 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
-:root{color-scheme:light;--paper:#A5AF79;--surface:#F7F9F3;--ink:#20291f;--muted:#596653;--line:#d5ddce;--leaf:#3D852D;--leaf-deep:#285c20;--lime:#8eaf68;--sunshine:#F0BE64;--turmeric:#E1C714;--orange-grove:#E69030;--vermilion:#D23021;--water:#E9EEE0;--color-emerald-50:#f1f6ed;--color-emerald-200:#d4e4ce;--color-emerald-300:#b3d0a8;--color-emerald-400:#8fba80;--color-emerald-500:#65a354;--color-emerald-600:#3D852D;--color-emerald-700:#326d26;--color-emerald-800:#285c20;--color-amber-50:#fbf7d9;--color-amber-100:#f5edb0;--color-amber-600:#6d6000;--color-amber-800:#494000;--color-orange-50:#fbf0e0;--color-orange-100:#f6ddb8;--color-orange-500:#E69030;--color-orange-600:#bd701e;--color-orange-800:#70400f;--color-red-400:#e47b70;--color-red-600:#D23021;--color-red-700:#a9271c;--color-gray-50:#f4f6ef;--color-gray-100:#E9EEE0;--color-gray-200:#d5ddce;--color-gray-300:#bec9b4;--color-gray-400:#9ba88f;--color-gray-500:#71806a;--color-gray-600:#596653;--color-gray-700:#404d3a;--color-gray-800:#2d3829;--color-gray-900:#20291f;--color-gray-950:#151c14}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:var(--paper);color:var(--ink)}
-body{position:relative;isolation:isolate;font-family:inherit}
-.botanical-backdrop{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.site-content{position:relative;z-index:1;min-height:100vh}
-.site-content>main:not(.food-dashboard){margin-top:clamp(14px,4vh,34px);margin-bottom:24px;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 10px 32px #172d1818}
-.banana-leaf{position:absolute;display:block;width:min(78vw,440px);aspect-ratio:868.71576/553.85107;background:url('/bananaleaf.svg') center/contain no-repeat;opacity:1;transform-origin:center}
-.banana-leaf-one{top:5%;left:-160px;transform:rotate(161deg)}
-.banana-leaf-two{top:8%;right:-170px;transform:rotate(-18deg)}
-.banana-leaf-three{top:37%;left:-190px;width:min(84vw,500px);transform:rotate(198deg)}
-.banana-leaf-four{top:40%;right:-195px;width:min(84vw,500px);transform:rotate(18deg)}
-.banana-leaf-five{top:72%;left:-155px;width:min(74vw,410px);transform:rotate(192deg)}
-.banana-leaf-six{top:78%;right:-165px;width:min(74vw,410px);transform:rotate(-12deg)}
-button,a{-webkit-tap-highlight-color:transparent}
-button{font:inherit;cursor:pointer}
+/* ==== THE KHABAR BOOK · paper-on-desk, single screen ====
+   Single source of truth: the @theme block below holds the five palette
+   colours, the derived tints, fonts, radii, shadows and the type scale.
+   Everything else (hand-written component rules in @layer components and
+   Tailwind utilities alike) consumes those tokens — no raw hex in markup.
 
-/* Mobile-first, editorial food atlas */
-.food-app{min-height:100vh;background:transparent}
-.book-frame{width:100%;min-height:100vh;margin:auto;background:transparent}
-.site-header{position:sticky;top:0;z-index:8;display:flex;align-items:center;justify-content:space-between;min-height:62px;padding:9px 17px;border-bottom:1px solid #ffffff24;background:#285c20f2;color:#fff;backdrop-filter:blur(12px)}
-.brand-lockup{display:flex;align-items:center;gap:9px;color:inherit;text-decoration:none}
-.brand-mark{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:#E1C714;color:#20291f;font-size:19px}
-.brand-lockup strong{display:block;font-size:18px;font-weight:800;letter-spacing:-.6px;line-height:1;color:#fff}
-.brand-lockup strong span{color:#E1C714}
-.brand-lockup small{display:block;margin-top:3px;color:#e9eee0;font-size:9px;letter-spacing:.03em}
-.site-nav{display:flex;align-items:center;gap:13px;font-size:12px;font-weight:700}
-.site-nav a,.site-nav button{border:0;color:#fff;background:none;text-decoration:none}
-.site-nav .nav-current{display:none}
-.site-nav .nav-share{padding:8px 11px;border-radius:9px;background:#E1C714;color:#20291f}
-.nav-share span{font-size:15px}
-.food-dashboard{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"intro" "passport" "map" "share" "postcards" "next" "footer";gap:14px;padding:19px 15px 28px}
-.food-dashboard>*{min-width:0}
-.intro-card{grid-area:intro;padding:4px 2px 0}
-.intro-card .eyebrow{color:#fff}
-.eyebrow,.section-kicker{display:inline-flex;align-items:center;gap:7px;color:var(--leaf);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
-.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--vermilion);box-shadow:0 0 0 3px color-mix(in srgb,var(--vermilion) 12%,transparent)}
-.intro-card h1{margin:10px 0 4px;color:#fff;font-size:clamp(31px,9vw,43px);font-weight:800;letter-spacing:-1.5px;line-height:1.1}
-.intro-card h1 em{color:#E1C714;font-style:normal}
-.intro-card p{max-width:450px;margin:9px 0 0;color:#fff;font-size:13px;line-height:1.65}
-.intro-card .intro-english{margin-top:0;color:#fff;font-size:11px;font-weight:600;letter-spacing:.01em}
-.card-piece{position:relative;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:0 4px 15px #2738280a}
-.passport{grid-area:passport;padding:11px 14px;border-radius:14px}
-.passport-title{display:flex;align-items:center;gap:8px;margin-bottom:7px;color:#394735;font-size:12px;font-weight:800}
-.passport-icon{display:grid;place-items:center;width:23px;height:23px;border-radius:7px;background:#e1ead8;color:var(--leaf);font-size:15px}
-.passport-edition{margin-left:auto;color:#71806a;font-size:9px;font-weight:700;letter-spacing:.08em}
-.passport-progress{display:flex;align-items:center;gap:12px}
-.progress-ring{display:grid;place-items:center;flex:none;width:49px;height:49px;border-radius:50%;background:conic-gradient(var(--leaf) var(--progress),#d5ddce var(--progress))}
-.progress-ring span{display:grid;place-items:center;width:39px;height:39px;border-radius:50%;background:var(--surface);font-size:15px;font-weight:800}
-.progress-ring small{font-size:8px}
-.passport-count{display:block;font-size:20px;line-height:1.1}
-.passport-count small{color:#71806a;font-size:11px;font-weight:500}
-.passport-progress strong{display:block;margin-top:3px;color:var(--leaf);font-size:12px}
-.passport-progress em{display:block;color:var(--muted);font-size:10px;font-style:normal}
-.passport-bar{height:5px;overflow:hidden;margin:12px 0 10px;border-radius:9px;background:#dfe6d8}
-.passport-bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--leaf),var(--lime));transition:width .5s ease}
-.map-stage{grid-area:map;position:relative;display:flex;min-height:380px;flex-direction:column;gap:8px;overflow:hidden;border:1px solid #d2ddc9;border-radius:18px;background:var(--surface);padding:10px}
-.map-poster{display:flex;flex:1;min-height:0;width:100%;flex-direction:column;align-items:center;overflow:hidden;border-radius:9px;background:#254a27;padding:clamp(12px,2vw,20px)}
-.lotus-clip{position:absolute;inset:0;z-index:0;overflow:hidden;border-radius:inherit;pointer-events:none}
-.map-lotus{position:absolute;top:50%;left:50%;width:100%;height:100%;object-fit:contain;transform:translate(-50%,-50%);opacity:.13;animation:lotus-rotate 54s linear infinite}
-@keyframes lotus-rotate{to{transform:translate(-50%,-50%) rotate(360deg)}}
-.poster-heading{position:relative;z-index:2;display:flex;flex:none;width:100%;align-items:flex-start;justify-content:space-between;gap:10px}
-.poster-heading>div:first-child>span{display:block;color:#e9eee0;font-size:8px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
-.poster-heading strong{display:block;margin-top:4px;color:#f7f9f3;font-size:clamp(20px,2.1vw,29px);font-weight:900;letter-spacing:-1.1px;line-height:1.15}
-.poster-count{display:flex;flex:none;align-items:baseline;gap:4px;padding-top:4px;color:var(--sunshine)}
-.poster-count>b{font-size:clamp(25px,3vw,38px);font-weight:900;letter-spacing:-1.5px;line-height:1}
-.poster-count>span{color:#e9eee0;font-size:13px;font-weight:800}
-.poster-count small{display:block;margin-top:2px;font-size:8px;text-align:right}
-.district-map{position:relative;z-index:1;display:block;flex:1;min-height:0;width:auto;max-width:100%;overflow:visible;filter:drop-shadow(0 4px 4px #25442b19)}
-.district-shape{cursor:pointer;stroke:#e9eee0;stroke-width:1.35;outline:none;transition:filter .18s,fill .25s}
-.district-shape.tone-empty{fill:#c5cebc}.district-shape.tone-new{fill:var(--turmeric)}.district-shape.tone-partial{fill:var(--sunshine)}.district-shape.tone-complete{fill:var(--leaf)}
-.district-shape:hover{filter:brightness(1.08);fill:var(--vermilion)}
-.district-shape:focus-visible{stroke:var(--vermilion);stroke-width:2.2;fill:var(--vermilion)}
-.district-shape.district-selected{stroke:#fff;stroke-width:2.2;fill:var(--vermilion);filter:drop-shadow(0 0 3px #172d1888)}
-.poster-signature{position:relative;z-index:2;display:flex;flex:none;width:100%;align-items:center;gap:7px;margin-top:5px;color:#e9eee0;font-size:7px;font-weight:800;letter-spacing:.12em}
-.poster-signature i{flex:1;height:1px;background:#84957a}
-.map-legend{position:relative;display:flex;flex:none;justify-content:center;align-items:center;gap:clamp(8px,2vw,16px);min-height:32px;padding:2px 3px;color:#596653;font-size:8px;font-weight:700}
-.map-legend span{display:flex;align-items:center;gap:4px;white-space:nowrap}
-.legend-dot{width:8px;height:8px;margin-left:7px;border-radius:50%;background:var(--leaf)}
-.legend-dot.waiting{background:var(--turmeric)}
-.legend-dot.empty{background:#c5cebc}
-.share-banner{grid-area:share;display:flex;align-items:center;gap:11px;padding:13px;border:1px solid #e7d986;border-radius:14px;background:#fbf7d9}
-.share-symbol{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:11px;background:var(--leaf);color:white;font-size:22px}
-.share-banner>div{min-width:0;flex:1}
-.share-banner strong,.share-banner small{display:block}
-.share-banner strong{font-size:12px}
-.share-banner small{margin-top:3px;color:#596653;font-size:9px;line-height:1.4}
-.share-banner button{flex:none;border:0;border-radius:9px;padding:9px 11px;background:var(--vermilion);color:#fff;font-size:10px;font-weight:800;white-space:nowrap}
-.share-banner button span{margin-left:3px}
-.dish-postcards{grid-area:postcards;display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.dish-section-heading{grid-column:1/-1;display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:1px}
-.dish-section-heading h2{margin:3px 0 0;font-size:17px;font-weight:800;letter-spacing:-.4px}
-.dish-section-heading a{color:var(--leaf);font-size:10px;font-weight:800;text-decoration:none;white-space:nowrap}
-.dish-section-heading a span{font-size:13px}
-.dish-postcard{position:relative;min-height:105px;overflow:hidden;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface);text-align:left;box-shadow:0 3px 10px #27382808;transition:transform .18s,box-shadow .18s}
-.dish-postcard:hover{transform:translateY(-2px);box-shadow:0 8px 18px #27382814}
-.dish-art{display:grid;place-items:center;width:32px;height:32px;margin-bottom:8px;border-radius:10px;background:#f6ddb8;font-size:18px}
-.dish-postcard:nth-of-type(3) .dish-art{background:#f8e4df}
-.dish-postcard strong,.dish-postcard small{display:block}
-.dish-postcard strong{font-size:12px;line-height:1.3}
-.dish-postcard small{margin-top:3px;color:var(--muted);font-size:9px;line-height:1.35}
-.next-card{grid-area:next;padding:14px}
-.next-card p{margin:7px 0 11px;color:#535c52;font-size:12px;line-height:1.55}
-.primary-button{border:0;border-radius:9px;padding:9px 13px;background:var(--vermilion);color:#fff;font-size:11px;font-weight:800;box-shadow:0 3px 0 #a9271c}
-.primary-button:hover{transform:translateY(-1px)}
-.home-footer{grid-area:footer;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:11px 10px 0;border-top:1px solid #E1C714;border-radius:8px;background:transparent;color:#fff;font-size:9px}
-.home-footer button{border:0;padding:0;background:none;color:inherit;text-decoration:underline}
-.creator-links{display:flex;align-items:center;gap:7px;color:#fff;font-size:10px;font-weight:700}
-.creator-links a{display:block;width:30px;height:30px;overflow:hidden;border:1px solid #E1C714;border-radius:50%;background:var(--surface)}
-.creator-links img{display:block;width:100%;height:100%;object-fit:cover}
+   Palette: Cream #F8F2E8 · Tomato #E94D2E · Mango #F6C94C · Leaf #47764A ·
+   Ink #24231F; every other colour is a color-mix of those five
+   (docs/Khabar Book — Style Guide v4.1.md). */
 
-/* District and social share sheets */
-body:has(.food-app) .fixed.inset-x-0.bottom-0{z-index:20;max-width:560px;max-height:78vh;border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;background:var(--surface);box-shadow:0 -12px 50px #17231c38;padding:19px 20px calc(20px + env(safe-area-inset-bottom))}
-body:has(.food-app) .fixed.inset-x-0.bottom-0:before{content:"";display:block;width:38px;height:4px;margin:-9px auto 14px;border-radius:3px;background:#bec9b4}
-body:has(.food-app) .fixed.inset-x-0.bottom-0 h2{color:var(--leaf);font-size:21px}
-body:has(.food-app) .district-pager{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
-body:has(.food-app) .district-pager>span{color:var(--muted);font-size:11px;font-weight:700}
-body:has(.food-app) .district-pager button{border:0;border-radius:9px;padding:9px 13px;background:var(--leaf);color:#fff;font-size:12px;font-weight:800}
-body:has(.food-app) .district-pager button span{margin-left:5px}
-body:has(.food-app) .district-pager button:focus-visible{outline:3px solid var(--sunshine);outline-offset:2px}
-body:has(.food-app) .fixed.inset-x-0.bottom-0 li>button{border-color:var(--line);background:var(--surface)}
-body:has(.food-app) .fixed.inset-x-0.bottom-0 li>button[aria-pressed="true"]{border-color:var(--leaf);background:#e1ead8}
-body:has(.food-app) .fixed.inset-x-0.bottom-0 button.rounded-full{border-color:#d5ddce}
-.district-dish-card{min-height:92px;gap:4px;transition:border-color .18s,background-color .18s,transform .18s}
-.district-dish-card:active{transform:scale(.99)}
-.district-dish-toggle{gap:0;border:0;background:transparent;color:inherit}
-.dish-detail-button{display:grid;flex:none;width:34px;height:34px;place-items:center;border:1px solid var(--leaf);border-radius:10px;background:var(--surface);color:var(--leaf-deep);font-size:19px;font-weight:800;text-decoration:none}
-.dish-detail-button:focus-visible{outline:3px solid var(--sunshine);outline-offset:2px}
-.dish-thumb{position:relative;display:grid;flex:none;width:70px;height:70px;place-items:center;overflow:hidden;border-radius:11px;background:#f6ddb8}
-.dish-thumb-fallback{display:grid;width:100%;height:100%;place-items:center;font-size:29px}
-.dish-thumb-image{width:100%;height:100%;object-fit:cover}
-.dish-check{display:grid;flex:none;width:29px;height:29px;place-items:center;border:1px solid var(--line);border-radius:50%;color:var(--muted);font-size:17px;font-weight:700}
-.dish-check.is-eaten{border-color:var(--leaf);background:var(--leaf);color:white}
-body:has(.food-app) .fixed.inset-0.z-20.flex.items-end{z-index:30;background:#12231c99;backdrop-filter:blur(5px)}
-body:has(.food-app) .fixed.inset-0.z-20.flex.items-end>div:first-child{max-height:94vh;border:1px solid var(--line);border-radius:20px 20px 0 0;background:var(--surface);padding:17px}
-body:has(.food-app) .fixed.inset-0.z-20.flex.items-end h2{font-size:18px;letter-spacing:-.3px}
-body:has(.food-app) .fixed.inset-0.z-20.flex.items-end img{max-height:43vh;object-fit:contain;box-shadow:0 5px 20px #24392d1a}
-body:has(.food-app) .fixed.inset-0.z-20.flex.items-end>div:first-child>div:nth-child(2){margin-top:10px}
-body:has(.food-app) .fixed.inset-0.z-20.flex.items-end>div:first-child>div:nth-child(2) button{border-color:var(--line);border-radius:8px;background:var(--surface);padding:7px 10px;font-size:10px}
-body:has(.food-app) .fixed.inset-0.z-20.flex.items-end>div:first-child>div:nth-child(2) button[class*="emerald"]{border-color:var(--leaf);background:#e1ead8;color:var(--leaf-deep)}
-body:has(.food-app) .fixed.inset-0.z-20.flex.items-end>div:first-child>div:nth-child(4) button{border-radius:9px;font-size:11px;font-weight:800}
-body:has(.food-app) .fixed.inset-0.z-20.flex.items-end>div:first-child>div:nth-child(4) button:first-child{background:var(--leaf)}
+@theme {
+  /* § palette — the only five hues */
+  --color-cream: #f8f2e8;
+  --color-tomato: #e94d2e;
+  --color-mango: #f6c94c;
+  --color-leaf: #47764a;
+  --color-ink: #24231f;
+  /* derived tints/shades (color-mix — no new hues) */
+  --color-paper: var(--color-cream);
+  --color-card: color-mix(in srgb, var(--color-cream) 45%, #fff);
+  --color-sand: color-mix(in srgb, var(--color-cream) 82%, var(--color-ink));
+  --color-muted: color-mix(in srgb, var(--color-ink) 66%, var(--color-cream));
+  --color-body: color-mix(in srgb, var(--color-ink) 82%, var(--color-cream));
+  --color-edge: color-mix(in srgb, var(--color-cream) 74%, var(--color-ink));
+  --color-leaf-2: color-mix(in srgb, var(--color-leaf) 65%, #fff);
+  --color-leaf-d: color-mix(in srgb, var(--color-leaf) 72%, #000);
+  --color-tomato-d: color-mix(in srgb, var(--color-tomato) 72%, #000);
+  --color-line: rgb(36 35 31 / 0.16);
+  /* the desk/book edge + dock top rule (paper-on-desk frame) */
+  --color-desk-line: #3b3a35;
 
-/* Wider layout: map remains the visual anchor while the side panels open up. */
-@media(min-width:760px){
- .book-frame{max-width:1440px;min-height:100vh}
- .site-header{position:relative;min-height:76px;padding:12px clamp(28px,5vw,76px)}
- .brand-mark{width:42px;height:42px;border-radius:14px;font-size:21px}
- .brand-lockup strong{font-size:22px}
- .brand-lockup small{font-size:10px}
- .site-nav{gap:24px;font-size:13px}
- .site-nav .nav-current{display:block;color:#E1C714}
- .site-nav .nav-share{padding:9px 14px}
- .food-dashboard{grid-template-columns:minmax(0,.82fr) minmax(0,1.35fr);grid-template-rows:auto auto auto auto;grid-template-areas:"intro map" "passport map" "share map" "footer footer";gap:18px clamp(16px,2.5vw,28px);padding:28px clamp(24px,4vw,48px) 22px;max-width:1340px;margin:auto}
- .dish-postcards,.next-card{display:none}
- .intro-card{padding:12px 3px 0}
- .intro-card h1{margin-top:15px;font-size:clamp(37px,4vw,55px);letter-spacing:-2px}
- .intro-card .intro-english{font-size:12px}
- .intro-card p{font-size:14px}
- .passport{padding:12px 15px;border-radius:16px}
- .passport-title{font-size:13px}
- .progress-ring{width:55px;height:55px}
- .progress-ring span{width:44px;height:44px;font-size:17px}
- .passport-count{font-size:23px}
- .map-stage{min-height:590px;border-radius:22px}
- .map-stage{padding:12px;gap:10px}
- .map-poster{padding:20px}
- .poster-heading>div:first-child>span{font-size:9px}
- .poster-heading strong{font-size:clamp(28px,3vw,38px)}
- .poster-count>b{font-size:clamp(36px,4vw,48px)}
- .poster-count>span{font-size:16px}
- .poster-count small{font-size:9px}
- .poster-signature{font-size:8px}
- .map-legend{min-height:38px;font-size:9px}
- .share-banner{align-self:start;padding:14px;border-radius:14px}
- .share-banner strong{font-size:13px}.share-banner small{font-size:10px}
- .share-banner button{font-size:11px}
- .home-footer{font-size:10px}
+  /* § fonts — Tiro Bangla (serif, italics for English asides) + Hind Siliguri (UI) */
+  --font-serif: var(--font-tiro), "Tiro Bangla", Georgia, serif;
+  --font-sans: var(--font-hind), "Hind Siliguri", "Trebuchet MS", system-ui, sans-serif;
+
+  /* § type scale — rem so it rides the clamped root size
+     (html{font-size:clamp(17px,.55vw + 10px,21px)}): ~15→18, ~17→21,
+     ~19→23, ~18→22, ~23→28, ~36→56, ~43→64px. 14px hard floor. */
+  --text-micro: 0.875rem;         /* 14px — meta / micro (hard floor) */
+  --text-micro--line-height: 1.5;
+  --text-meta: 0.9375rem;         /* 15px — secondary */
+  --text-meta--line-height: 1.5;
+  --text-body: 1rem;              /* 16px — body */
+  --text-body--line-height: 1.6;
+  --text-ui: 1rem;                /* 16px — nav, buttons, chips */
+  --text-ui--line-height: 1.45;
+  --text-title: 1.125rem;         /* 18px — dish & card titles */
+  --text-title--line-height: 1.3;
+  --text-modal: 1.375rem;         /* 22px — modal titles */
+  --text-modal--line-height: 1.25;
+  --text-h1: 1.75rem;             /* 28px — page H1 (mobile) */
+  --text-h1--line-height: 1.2;
+  --text-h1-lg: 2.25rem;          /* 36px — page H1 (desktop) */
+  --text-hero: 2rem;              /* 32px — home hero (mobile) */
+  --text-hero--line-height: 1.15;
+  --text-hero-lg: 2.75rem;        /* 44px — home hero (desktop) */
+  /* backward-compatible aliases */
+  --text-label: var(--text-micro);
+  --text-small: var(--text-body);
+
+  /* § shape */
+  --radius-paper: 10px;
+  --radius-chip: 99px;
+  --shadow-paper: 0 8px 20px rgb(36 35 31 / 0.16);
+  --shadow-lift: 0 14px 30px rgb(36 35 31 / 0.22);
+
+  /* § z-index scale — the ONLY allowed values. */
+  --z-decor: -1;
+  --z-content: 0;
+  --z-content-1: 1;
+  --z-content-2: 2;
+  --z-content-3: 3;
+  --z-content-4: 4;
+  --z-content-5: 5;
+  --z-content-6: 6;
+  --z-content-7: 7;
+  --z-content-8: 8;
+  --z-content-9: 9;
+  --z-content-10: 10;
+  --z-sticky: 30;
+  --z-popover: 40;
+  --z-fab: 45;
+  --z-drawer: 50;
+  --z-modal: 60;
+  --z-toast: 70;
+  --z-map-label: 80;
 }
-@media(min-width:1050px){.food-dashboard{grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr) minmax(0,.95fr);grid-template-rows:auto auto auto;grid-template-areas:"intro map passport" "share map ." "footer footer footer";gap:20px clamp(18px,2.4vw,32px);padding:clamp(30px,3.7vw,42px) clamp(28px,5vw,76px) 22px}}
-@media(min-width:1150px){.map-stage{min-height:660px}.district-map{height:min(64vh,560px)}}
-@media(max-width:759px){
- .site-header{position:relative;min-height:calc(56px + env(safe-area-inset-top));padding-top:8px;}
- .food-dashboard{grid-template-rows:auto auto auto auto auto;grid-template-areas:"intro" "passport" "map" "share" "footer";gap:9px;padding:12px 15px max(10px,env(safe-area-inset-bottom));}
- .dish-postcards,.next-card{display:none;}
- .intro-card{padding-top:0;}
- .intro-card h1{margin-top:7px;font-size:clamp(28px,8vw,37px);}
- .intro-card p{margin-top:5px;font-size:12px;line-height:1.45;}
- .intro-card .intro-english{font-size:10px;}
- .passport{padding:9px 12px;}
- .passport-title{margin-bottom:5px;}
- .passport-progress{gap:10px;}
- .progress-ring{width:42px;height:42px;}
- .progress-ring span{width:34px;height:34px;font-size:13px;}
- .passport-count{font-size:18px;}
- .passport-bar{margin:7px 0 2px;}
- .map-stage{min-height:max(460px,68svh);height:auto;}
- .map-stage{gap:6px;padding:7px}
- .map-poster{padding:12px}
- .poster-heading>div:first-child>span{font-size:7px}
- .poster-heading strong{font-size:21px;letter-spacing:-.7px}
- .poster-count>b{font-size:29px}
- .poster-count>span{font-size:11px}
- .poster-count small{font-size:7px}
- .poster-signature{font-size:6px;letter-spacing:.08em}
- .map-legend{min-height:30px;gap:7px;padding:0;font-size:7px}
- .map-legend span{gap:3px}
- .legend-dot{width:7px;height:7px;margin:0}
- .share-banner{padding:10px 11px;}
- .share-symbol{width:32px;height:32px;}
- .home-footer{padding-top:7px;}
+
+:root {
+  /* legacy token names → theme vars (old rules keep working, one source) */
+  --cream: var(--color-cream);
+  --tomato: var(--color-tomato);
+  --mango: var(--color-mango);
+  --leaf: var(--color-leaf);
+  --ink: var(--color-ink);
+  --paper: var(--color-paper);
+  --card: var(--color-card);
+  --sand: var(--color-sand);
+  --muted: var(--color-muted);
+  --body: var(--color-body);
+  --edge: var(--color-edge);
+  --line: var(--color-line);
+  --leaf-2: var(--color-leaf-2);
+  --leaf-d: var(--color-leaf-d);
+  --tomato-d: var(--color-tomato-d);
+  --serif: var(--font-serif);
+  --sans: var(--font-sans);
+  --shadow: var(--shadow-paper);
+  --desk-a: #24231f;
+  --desk-b: #2e2d28;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-@media(max-width:360px){.site-nav{gap:8px;font-size:11px}.site-nav .nav-share{padding:7px 9px}.share-banner{gap:8px;padding:10px}.share-banner button{padding:8px}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
-@media(min-width:760px){.food-dashboard>.dish-postcards,.food-dashboard>.next-card{display:none!important}}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --desk-a: #141311; --desk-b: #1d1c19; }
+}
+:root[data-theme="dark"] { --desk-a: #141311; --desk-b: #1d1c19; }
+@property --done { syntax: '<percentage>'; inherits: false; initial-value: 0% }
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box }
+  /* the whole type scale rides this clamped root — one knob for every size */
+  html { font-size: 100% }
+  html, body { margin: 0; width: 100%; height: 100%; overflow: hidden }
+  /* the shared-result page may be taller than one screen */
+  html:has(.result), body:has(.result) { overflow: auto }
+  body {
+    color: var(--ink);
+    background: var(--desk-a);
+    font: 500 1rem/1.55 var(--sans);
+    font-synthesis: none; /* Tiro Bangla has no bold — never fake one */
+    display: grid;
+    place-items: center;
+  }
+  /* 44px tap floor for everything tappable (spec § tap targets) */
+  button { font: inherit; color: inherit; cursor: pointer; min-height: 44px }
+  h1, h2, h3 { line-height: 1.25; margin: 0; color: inherit; font-weight: 400 }
+  :focus-visible { outline: 3px solid var(--tomato); outline-offset: 2px }
+}
+
+@layer components {
+/* ---------- desk & book ---------- */
+.desk{position:fixed;inset:0;background:radial-gradient(ellipse at 18% 14%,rgb(246 201 76 / .10),transparent 28%),repeating-linear-gradient(92deg,var(--desk-a) 0,var(--desk-b) 5px,var(--desk-a) 12px,var(--desk-b) 18px)}
+.book{position:relative;width:100vw;height:min(1000px,100dvh);overflow:hidden;display:grid;grid-template-rows:auto minmax(0,1fr);background:var(--paper);border:10px solid #3b3a35;box-shadow:0 18px 60px rgb(10 10 8 / .6);
+  background-image:radial-gradient(ellipse at 14% 25%,rgb(255 255 255 / .55),transparent 28%),radial-gradient(ellipse at 90% 80%,rgb(246 201 76 / .16),transparent 32%),repeating-linear-gradient(0deg,transparent 0 5px,rgb(36 35 31 / .025) 6px 7px)}
+.book::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.35;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E")}
+/* decor: lucide icons in safe zones, never over content, never clickable */
+.leaf{position:absolute;color:var(--leaf-2);opacity:.8;pointer-events:none;z-index:var(--z-decor);filter:saturate(.9)}
+.leaf svg{width:100%;height:100%;stroke-width:1.6}
+.leaf.one{top:2px;left:26%;width:clamp(26px,2.6vw,44px);rotate:-18deg}
+.leaf.two{bottom:6px;left:calc(21% + 6px);width:clamp(22px,2.2vw,38px);rotate:14deg}
+
+/* header — desktop: 76px; mobile: 56px */
+header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:8px 3.6%;min-height:76px;position:relative;z-index:var(--z-sticky);
+  border-bottom:1px dashed var(--line)
+}
+header .brand{display:flex;align-items:center;gap:10px;rotate:-2deg}
+header .brand-mark{width:44px;height:44px;display:grid;place-items:center;background:var(--tomato);border:2px solid var(--ink);border-radius:50%;font-size:22px;box-shadow:3px 3px 0 var(--ink)}
+header .brand-name{font:700 clamp(24px,2.8vw,38px)/.95 var(--sans);letter-spacing:-1px;color:var(--leaf)} header .brand-name span{color:var(--tomato)}
+header .tagline{font:italic var(--text-small)/1.4 var(--serif);margin-top:3px;white-space:nowrap}
+header nav{display:flex;align-items:center;gap:clamp(8px,1.6vw,24px);font-weight:600;font-size:var(--text-ui)}
+header nav button{border:0;background:none;padding:6px 4px;border-bottom:2px solid transparent;transition:color .2s,border-color .2s,transform .15s;display:inline-flex;align-items:center;gap:7px}
+header nav button:hover{transform:translateY(-1px)} header nav button.active{border-color:var(--leaf);color:var(--leaf)}
+header nav .cta{background:var(--tomato);color:#fff;border-radius:var(--radius-chip);padding:6px 18px;border:0;box-shadow:0 3px 0 var(--tomato-d);font-weight:700;font-size:var(--text-body)}
+header nav .cta:active{transform:translateY(2px);box-shadow:none}
+header .mobile-actions{display:none}
+
+/* mobile header overrides */
+@media (max-width: 767px) {
+  header{min-height:56px;padding:0 12px}
+  header .brand-mark{width:36px;height:36px;font-size:18px}
+  header .brand-name{font-size:clamp(20px,4vw,28px)}
+  header .tagline{display:none}
+  header nav{display:none} /* replaced by the bottom dock */
+  header .mobile-actions{display:flex;align-items:center;gap:8px}
+  header .mobile-actions .icon-btn{width:40px;height:40px}
+  header .mobile-actions .icon{width:1.25em;height:1.25em}
+}
+
+.icon{width:1.15em;height:1.15em;stroke-width:2.2;flex:none}
+.icon-btn{display:inline-grid;place-items:center;background:none;border:0;color:var(--muted);border-radius:8px;padding:0;transition:color .15s,background .15s}
+.icon-btn:hover{color:var(--ink);background:color-mix(in srgb,var(--card) 70%,transparent)}
+
+/* layout: map is the hero (~56% on desktop) — nothing overlaps, nothing scrolls */
+main{position:relative;z-index:var(--z-content-1);min-height:0;display:grid;gap:clamp(8px,1.4dvh,16px) clamp(10px,1.6vw,24px);padding:clamp(8px,1.6dvh,20px) 3.6%;
+  grid-template-columns:minmax(200px,21%) minmax(0,1fr) minmax(250px,23%);grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-areas:"intro map pass" "cards map panel" "next top panel"}
+main>*{min-height:0;min-width:0}
+.piece{position:relative;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow)}
+.piece::after{content:"";position:absolute;inset:6px;border:1.5px dashed rgb(233 77 46 / .3);pointer-events:none}  /* nakshi-kantha stitch */
+.intro{grid-area:intro;align-self:start;z-index:var(--z-content-3)}
+.eyebrow{color:var(--tomato-d);font-weight:700;font-size:var(--text-label);letter-spacing:0;text-transform:uppercase}
+h1{font:400 var(--text-h1)/1.25 var(--serif);margin:6px 0 4px;rotate:-1.5deg}
+h1 em{font-style:normal;color:var(--leaf);text-decoration:underline;text-decoration-color:var(--tomato);text-decoration-thickness:3px;text-underline-offset:6px}
+.sub{font:italic var(--text-small) var(--serif);color:var(--leaf);margin:0 0 6px}
+.intro p{font-size:var(--text-small);color:var(--body);max-width:32ch;margin:0}
+
+/* district combobox (জেলা খুঁজুন) */
+.combo{position:relative;margin-top:8px;max-width:300px}
+.combo input{width:100%;height:48px;border:1.5px solid var(--edge);background:var(--card);color:var(--ink);border-radius:var(--radius-paper);padding:0 12px 0 40px;font:500 var(--text-small) var(--sans)}
+.combo input:focus{border-color:var(--leaf);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--leaf) 25%,transparent)}
+.combo .icon{position:absolute;left:12px;top:50%;translate:0 -50%;color:var(--muted);pointer-events:none}
+/* portaled listbox — positioning is handled by floating-ui (inline styles) */
+.combo-list{max-height:360px;overflow-y:auto;z-index:var(--z-popover);background:var(--card);border:1.5px solid var(--ink);border-radius:var(--radius-paper);box-shadow:var(--shadow-lift);padding:4px;list-style:none;margin:0;min-width:220px}
+.combo-opt{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:8px 10px;font-size:var(--text-small);font-weight:500;min-height:44px}
+.combo-opt small{color:var(--muted);font-size:var(--text-label);font-weight:500;align-self:center}
+.combo-opt:hover,.combo-opt.hi{background:var(--mango)}
+/* "শীঘ্রই" districts have no dish yet — still pickable, just quieter */
+.combo-opt.dim{opacity:.6}
+.combo-opt.dim small{font-style:italic}
+.combo-empty{padding:8px 10px;color:var(--muted);font-size:var(--text-label)}
+
+/* mobile full-screen search sheet */
+.search-sheet{position:fixed;inset:0;z-index:var(--z-modal);background:var(--paper);display:flex;flex-direction:column}
+.search-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px dashed var(--line)}
+.search-bar input{flex:1;height:48px;border:1.5px solid var(--edge);background:#fff;color:var(--ink);border-radius:var(--radius-paper);padding:0 14px;font:500 var(--text-body) var(--sans)}
+.search-bar input:focus{border-color:var(--leaf);outline:none}
+.search-results{flex:1;overflow-y:auto;padding:8px 12px}
+
+/* passport */
+.passport{grid-area:pass;align-self:start;padding:14px 16px;rotate:2deg;clip-path:polygon(1% 0,100% 2%,98% 100%,0 97%);z-index:var(--z-content-4)}
+.pass-head{display:flex;align-items:center;gap:9px;font-weight:700;font-size:var(--text-ui)}
+.pass-icon{background:var(--leaf);color:var(--mango);width:36px;height:40px;display:grid;place-items:center;border-radius:4px}
+.pass-icon .icon{width:20px;height:20px}
+.prow{display:flex;align-items:center;gap:14px;margin:10px 0 4px}
+.ring{position:relative;width:76px;height:76px;border-radius:50%;flex:none;display:grid;place-items:center;background:conic-gradient(var(--leaf) 0 var(--done),var(--sand) var(--done) 100%);transition:--done 1.2s cubic-bezier(.2,1,.3,1)}
+.ring::after{content:"";position:absolute;width:58px;height:58px;border-radius:50%;background:var(--card)}
+.ring-num{position:relative;z-index:var(--z-content-1);font-size:var(--text-title);font-weight:700;line-height:1}
+.num{font-size:var(--text-title);font-weight:700;line-height:1.2}.num small{font-size:var(--text-label);font-weight:500;color:var(--muted)}
+.tier{font-weight:700;font-size:var(--text-title);color:var(--leaf);line-height:1.3;animation:flip .6s cubic-bezier(.2,1.4,.4,1)}.tier-en{font:italic var(--text-label) var(--serif);color:var(--muted);display:block}
+.bar{height:10px;background:var(--sand);border-radius:9px;overflow:hidden;margin:6px 0 8px}
+.bar span{display:block;height:100%;width:var(--w,0%);background:linear-gradient(90deg,var(--leaf),var(--leaf-2));border-radius:9px;transition:width 1.2s cubic-bezier(.2,.3,1)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px dashed var(--line);padding-top:6px}
+.stat{text-align:center;border-right:1px dashed var(--line)}.stat:last-child{border:0}
+.stat .icon{width:16px;height:16px;color:var(--muted)}
+.stat b{display:block;font-size:var(--text-title)}
+.stat span{display:inline-flex;align-items:center;gap:4px;font-size:var(--text-label);color:var(--muted)}
+
+/* map — the real geoBoundaries districts, styled with the five tokens */
+.map-zone{grid-area:map;position:relative;display:grid;place-items:center;z-index:var(--z-content-2);padding:clamp(4px,1dvh,14px) clamp(4px,1.2vw,24px)}
+.mand-bg{position:absolute;inset:2%;display:grid;place-items:center;color:var(--line);opacity:.9;animation:spin 140s linear infinite;pointer-events:none}
+.mand-bg svg{height:100%;max-width:100%;aspect-ratio:1}
+.map-svg{position:relative;width:100%;height:100%;filter:drop-shadow(4px 7px 0 rgb(36 35 31 / .3))}
+.d{stroke:var(--cream);stroke-width:2;vector-effect:non-scaling-stroke;cursor:pointer;transform-box:fill-box;transform-origin:center;transition:filter .15s,fill .4s;animation:cell .55s var(--cd,0s) cubic-bezier(.2,1.4,.4,1) backwards}
+.d.no{fill:var(--sand)}.d.has{fill:var(--mango)}.d.done{fill:var(--leaf)}
+.d:hover{filter:brightness(1.12)}
+/* selection = a bolder version of the district's own colour;
+   keyboard focus gets an explicit ink ring so it never depends on colour */
+.d:focus{outline:none}
+.d:focus-visible{outline:none;stroke:var(--ink);stroke-width:3.5;filter:drop-shadow(0 0 2px var(--card))}
+.d.no.sel{fill:color-mix(in srgb,var(--sand) 62%,var(--ink))}
+.d.has.sel{fill:color-mix(in srgb,var(--mango) 68%,#000)}
+.d.done.sel{fill:color-mix(in srgb,var(--leaf) 68%,#000)}
+/* ONE pin — positioning handled by the <g translate>, animation by .pin-drop.
+   Quiet 280ms drop (no overshoot); constant 28px on-screen size via scale(). */
+.pin-layer{pointer-events:none}
+.pin-drop{transform-box:fill-box;transform-origin:center;animation:pinDrop .28s cubic-bezier(.22,1,.36,1) both;pointer-events:none;filter:drop-shadow(1px 2px 0 rgb(36 35 31 / .35))}
+/* tapping the empty map background clears the selection — arrow, not a pointer */
+.map-bg{cursor:default}
+/* মানচিত্রে দেখো: one 900ms bloom on the district search just revealed */
+.d.pulse{animation:pulseD .9s ease-out 1}
+@keyframes pulseD{
+  0%{filter:brightness(1);stroke:var(--cream);stroke-width:2}
+  35%{filter:brightness(1.5);stroke:var(--ink);stroke-width:5}
+  100%{filter:brightness(1);stroke:var(--cream);stroke-width:2}
+}
+/* single district-name label — portal on body, positioned above the point by
+   floating-ui (offset + flip + shift), rAF translate3d, never trapped */
+.map-label{position:fixed;left:0;top:0;z-index:var(--z-map-label);pointer-events:none;opacity:0;transition:opacity .12s ease;will-change:transform}
+.ml-card{background:var(--ink);color:var(--card);border-radius:8px;padding:6px 12px;box-shadow:var(--shadow-lift);white-space:nowrap;text-align:center}
+.ml-bn{display:block;font:600 var(--text-ui)/1.3 var(--sans)}
+.ml-en{display:block;font:italic var(--text-label)/1.3 var(--serif);color:var(--sand)}
+/* visually-hidden polite live region (tap highlights, etc.) */
+.sr-live{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap;border:0}
+.stamp{position:absolute;right:0;top:1%;width:clamp(96px,7.5vw,128px);aspect-ratio:1;border:3px double var(--tomato);color:var(--tomato);border-radius:50%;display:grid;place-items:center;text-align:center;rotate:13deg;font-weight:700;font-size:var(--text-label);letter-spacing:0;pointer-events:none;line-height:1.25}
+.stamp strong{font:400 var(--text-ui)/1.2 var(--serif);display:block}
+.sea{position:absolute;left:0;bottom:1%;display:flex;align-items:flex-end;gap:10px;pointer-events:none;color:var(--leaf);opacity:.75}
+.boat{width:clamp(44px,5vw,76px);animation:drift 9s ease-in-out infinite alternate;filter:drop-shadow(0 4px 3px rgb(0 0 0 / .2))}
+.waves{font-size:22px;letter-spacing:4px;animation:wave 6s ease-in-out infinite}
+.compass{font:40px/1 var(--serif);color:var(--muted);text-align:center;rotate:-12deg;animation:sway 7s ease-in-out infinite}.compass small{display:block;font-size:var(--text-label);letter-spacing:2px}
+
+/* polaroids — a tidy scattered group, no dead zone */
+.cards{grid-area:cards;display:flex;flex-direction:row;justify-content:flex-start;align-items:flex-start;gap:0;z-index:var(--z-content-4);padding-left:2%}
+.pola{position:relative;width:clamp(124px,9.5vw,176px);padding:8px 8px 12px;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);rotate:var(--r);cursor:pointer;transition:rotate .25s,scale .25s}
+.pola:nth-child(2){align-self:flex-end;margin-left:-18px}
+.pola:hover{rotate:0deg;scale:1.04}
+.pola .ph{width:100%;height:clamp(52px,6.5dvh,84px)}
+.pola b{font-size:var(--text-ui);display:block;margin:4px 3px 0;line-height:1.3}
+.pola small{display:flex;align-items:center;gap:4px;margin:0 3px;color:var(--muted);font-size:var(--text-label);line-height:1.5}.pola small.en{font:italic var(--text-label) var(--serif)}
+.heart{position:absolute;right:6px;bottom:6px;z-index:var(--z-content-2);border:0;background:none;color:var(--tomato);font-size:22px;line-height:1;padding:0;min-height:44px;min-width:44px}
+.pola-hit{position:absolute;inset:0;z-index:var(--z-content-1);background:none;border:0;padding:0;cursor:pointer;border-radius:3px}
+.pola-hit:focus-visible{outline:3px solid var(--ink);outline-offset:-3px}
+.next{grid-area:next;align-self:end;padding:12px 16px;rotate:-2deg;z-index:var(--z-content-3)}
+.next-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.next h2,.top h3,.panel h3{font:400 var(--text-ui) var(--serif);margin:0 0 4px;display:inline-flex;align-items:center;gap:7px}
+.next p{font-size:var(--text-small);margin:0 0 8px;color:var(--body)}
+.btn{border:0;border-radius:var(--radius-chip);background:var(--tomato);color:#fff;padding:8px 20px;font-weight:700;font-size:var(--text-body);min-height:48px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 3px 0 var(--tomato-d);transition:transform .15s}
+.btn:hover{transform:translateY(-2px) rotate(-1.5deg)}.btn:active{transform:translateY(2px);box-shadow:none}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:0 3px 0 var(--tomato-d)}
+.btn.alt{background:transparent;color:var(--ink);border:1.5px solid var(--ink);box-shadow:none}
+.btn.alt:active{transform:translateY(2px)}
+/* overflow menu (reset lives here) */
+.menu{position:absolute;right:10px;bottom:calc(100% + 4px);z-index:var(--z-popover);background:var(--card);border:1.5px solid var(--ink);border-radius:var(--radius-paper);box-shadow:var(--shadow-lift);padding:4px;min-width:210px}
+/* .menu's --z-popover is trapped inside .next's stacking context, and .next
+   (--z-content-3) sits under the polaroids (--z-content-4) — so the open
+   dropdown used to render beneath them and swallow clicks. Lift .next itself
+   only while the menu is mounted: nothing moves at any other time. */
+.next:has(.menu){z-index:var(--z-content-5)}
+.menu button{display:flex;align-items:center;gap:9px;width:100%;background:none;border:0;border-radius:8px;padding:8px 12px;font-size:var(--text-small);font-weight:600;text-align:left}
+.menu button:hover{background:var(--mango)}
+.menu button .icon{color:var(--tomato-d)}
+.top{grid-area:top;align-self:end;padding:13px 18px;rotate:-.4deg;z-index:var(--z-content-3)}
+.top-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.top-h button{background:none;border:0;color:var(--leaf);font-weight:700;font-size:var(--text-label);display:inline-flex;align-items:center;gap:4px}
+.ranks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.rank{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--card) 70%,transparent);border:1px solid var(--edge);padding:8px;border-radius:8px;transition:translate .2s}
+.rank:hover{translate:0 -3px}
+.rank .ph{width:56px;height:56px;border-radius:50%;border:2px solid #fff;flex:none}
+.rank b{display:block;font-size:var(--text-ui);line-height:1.3}.rank small{display:block;color:var(--tomato-d);font-size:var(--text-label);font-weight:700}.rank em{font-style:normal;font-size:var(--text-label);color:var(--muted)}
+
+/* dish panel (today's special / selected district) — structured, no dead gap */
+.panel{grid-area:panel;display:flex;flex-direction:column;gap:8px;padding:16px 18px;rotate:1.5deg;overflow:hidden;z-index:var(--z-content-4)}
+.p-label{font-size:var(--text-label);color:var(--tomato-d);font-weight:700;letter-spacing:0}
+.p-body{display:flex;flex-direction:column;gap:5px;flex:1;min-height:0;overflow-y:auto}
+.p-body>*{flex:0 0 auto}
+.p-body.swap{animation:swap .45s cubic-bezier(.2,1.2,.4,1)}
+.p-top{display:flex;flex-direction:column;gap:6px;min-height:0}
+.p-top .ph{width:100%;aspect-ratio:16/10;max-height:15dvh;flex:none;border:4px solid #fff;box-shadow:0 3px 8px rgb(36 35 31 / .18)}
+.p-name{font:700 var(--text-title)/1.3 var(--sans)}
+.p-en{font:italic var(--text-small) var(--serif);color:var(--muted);margin-top:-4px}
+.p-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:var(--text-label);font-weight:600;color:var(--muted)}
+.p-meta span{display:inline-flex;align-items:center;gap:4px}
+.p-meta .icon{width:14px;height:14px}
+/* the highlight card shows ONE line of story (design pass §6d) */
+.p-desc{margin:0;font-size:var(--text-small);color:var(--body);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.p-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.p-state{font-size:var(--text-small);color:var(--muted)}
+.check{border:2px solid var(--tomato);background:none;color:var(--tomato-d);border-radius:var(--radius-chip);padding:6px 20px;font-weight:700;font-size:var(--text-body);white-space:nowrap;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%}
+.check.on{background:var(--leaf);border-color:var(--leaf);color:#fff;box-shadow:0 3px 0 var(--leaf-d);animation:popc .45s cubic-bezier(.2,1.8,.4,1)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;max-height:0;opacity:0;overflow:hidden;transition:max-height .45s cubic-bezier(.2,.3,1),opacity .3s}
+.chips.open{max-height:180px;opacity:1}
+.chip{border:1.5px solid var(--edge);background:var(--card);border-radius:var(--radius-chip);padding:6px 14px;font-weight:600;font-size:var(--text-ui);transition:transform .15s,background .2s;display:inline-flex;align-items:center;gap:6px}
+.chip:active{transform:scale(.93)}.chip.on{background:var(--mango);border-color:var(--ink)}
+.chip.over{border-style:dashed}.chip.over.on{background:color-mix(in srgb,var(--tomato) 26%,var(--card));border-color:var(--tomato);border-style:solid;color:var(--tomato-d)}
+.p-more{list-style:none;margin:2px 0 0;padding:0;display:grid;gap:4px;overflow-y:auto;min-height:0}
+.p-more-row{display:flex;width:100%;justify-content:space-between;gap:8px;padding:8px 12px;font-size:var(--text-ui);font-weight:600;background:color-mix(in srgb,var(--card) 70%,transparent);border:1px solid var(--edge);border-radius:8px}
+.p-more-row.on{background:var(--mango);border-color:var(--ink)}
+.p-place{display:flex;align-items:center;gap:8px;margin-top:2px;border:1.5px dashed var(--edge);border-radius:8px;padding:8px 12px;font-size:var(--text-label);font-weight:600;color:var(--muted)}
+.p-place .icon{width:15px;height:15px;flex:none}
+.soon{text-align:center;padding:14px 0;color:var(--muted)}.soon b{display:block;font:400 var(--text-title) var(--serif);color:var(--tomato)}
+.link{background:none;border:0;color:var(--leaf);font-weight:700;font-size:var(--text-label);text-decoration:underline;margin-top:6px;padding:0;min-height:44px}
+
+/* photo slot: a real <img> covers the gradient+letter; if the dish has no
+   photo (or it fails) the placeholder stays — a big Bangla first letter on the
+   category tint. Never a broken icon. */
+.ph{position:relative;overflow:hidden;display:grid;place-items:center;background:linear-gradient(135deg,var(--a,#e9b96a),var(--b,#c9742f))}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.92)}
+.ph-letter{position:absolute;inset:0;display:grid;place-items:center;font:700 clamp(28px,6vw,92px)/1 var(--serif);color:rgb(255 255 255 / .85);text-shadow:0 3px 0 rgb(36 35 31 / .18)}
+.rank .ph-letter,.srow .ph-letter,.pod .ph-letter{font-size:26px}
+.pola .ph-letter{font-size:34px}
+.p-top .ph-letter{font-size:44px}
+.cat-card .ph-letter{font-size:72px}
+.dish-modal .ph-letter{font-size:64px}
+.ph-tag{position:absolute;left:8px;bottom:8px;background:rgb(36 35 31 / .72);color:var(--card);border-radius:99px;padding:2px 10px;font-size:var(--text-label);font-weight:600}
+
+/* modals, toast, menu backdrop */
+.toast{position:absolute;left:50%;bottom:6%;translate:-50% 0;padding:12px 20px;background:var(--ink);color:var(--card);border-radius:8px;font-size:var(--text-ui);box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s;z-index:var(--z-toast);white-space:nowrap}
+.toast.show{opacity:1;animation:toastIn .35s cubic-bezier(.2,1.4,.4,1)}
+.mb{position:absolute;inset:0;background:rgb(36 35 31 / .78);display:grid;place-items:center;z-index:var(--z-modal);padding:10px;animation:mbIn .25s ease}
+.mb.fix{position:fixed}
+.modal{width:min(460px,100%);max-height:96%;overflow:auto;display:flex;flex-direction:column;gap:12px;background:var(--card);padding:20px;border:2px solid var(--ink);box-shadow:8px 8px 0 var(--ink);rotate:-1deg;animation:modalIn .4s cubic-bezier(.2,1.5,.4,1)}
+.modal.share{width:min(720px,92vw)}
+.modal h2{font:400 var(--text-title) var(--serif);margin:0;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.x{border:0;background:none;padding:0;min-height:44px;min-width:44px;display:inline-grid;place-items:center;color:var(--muted)}
+.x:hover{color:var(--ink)}
+.x .icon{width:22px;height:22px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.acts{display:flex;gap:8px}.acts .btn{flex:1;padding:10px 8px;justify-content:center}
+.preview{display:grid;place-items:center;min-height:120px;background:color-mix(in srgb,var(--card) 60%,var(--paper));border:1px dashed var(--edge);border-radius:8px;padding:8px}
+.preview img{max-width:100%;max-height:52dvh;border:1px solid var(--edge);box-shadow:var(--shadow)}
+.note{font-size:var(--text-label);color:var(--muted);margin:0}
+.note.big{font-size:var(--text-small);color:var(--body)}
+.mlist{display:grid;gap:8px}
+.mlist .rank{padding:8px 10px}.mlist .bb{height:6px;background:var(--sand);border-radius:9px;margin-top:4px;overflow:hidden}.mlist .bb i{display:block;height:100%;background:var(--tomato);width:var(--p)}
+.bit{position:fixed;width:8px;height:12px;border-radius:50% 0;z-index:var(--z-toast);pointer-events:none;animation:fly .8s ease-out forwards}
+
+/* ---------- tab panes (খাবার / সেরা), mobile sheet, suggest form ---------- */
+main.off{display:none}
+main.pane{display:flex;flex-direction:column;gap:14px;overflow-y:auto;padding:clamp(14px,3dvh,26px) 3.6% 30px;animation:rise .5s cubic-bezier(.2,1.1,.4,1) backwards}
+/* main>* sets min-height:0 — in the pane's column flex that would let tall
+   content (the catalog grid) flex-shrink to nothing; scroll instead */
+main.pane>*{flex:0 0 auto}
+.pane h1{font-size:var(--text-h1)}
+.pane .mlist{list-style:none;padding-left:0;margin:0}
+.pane-sec{border-top:1px dashed var(--line);padding-top:14px}
+.pane-sec h3{font:400 var(--text-title) var(--serif);margin:0 0 10px}
+.pane-note{padding:16px 20px}
+.rank-btn{cursor:pointer;color:inherit;transition:translate .15s}
+.rank-btn:hover{translate:0 -3px}
+.spot-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:color-mix(in srgb,var(--card) 70%,transparent);border:1px solid var(--edge);border-radius:8px;font-size:var(--text-ui)}
+.spot-row a{color:var(--leaf);font-weight:700}
+.spot-row span{color:var(--muted);font-size:var(--text-label);white-space:nowrap}
+
+/* খাবার catalog: sticky filter bar + vertical dish-card grid */
+.cat-h{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.cat-h h1{margin-bottom:0}
+.cat-tools{position:sticky;top:0;z-index:var(--z-sticky);display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;background:var(--paper)}
+.cat-tools input,.cat-tools select{border:1.5px solid var(--edge);background:#fff;color:var(--ink);border-radius:var(--radius-paper);padding:0 14px;font:500 var(--text-small) var(--sans)}
+.cat-tools input{width:100%;height:52px;padding:0 14px 0 42px}
+.cat-tools select{height:52px}
+.cat-tools input:focus,.cat-tools select:focus{border-color:var(--leaf);outline:none}
+.cat-tools input::-webkit-search-cancel-button{display:none}
+.cat-tools .link{margin-top:0;white-space:nowrap}
+.cat-chips{display:flex;gap:8px;flex-wrap:wrap}
+.cat-count{margin:0;font-size:var(--text-small);color:var(--muted);font-weight:600}
+/* column count lives here (phones 2, then 2/3/4) — no Tailwind grid utilities
+   in the markup so the phone layout can differ from the desktop one */
+.cat-grid{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr));max-width:1200px}
+@media (min-width:1024px){.cat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1536px){.cat-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+/* search wrap: was an inline style, now a class so phones can restyle it */
+.cat-search{position:relative;flex:1 1 auto;min-width:200px;display:inline-flex}
+.cat-card{display:flex;flex-direction:column;align-items:stretch;padding:0;overflow:hidden;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);border-radius:var(--radius-paper);text-align:left;font-weight:600;font-size:var(--text-ui);transition:translate .15s,rotate .15s}
+.cat-card:hover{translate:0 -4px;rotate:-.6deg}
+.cat-card>span{min-width:0}
+.cat-card .ph{width:100%;aspect-ratio:4/3;border-radius:0;flex:none}
+.cat-meta{display:grid;gap:2px;padding:12px 14px;align-content:start}
+.cat-meta .dist{display:flex;align-items:center;gap:5px;font-weight:500;font-size:var(--text-small);color:var(--muted)}
+.cat-meta .dist .icon{width:14px;height:14px;flex:none}
+
+/* slide-up district sheet (phones) */
+.sheet{position:fixed;left:50%;translate:-50% 0;bottom:0;z-index:var(--z-drawer);width:min(560px,100%);max-height:min(72dvh,660px);overflow-y:auto;background:var(--paper);border:2px solid var(--ink);border-bottom:0;border-radius:16px 16px 0 0;box-shadow:0 -12px 34px rgb(36 35 31 / .35);padding:14px 16px 22px;animation:sheetIn .4s cubic-bezier(.2,1.1,.4,1)}
+.sheet::before{content:"";display:block;width:52px;height:5px;border-radius:99px;background:var(--edge);margin:0 auto 10px}
+.sheet-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.sheet-h h2{font:400 var(--text-title) var(--serif)}
+.sheet-h .caption{font:italic var(--text-small) var(--serif);color:var(--muted);margin:2px 0 0}
+.sheet ul{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:11px}
+.sheet li{display:grid;gap:6px}
+.sheet-en{display:block;font-weight:400;font-size:var(--text-label);color:var(--muted)}
+.sheet-empty{color:var(--muted);font-size:var(--text-small);margin:10px 0 0}
+.sheet .chips{max-height:none;opacity:1;overflow:visible}
+
+/* MapDishPopup — the district popup (modal): header, brief, dish list, and the
+   swiped-in recipe card. Distinct from DishDetailModal (the surprise card). */
+.dish-popup{display:flex;flex-direction:column;gap:6px;max-width:520px;width:min(94vw,520px);max-height:86dvh;overflow-y:auto}
+.dish-popup .dish-loc{display:flex;align-items:center;gap:5px;font-size:var(--text-label);font-weight:600;color:var(--body);margin-top:2px}
+.mp-back{display:inline-flex;align-items:center;gap:2px;align-self:flex-start;background:none;border:0;padding:0;margin-bottom:4px;color:var(--accent);font:600 var(--text-ui)/1.3 var(--sans);cursor:pointer}
+.mp-list{display:grid;gap:8px;margin:10px 0 4px}
+.mp-row{display:flex;align-items:center;gap:10px;padding:6px;border:1px solid var(--edge);border-radius:var(--radius-paper);background:var(--card);cursor:pointer;text-align:left;color:var(--ink);transition:border-color .16s ease,transform .16s ease}
+.mp-row:hover{border-color:var(--accent);transform:translateX(2px)}
+.mp-names{display:grid;gap:2px;flex:1;min-width:0}
+.mp-names b{font-size:var(--text-ui);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp-ph{width:44px;height:44px;flex:none;border-width:2px}
+.mp-ph .ph-letter{font-size:20px}
+.mp-state{display:flex;align-items:center;justify-content:center;width:26px;height:26px;flex:none;border-radius:50%;border:1px solid var(--edge);color:var(--muted)}
+.mp-state.on{background:var(--leaf-tint,#47764A);border-color:transparent;color:#fff}
+.mp-state .rot{transform:rotate(180deg)}
+/* swipe motion: the recipe card slides in from the right when a dish is picked */
+.swipe-in{animation:swipeIn .3s cubic-bezier(.22,.61,.36,1) both}
+@media (prefers-reduced-motion:reduce){.swipe-in{animation:none}}
+
+/* suggest form (paper) */
+.sf{display:grid;gap:10px;margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
+.sf-l{display:grid;gap:4px;font-size:var(--text-small);font-weight:600;color:var(--body)}
+.sf-l em{font-weight:400;color:var(--muted)}
+.sf input,.sf select{width:100%;height:48px;border:1.5px solid var(--edge);background:#fff;color:var(--ink);border-radius:var(--radius-paper);padding:0 14px;font:500 var(--text-small) var(--sans)}
+.sf input:focus,.sf select:focus{border-color:var(--leaf);outline:none}
+.sf-acts{display:flex;align-items:center;gap:14px}
+.sf-acts .btn{padding:8px 20px}
+.sf-acts .link{margin-top:0}
+.sf-ok{margin:0;font-size:var(--text-small);color:var(--leaf);font-weight:700}
+.sf-err{margin:0;font-size:var(--text-small);color:var(--tomato-d);font-weight:700}
+
+/* dish detail modal — Surprise's re-roll card only (dish clicks open /dishes/[slug]) */
+.dish-modal .ph{width:100%;aspect-ratio:16/10;border:1px solid var(--edge);border-radius:8px;flex:none}
+.dish-en{font:italic var(--text-small) var(--serif);color:var(--muted);margin-top:-6px}
+.dish-loc{display:flex;align-items:center;gap:6px;font-weight:700;font-size:var(--text-small);color:var(--tomato-d)}
+.dish-loc .icon{width:15px;height:15px}
+.dish-story{margin:0;font-size:var(--text-small);line-height:1.6;color:var(--body)}
+.dish-modal .btn{align-self:flex-start;margin-top:2px}
+/* surprise: a mango 🎲 badge marks the modal as a random pick */
+.dice-tag{align-self:flex-start;background:var(--mango);color:var(--ink);
+  border:1.5px solid var(--ink);border-radius:var(--radius-chip);
+  padding:3px 11px;font-size:var(--text-label);font-weight:700;white-space:nowrap}
+
+/* place pick row (sheet / panel) */
+.place-edit{display:flex;gap:8px;align-items:center;margin-top:2px}
+.place-edit input{flex:1;min-width:0;height:48px;border:1.5px solid var(--edge);background:#fff;border-radius:var(--radius-paper);padding:0 12px;font:500 var(--text-small) var(--sans)}
+.place-view{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:var(--text-small);color:var(--body);margin-top:2px}
+.place-view span{display:inline-flex;align-items:center;gap:5px}
+.place-view button{background:none;border:0;color:var(--muted);text-decoration:underline;font-size:var(--text-label);padding:0}
+.place-add{margin-top:2px;border:1.5px dashed var(--edge);background:none;border-radius:var(--radius-chip);padding:6px 14px;font-size:var(--text-small);font-weight:600;color:var(--body);align-self:start;display:inline-flex;align-items:center;gap:6px}
+.place-add:hover{border-color:var(--leaf);color:var(--leaf)}
+
+/* সেরা pane: podium + grid rows + sections */
+.podium{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.pod{display:flex;flex-direction:column;gap:8px;padding:14px 16px;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);border-radius:var(--radius-paper);cursor:pointer;transition:translate .15s}
+.pod:hover{translate:0 -4px}
+.pod-top{display:flex;align-items:center;gap:12px}
+.pod-rank{font:700 var(--text-title)/1 var(--sans);color:var(--tomato-d);min-width:1.6em;text-align:center}
+.pod .ph{width:72px;height:72px;border-radius:50%;border:3px solid #fff;flex:none;box-shadow:var(--shadow)}
+.pod-name{font:700 var(--text-title)/1.25 var(--sans)}
+.pod-dist{display:flex;align-items:center;gap:5px;font-size:var(--text-small);color:var(--muted)}
+.pod-dist .icon{width:14px;height:14px}
+.pod-pct{font-size:var(--text-title);font-weight:700;color:var(--leaf)}
+.srow{display:grid;grid-template-columns:2.2rem 64px minmax(0,1fr) minmax(0,320px) auto;align-items:center;gap:12px;width:100%;text-align:left;padding:8px 10px;background:color-mix(in srgb,var(--card) 70%,transparent);border:1px solid var(--edge);border-radius:8px;transition:translate .15s}
+.srow:hover{translate:0 -2px}
+.srow-rank{font-weight:700;font-size:var(--text-ui);color:var(--tomato-d);text-align:center}
+.srow .ph{width:64px;height:64px;border-radius:50%;border:2px solid #fff;flex:none}
+.srow-name{display:block;font-weight:700;font-size:var(--text-ui);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow-dist{display:flex;align-items:center;gap:5px;font-size:var(--text-small);color:var(--muted)}
+.srow-dist .icon{width:14px;height:14px}
+.srow-bar{height:10px;background:var(--sand);border-radius:9px;overflow:hidden}
+.srow-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--tomato),color-mix(in srgb,var(--tomato) 60%,var(--mango)));border-radius:9px}
+.srow-pct{font-size:var(--text-ui);font-weight:700;white-space:nowrap}
+.pane-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(430px,100%),1fr));gap:20px}
+.board-h{font:400 var(--text-title) var(--serif);margin:0 0 10px}
+
+/* shared result page (/r/…) — one piece on the same desk */
+.book.result{display:block;width:min(680px,100vw);height:auto;min-height:100dvh;padding:clamp(16px,4vw,40px);border-width:6px}
+.result-card{display:flex;flex-direction:column;gap:8px;padding:clamp(18px,4vw,34px);rotate:-.6deg;max-width:560px;margin-inline:auto}
+.result-card h1{font:400 clamp(26px,5vw,38px)/1.3 var(--serif);color:var(--leaf);margin:6px 0 0;rotate:0deg}
+.result-sub{margin:0;font-size:clamp(15px,2.4vw,19px);font-weight:600}
+.result-map{display:block;width:min(320px,72%);height:auto;margin:8px auto;filter:drop-shadow(3px 5px 0 rgb(36 35 31 / .25))}
+.result-compare{border-top:1px dashed var(--line);padding-top:10px}
+.result-compare h3{font:400 var(--text-ui) var(--serif);margin:0 0 4px}
+.result-compare p{margin:2px 0;font-size:var(--text-small);color:var(--body)}
+.result-compare ul{margin:4px 0 0;padding-left:18px;font-size:var(--text-small);color:var(--body)}
+.result-card .btn{align-self:flex-start;margin-top:10px;text-decoration:none}
+.result-credit{margin:6px 0 0;font-size:var(--text-label);color:var(--muted)}
+
+/* ---------- /dishes/[slug] — the dish recipe page (the old detail card) ----------
+   reuses the .book.result frame + .result-card; only the innards are new */
+.dish-page .ph{width:100%;aspect-ratio:16/10;max-height:38dvh;border:1px solid var(--edge);border-radius:8px;flex:none}
+.dish-page .ph-letter{font-size:64px}
+.dish-page .check{align-self:flex-start;width:auto;min-width:180px;margin-top:2px}
+.dish-loc-link{color:inherit;text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}
+.dish-stats{border-top:1px dashed var(--line);padding-top:10px;display:grid;gap:8px}
+.dish-stats h2{font:400 var(--text-ui) var(--serif)}
+.bar{display:grid;gap:3px;font-size:var(--text-small);color:var(--body)}
+.bar-h{display:flex;justify-content:space-between;gap:8px}
+.bar-h b{font-weight:600;color:var(--ink)}
+.bar-t{height:8px;border-radius:99px;background:var(--sand);overflow:hidden}
+.bar-t i{display:block;height:100%;border-radius:99px}
+
+/* ---------- phone-only pieces: styled in the ≤767px block below,
+   display:none here so the desktop/tablet page stays pixel-identical ---------- */
+.dock{display:none}                 /* bottom nav — replaces the header nav */
+.pass-left{display:none}            /* ribbon's "বাকি N" right-hand stat */
+.pin-float{display:none}            /* 📌 floating above the open sheet */
+.zoom-ctl{display:none}             /* ± zoom buttons — phones only */
+.tb-chips{display:none}             /* সেরা board switcher row */
+.tb-ico{display:none}               /* SVG heading icons (emoji ≥768px) */
+.dish-count{display:none}           /* sheet-header dish count */
+.cat-suggest-txt{display:contents}  /* ≥768px keeps the full labelled pill */
+.pass-ribbon{display:contents}      /* the ribbon box only exists on phones */
+.pass-open{display:none}            /* tappable ribbon cover — phones only */
+/* photo+names wrapper in the dish sheets: flattens to the exact previous
+   DOM order ≥768px; phones turn it into one header row */
+.dish-head,.dish-head-txt{display:contents}
+
+/* ---------- responsive ---------- */
+@media (min-width:761px) and (max-width:1100px){main{grid-template-columns:minmax(170px,21%) minmax(0,1fr) minmax(230px,26%)}.tagline{display:none}}
+/* short screens: hide the lowest-priority pieces first, never shrink type */
+@media (min-width:761px) and (max-height:780px){.intro p{display:none}}
+@media (min-width:761px) and (max-height:740px){.compass{display:none}}
+@media (min-width:761px) and (max-height:720px){.cards{display:none}}
+@media (min-width:761px) and (max-height:640px){.top{display:none}}
+/* short desktop: panel sheds supplementary lines + shrinks its photo before scrolling */
+@media (min-width:761px) and (max-height:950px){.p-desc{display:none}.p-top .ph{max-height:11dvh}}
+@media (min-width:761px) and (max-height:760px){.p-en{display:none}.p-top .ph{max-height:64px}}
+/* narrow desktop columns: polaroids need width, so they go; photo capped to column */
+@media (min-width:761px) and (max-width:1100px){.cards{display:none}.p-desc{display:none}.p-top .ph{max-height:120px}}
+
+/* desktop single-screen (≥1024px & height ≥700px) — nothing scrolls */
+@media (min-width: 1024px) and (min-height: 700px) {
+  html, body { overflow: hidden; }
+  .book { height: 100dvh; overflow: hidden; }
+}
+
+/* tablet (768-1023px) or short desktop — master/detail with scroll */
+@media (min-width: 768px) and (max-width: 1023px),
+       (min-width: 1024px) and (max-height: 699px) {
+  html, body { overflow: auto; height: auto; }
+  .book { height: auto; min-height: 100dvh; overflow: visible; }
+}
+
+/* mobile (<768px) — the phone book: no page scroll, three tabs in the dock */
+@media (max-width: 767px) {
+  /* one screen only: the book owns the height, the panes scroll inside it */
+  html, body { overflow: hidden; height: 100%; }
+  .book { width: 100%; height: 100dvh; min-height: 0; border: 0; overflow: hidden;
+    grid-template-rows: auto minmax(0, 1fr) auto; }
+
+  /* ---- shared frame: 56px header (brand + wordmark, search/share) ---- */
+  header{min-height:56px;padding:0 10px}
+  header .brand-mark{width:34px;height:34px;font-size:17px;box-shadow:2px 2px 0 var(--ink)}
+  header .brand-name{font-size:clamp(20px,5vw,26px)}
+  header .tagline{display:none}
+  header nav{display:none} /* replaced by the dock */
+  header .mobile-actions{display:flex;align-items:center;gap:4px}
+  header .mobile-actions .icon-btn{width:44px;height:44px}
+  header .mobile-actions .icon{width:22px;height:22px}
+
+  /* ---- bottom dock: 5 slots, raised সারপ্রাইজ, desk stripes.
+     z-index var(--z-fab) (45) — always BELOW the scrim/modal layers (60),
+     so the raised button can never draw on top of the district sheet ---- */
+  .dock{display:grid;grid-template-columns:repeat(5,1fr);align-items:center;
+    height:calc(84px + env(safe-area-inset-bottom,0px));
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    position:relative;z-index:var(--z-fab);
+    border-top:3px solid #3b3a35;
+    background:repeating-linear-gradient(92deg,var(--desk-a) 0,var(--desk-b) 5px,var(--desk-a) 12px,var(--desk-b) 18px)}
+  .dock-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    background:none;border:0;color:var(--sand);min-height:44px;padding:4px 0;position:relative}
+  .dock-btn span{font-size:14px;font-weight:600;line-height:1.1}
+  .dock-btn .icon{width:22px;height:22px}
+  .dock-btn.active{color:var(--mango)}
+  .dock-btn.active::before{content:"";position:absolute;top:0;left:20%;right:20%;height:3px;
+    background:var(--mango);border-radius:0 0 3px 3px}
+  .dock-mid{display:grid;place-items:center;align-self:stretch}
+  .dock-surprise{position:relative;display:block;height:100%;background:none;border:0;padding:0}
+  .dock-circle{width:62px;height:62px;border-radius:50%;background:var(--tomato);
+    border:3px solid var(--cream);color:#fff;display:grid;place-items:center;
+    box-shadow:0 5px 14px rgb(10 10 8 / .45);translate:0 -30px}
+  .dock-circle .icon{width:26px;height:26px}
+  .dock-lbl{position:absolute;top:38px;left:50%;translate:-50% 0;
+    font-size:14px;font-weight:700;color:var(--sand);line-height:1}
+
+  /* ---- map tab: ribbon (64px) · map (flex:1) · today's flap (112px) ---- */
+  main{display:flex;flex-direction:column;gap:0;padding:10px 12px 0;min-height:0;overflow:hidden}
+  .intro,.cards,.next,.top,.compass,.leaf{display:none}
+
+  /* passport ribbon: full-bleed left, swallowtail right end, dashed stitch */
+  .passport{rotate:0;clip-path:none;background:none;border:0;box-shadow:none;
+    filter:drop-shadow(2px 3px 0 rgb(36 35 31 / .25));flex:none}
+  .pass-ribbon{display:flex;flex-direction:column;justify-content:center;gap:3px;
+    height:64px;position:relative;margin:0 -12px;padding:4px 74px 4px 16px;
+    background:var(--card);border:1px solid var(--edge);
+    clip-path:polygon(0 0,100% 0,calc(100% - 20px) 50%,100% 100%,0 100%)}
+  .pass-ribbon::after{content:"";position:absolute;inset:4px 26px 4px 5px;border:1.5px dashed rgb(233 77 46 / .3);pointer-events:none}
+  .pass-head,.passport .stats{display:none}
+  .prow{margin:0;gap:10px;align-items:center}
+  .pass-nums .num,.tier-en{display:none}
+  .tier{font-size:15px;line-height:1.15}
+  .ring{width:46px;height:46px;flex:none}
+  .ring::after{width:34px;height:34px}
+  .ring-num{font-size:15px}
+  .bar{height:8px;margin:0}
+  .pass-left{display:flex;flex-direction:column;align-items:center;line-height:1.05;
+    position:absolute;right:30px;top:50%;translate:0 -50%}
+  .pass-left b{font-size:19px;color:var(--leaf)}
+  .pass-left span{font-size:14px;color:var(--muted)}
+
+  /* map zone fills the middle; stamp top-right, nouka bottom-left, hint pill */
+  .map-zone{flex:1;min-height:0;padding:4px 8px 28px;overflow:hidden}
+  .mand-bg{inset:0}
+  .stamp{width:88px;right:2px;top:2px;font-size:14px}
+  .stamp strong{font-size:15px}
+  .sea{bottom:2px}
+  .boat{width:52px}
+  .waves{display:none}
+  /* the map owns pinch/pan, so the browser must not scroll or zoom the page */
+  .map-svg{touch-action:none}
+  .d{touch-action:none;-webkit-touch-callout:none;user-select:none}
+  /* tap feedback: the pressed district takes a quick ink outline */
+  .d:active{stroke:var(--ink);stroke-width:2.5}
+  /* zoom: two 44px buttons stacked at the left edge, mid-height (phones only) */
+  .zoom-ctl{display:flex;flex-direction:column;gap:8px;position:absolute;left:6px;top:50%;
+    translate:0 -50%;z-index:var(--z-content-3)}
+  .zoom-btn{width:44px;height:44px;display:grid;place-items:center;padding:0;
+    background:var(--card);color:var(--ink);border:1.5px solid var(--ink);
+    border-radius:var(--radius-chip);box-shadow:2px 2px 0 var(--ink);cursor:pointer;
+    -webkit-tap-highlight-color:transparent}
+  .zoom-btn:active{translate:1px 1px;box-shadow:1px 1px 0 var(--ink)}
+  .zoom-btn:disabled{opacity:.4;cursor:default}
+  .zoom-btn .icon{width:20px;height:20px}
+  /* the selected pin floats above the open district sheet (portal on body).
+     --z-map-label (80) is the top of the scale — above modal (60) + toast.
+     translate(-50%,-100%) lands the svg's bottom-centre — the pin tip — on
+     the district anchor. */
+  .pin-float{display:block;position:fixed;z-index:var(--z-map-label);
+    pointer-events:none;translate:-50% -100%;line-height:0;
+    filter:drop-shadow(1px 2px 0 rgb(36 35 31 / .35))}
+
+  /* today's special: 112px page flap with its own mango index tab. The panel
+     wrapper drops the paper chrome (the .flap carries it) and goes transparent
+     so the tab can protrude above the flap's top edge. */
+  .panel{rotate:0;flex:none;margin-top:22px;padding:0;background:none;border:0;
+    box-shadow:none;overflow:visible}
+  .panel::after{display:none}          /* the .piece stitch — the flap has its own */
+  .panel .p-label{display:none}        /* desktop label; phones use .flap-tab */
+  .flap{position:relative;display:flex;align-items:center;gap:10px;height:112px;
+    background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);
+    border-radius:var(--radius-paper);padding:10px 12px}
+  .flap-tab{position:absolute;top:0;left:14px;translate:0 -100%;
+    background:var(--mango);color:var(--ink);border:1.5px solid var(--ink);border-bottom:0;
+    border-radius:8px 8px 0 0;padding:2px 12px;font-size:14px;font-weight:700;white-space:nowrap}
+  .flap-main{display:flex;align-items:center;gap:10px;flex:1;min-width:0;
+    background:none;border:0;padding:0;text-align:left;min-height:44px}
+  .flap-ph{width:80px;height:80px;aspect-ratio:auto;min-height:0;border-width:3px;flex:none}
+  .flap-ph .ph-letter{font-size:34px}
+  .flap-txt{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+  .flap-name{font-size:18px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .flap-en{font-size:14px;font-style:italic;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .flap-dist{display:flex;align-items:center;gap:4px;font-size:14px;color:var(--muted)}
+  .flap-check{flex:none;width:auto;margin-left:auto;padding:6px 16px;height:44px;white-space:nowrap}
+
+  /* every sheet (district popup, menu, passport, about) rises from the very
+     bottom EDGE of the screen — flush with it (not floated above the dock;
+     the sheet's z-index covers the dock), dimmed scrim behind — one system */
+  .sheet-mb{background:rgb(36 35 31 / .6);align-items:end;justify-items:center;padding:0}
+  .sheet-mb .modal{width:100%;max-width:none;margin-bottom:0;
+    max-height:min(80dvh,calc(100dvh - env(safe-area-inset-bottom,0px) - 20px));
+    border-radius:16px 16px 0 0;border-bottom:0;rotate:0;box-shadow:0 -12px 34px rgb(36 35 31 / .35);
+    padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));
+    animation:sheetUp .4s cubic-bezier(.2,1.1,.4,1)}
+  @keyframes sheetUp{from{translate:0 40%;opacity:0}}
+  .sheet-mb .modal::before{content:"";display:block;width:52px;height:5px;flex:none;
+    border-radius:99px;background:var(--edge);margin:0 auto 4px}
+  .sheet-mb .modal h2{font-size:28px;line-height:1.15;align-items:flex-start}
+  .sheet-mb .modal h2 .x{margin-top:2px}
+  .dish-count{display:inline}
+  .sheet-mb .mp-row{padding:8px;gap:12px}
+  .sheet-mb .mp-ph{width:92px;height:92px;border-radius:8px;border-width:3px}
+  .sheet-mb .mp-ph .ph-letter{font-size:40px}
+  .sheet-mb .mp-names b{font-size:18px;white-space:normal}
+  .sheet-mb .check{width:100%;min-height:52px;font-size:17px}
+  /* dish-head is display:contents ≥768px; on phones it becomes one 92px row */
+  .sheet-mb .dish-head{display:flex;align-items:center;gap:12px;min-width:0}
+  .sheet-mb .dish-head .ph{width:92px;height:92px;aspect-ratio:auto;flex:none;
+    rotate:-2deg;border-width:3px}
+  .sheet-mb .dish-head .ph-letter{font-size:40px}
+  .sheet-mb .dish-head-txt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+
+  /* modals keep the centred paper look, just phone-width */
+  .modal{width:min(460px,100%)}.modal.share{width:min(460px,100%)}
+  .toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+
+  /* ---- খাবার tab: title row, sticky search, scrolling chips, 2-col grid ---- */
+  .cat-h{flex-wrap:nowrap;align-items:center;gap:10px}
+  .cat-h .eyebrow{display:none}
+  .cat-h h1{font-size:28px}
+  .cat-h .sub{font-size:14px;margin:0}
+  .cat-suggest{flex:none;width:48px;height:48px;min-height:48px;padding:0;
+    border-radius:50%;justify-content:center}
+  .cat-suggest-txt{display:none}
+  .cat-suggest .icon{width:22px;height:22px}
+  .cat-tools{gap:8px;flex-wrap:nowrap;padding:8px 0;margin:0 -14px;padding-inline:14px}
+  .cat-search{min-width:0}
+  .cat-tools input{height:48px}
+  .cat-tools select{height:48px;min-width:118px;max-width:40vw;text-overflow:ellipsis}
+  /* one horizontally scrolling chip row with a right-edge fade */
+  .cat-chips{flex-wrap:nowrap;overflow-x:auto;margin:0 -14px;padding:2px 14px 4px;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;
+    mask-image:linear-gradient(to right,#000 92%,rgb(0 0 0 / 0));
+    -webkit-mask-image:linear-gradient(to right,#000 92%,rgb(0 0 0 / 0))}
+  .cat-chips::-webkit-scrollbar,.tb-chips::-webkit-scrollbar{display:none}
+  .cat-chips .chip{flex:none;min-height:44px;white-space:nowrap}
+  .cat-grid{gap:10px}
+
+  /* ---- সেরা tab: chip-switched boards, podium + compact rows ---- */
+  .tb-chips{display:flex;gap:8px;overflow-x:auto;margin:0 -14px;padding:2px 14px 4px;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;
+    mask-image:linear-gradient(to right,#000 92%,rgb(0 0 0 / 0));
+    -webkit-mask-image:linear-gradient(to right,#000 92%,rgb(0 0 0 / 0))}
+  .tb-chips .chip{flex:none;min-height:44px;white-space:nowrap}
+  .tb-view{display:none}
+  .tb-view.shown{display:block}
+  .tb-emo{display:none}
+  .tb-ico{display:inline-block;vertical-align:-3px;color:var(--tomato-d);margin-right:6px}
+  .pane-cols{grid-template-columns:minmax(0,1fr);gap:14px}
+  .podium{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .pod{padding:12px}
+  .pod:first-child{grid-column:1/-1}
+  .pod .ph,.pod .pod-ph{width:52px;height:52px;border-width:2px}
+  .pod:first-child .pod-ph{width:124px;height:124px;border-radius:12px;border-width:3px}
+  .pod:first-child .pod-name{font-size:22px}
+  .pod-rank{background:var(--mango);color:var(--ink);width:28px;height:28px;
+    border-radius:50%;display:grid;place-items:center;font-size:14px;flex:none}
+  .pod .srow-bar{height:10px}
+  .pod-pct{color:var(--leaf-d)}
+  .pod-dist{font-size:14px}
+  /* compact ranked rows: rank · 48px photo · names · bold %. The bar is
+     dropped here — the podium above already carries the visual share, and a
+     6px strip on every row below just costs vertical room on a phone. */
+  .srow{grid-template-columns:1.7rem 48px minmax(0,1fr) auto;column-gap:8px}
+  .srow-rank{grid-row:1}
+  .srow .ph{grid-row:1;width:48px;height:48px}
+  .srow-names{grid-column:3;grid-row:1;min-width:0}
+  .srow-pct{grid-column:4;grid-row:1}
+  .srow-bar{display:none}
+  .srow-name{font-size:16px}
+  .srow-dist{font-size:14px}
+  .srow-dist .icon{display:none}
+  .srow-pct{font-weight:700}
+
+  /* panes scroll between the fixed header and the dock */
+  main.pane{padding:14px 14px 24px;gap:12px}
+  main.pane>*{flex:0 0 auto}
+}
+
+/* short phones: the flap sheds lines and the hint goes — never scrolls */
+@media (max-width: 767px) and (max-height: 667px){
+  .flap-ph{width:56px;height:56px}
+  .flap-ph .ph-letter{font-size:26px}
+  .panel{margin-top:18px}
+}
+@media (max-width: 767px) and (max-height: 620px){
+  .flap-en{display:none}
+}
+
+/* tiny phones: the wordmark only bows out below 340px */
+@media (max-width:340px){.brand-name{display:none}}
+
+/* ---------- motion: pieces settle onto the desk in sequence
+   (translate/scale/opacity only, so each piece keeps its rotation);
+   the prefers-reduced-motion block below kills all of it ---------- */
+header{animation:rise .6s .05s backwards}
+.intro{animation:rise .7s .2s backwards}
+.map-zone{animation:rise .9s .3s backwards}
+.passport{animation:drop .8s .45s cubic-bezier(.2,1.3,.4,1) backwards}
+.pola{animation:drop .8s var(--d) cubic-bezier(.2,1.3,.4,1) backwards,float 8s calc(var(--d) + 1s) ease-in-out infinite}
+.pola:nth-child(1){--d:.9s}.pola:nth-child(2){--d:1.05s}
+.next{animation:drop .8s 1.3s cubic-bezier(.2,1.3,.4,1) backwards}
+.top{animation:rise .8s 1.45s backwards}
+.panel{animation:drop .8s 1.6s cubic-bezier(.2,1.3,.4,1) backwards}
+.stamp{animation:slam .6s 1.8s cubic-bezier(.2,1.6,.4,1) backwards}
+.leaf{animation:sway 6s ease-in-out infinite;transform-origin:50% 0}
+.brand:hover .brand-mark{animation:wob .6s}
+.heart.on{animation:popc .45s cubic-bezier(.2,1.8,.4,1)}
+@keyframes rise{from{opacity:0;translate:0 18px}}
+@keyframes drop{from{opacity:0;translate:0 -30px;scale:.94}}
+@keyframes cell{from{opacity:0;scale:.35}}
+@keyframes slam{from{opacity:0;scale:2.4;rotate:-18deg}}
+@keyframes popin{from{opacity:0;scale:.2;translate:0 -14px}}
+@keyframes pinDrop{from{opacity:0;translate:0 -10px}}
+@keyframes swap{from{opacity:0;translate:14px 0}}
+@keyframes swipeIn{from{opacity:0;translate:44px 0}}
+@keyframes float{50%{translate:0 -5px}}
+@keyframes bob{50%{translate:0 -4px}}
+@keyframes sway{50%{rotate:6deg}}
+@keyframes wave{50%{translate:12px 0}}
+@keyframes drift{from{translate:-6px 0}to{translate:14px 3px}}
+@keyframes spin{to{rotate:360deg}}
+@keyframes popc{50%{scale:1.3}}
+@keyframes wob{25%{rotate:-14deg}75%{rotate:14deg}}
+@keyframes flip{from{opacity:0;rotate:x 90deg}}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(200deg);opacity:0}}
+@keyframes sheetIn{from{translate:-50% 30%;opacity:0}}
+@keyframes mbIn{from{opacity:0}}
+@keyframes modalIn{from{scale:.92;translate:0 14px}}
+@keyframes toastIn{from{opacity:0;translate:-50% 20px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+} /* end @layer components */
