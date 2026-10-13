@@ -177,7 +177,7 @@ body:has(.food-app) .fixed.inset-0.z-20.flex.items-end>div:first-child>div:nth-c
 @media(min-width:1150px){.map-stage{min-height:660px}.district-map{height:min(64vh,560px)}}
 @media(max-width:759px){
  .site-header{position:relative;min-height:calc(56px + env(safe-area-inset-top));padding-top:8px;}
- .food-dashboard{height:calc(100svh - 56px - env(safe-area-inset-top));grid-template-rows:auto auto minmax(130px,1fr) auto auto;grid-template-areas:"intro" "passport" "map" "share" "footer";gap:9px;padding:12px 15px max(10px,env(safe-area-inset-bottom));}
+ .food-dashboard{grid-template-rows:auto auto auto auto auto;grid-template-areas:"intro" "passport" "map" "share" "footer";gap:9px;padding:12px 15px max(10px,env(safe-area-inset-bottom));}
  .dish-postcards,.next-card{display:none;}
  .intro-card{padding-top:0;}
  .intro-card h1{margin-top:7px;font-size:clamp(28px,8vw,37px);}
@@ -190,7 +190,7 @@ body:has(.food-app) .fixed.inset-0.z-20.flex.items-end>div:first-child>div:nth-c
  .progress-ring span{width:34px;height:34px;font-size:13px;}
  .passport-count{font-size:18px;}
  .passport-bar{margin:7px 0 2px;}
- .map-stage{min-height:0;height:100%;}
+ .map-stage{min-height:max(460px,68svh);height:auto;}
  .map-stage{gap:6px;padding:7px}
  .map-poster{padding:12px}
  .poster-heading>div:first-child>span{font-size:7px}
