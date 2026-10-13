@@ -13,10 +13,10 @@ export function districtTone(id: string, eaten: Set<number>): DistrictTone {
 }
 
 const FILLS: Record<DistrictTone, string> = {
-  empty: '#dedfd4',
-  new: '#F5B52E',
-  partial: '#97b777',
-  complete: '#4F7D32',
+  empty: '#c5cebc',
+  new: '#E1C714',
+  partial: '#F0BE64',
+  complete: '#3D852D',
 };
 
 export function districtFill(id: string, eaten: Set<number>): string {

@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import { districts, paths, viewBox, totalDishes, dishes, districtById } from '@/lib/data';
 import { useProgress } from '@/lib/useProgress';
@@ -58,7 +59,7 @@ export default function FoodMap() {
   return (
     <div className="food-app">
       <div className="book-frame">
-        <header className="site-header">
+        <header className="site-header bg-[#827148]">
           <Link className="brand-lockup" href="/" aria-label="Khabar Book home">
             <span><strong>64<span>Tastes</span></strong><small>64 Tastes · Edition 01 · Bangladesh</small></span>
           </Link>
@@ -71,7 +72,7 @@ export default function FoodMap() {
 
         <main className="food-dashboard">
           <section className="intro-card">
-            <span className="eyebrow"><i /> বাংলাদেশের ঘুরি স্বাদের সন্ধানে</span>
+            <span className="eyebrow"><i /> বাংলাদেশ ঘুরি স্বাদের সন্ধানে</span>
             <h1>দেশের স্বাদ,<br /><em>তোমার গল্প।</em></h1>
             <p className="intro-english">How much of Bangladesh have you tasted?</p>
             <p>৬৪ জেলার পরিচিত স্বাদ ঘুরে দেখো। যেগুলো চেখেছ, সেগুলো যোগ করো তোমার নিজের খাবারের মানচিত্রে।</p>
@@ -88,6 +89,15 @@ export default function FoodMap() {
 
           <section className="map-stage" id="map" aria-label="Explore Bangladesh by district">
             <div className="map-poster">
+              <div className="lotus-clip" aria-hidden="true">
+                <Image
+                  className="map-lotus"
+                  src="/Lotus.svg"
+                  alt=""
+                  width={317}
+                  height={317}
+                />
+              </div>
               <div className="poster-heading">
                 <div><span>বাংলাদেশ খাবার মানচিত্র</span><strong>স্বাদের বাংলাদেশ</strong></div>
                 <div className="poster-count"><b>{bn(count)}</b><span>/{bn(totalDishes)}<small>খাবার</small></span></div>

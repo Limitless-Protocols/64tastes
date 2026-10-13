@@ -1,4 +1,6 @@
 'use client';
+import Image from 'next/image';
+import { useState } from 'react';
 import { districtById, dishesByDistrict, districts } from '@/lib/data';
 import { bn } from '@/lib/format';
 import type { MyRating, Rating } from '@/lib/useRatings';
@@ -10,6 +12,24 @@ const OPTIONS: { value: Rating; label: string }[] = [
   { value: 'okay', label: '🙂 মোটামুটি' },
   { value: 'not_for_me', label: '😕 পছন্দ হয়নি' },
 ];
+
+function DishPhoto({ slug }: { slug: string }) {
+  const [failed, setFailed] = useState(false);
+  const photo = slug ? `/dishes/${slug}.webp` : '';
+
+  return (
+    <span className="dish-thumb" aria-hidden="true">
+      <Image
+        src={photo && !failed ? photo : '/dishes/placeholder.svg'}
+        alt=""
+        width={88}
+        height={88}
+        className="dish-thumb-image"
+        onError={photo && !failed ? () => setFailed(true) : undefined}
+      />
+    </span>
+  );
+}
 
 type Props = {
   districtId: string;
@@ -61,15 +81,16 @@ export default function DistrictSheet({
                 <button
                   onClick={() => onToggle(dish.id)}
                   aria-pressed={has}
-                  className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left ${
+                  className={`district-dish-card flex w-full items-center justify-between rounded-xl border p-2.5 text-left ${
                     has ? 'border-emerald-600 bg-emerald-50' : 'border-gray-200'
                   }`}
                 >
-                  <span>
-                    <span className="block font-medium">{dish.nameBn}</span>
-                    <span className="block text-sm text-gray-500">{dish.nameEn}</span>
+                  <DishPhoto slug={dish.slug} />
+                  <span className="min-w-0 flex-1 px-3">
+                    <span className="block font-semibold leading-snug">{dish.nameBn}</span>
+                    <span className="mt-1 block truncate text-sm text-gray-500">{dish.nameEn}</span>
                   </span>
-                  <span className="text-xl">{has ? '✅' : '⬜'}</span>
+                  <span className={`dish-check ${has ? 'is-eaten' : ''}`} aria-hidden="true">{has ? '✓' : '+'}</span>
                 </button>
 
                 {has && (

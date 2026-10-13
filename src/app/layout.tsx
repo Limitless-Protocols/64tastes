@@ -1,10 +1,22 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/site';
-import { Noto_Sans_Bengali } from 'next/font/google';
+import { Hind_Siliguri, Tiro_Bangla } from 'next/font/google';
 import './globals.css';
 import VerifierHost from '@/components/VerifierHost';
 
-const noto = Noto_Sans_Bengali({ subsets: ['bengali', 'latin'], display: 'swap' });
+const sans = Hind_Siliguri({
+  subsets: ['bengali', 'latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+const serif = Tiro_Bangla({
+  subsets: ['bengali', 'latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--font-serif',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -23,8 +35,16 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="bn">
-      <body className={`${noto.className} antialiased`}>
-        {children}
+      <body className={`${sans.className} antialiased`}>
+        <div className="botanical-backdrop" aria-hidden="true">
+          <span className="banana-leaf banana-leaf-one" />
+          <span className="banana-leaf banana-leaf-two" />
+          <span className="banana-leaf banana-leaf-three" />
+          <span className="banana-leaf banana-leaf-four" />
+          <span className="banana-leaf banana-leaf-five" />
+          <span className="banana-leaf banana-leaf-six" />
+        </div>
+        <div className="site-content">{children}</div>
         <VerifierHost />
       </body>
     </html>

@@ -15,7 +15,7 @@ export default function MiniMap({
           key={d.id}
           d={paths[d.id]}
           fill={districtFill(d.id, eaten)}
-          stroke="#ffffff"
+          stroke="#E9EEE0"
           strokeWidth={1.5}
         />
       ))}

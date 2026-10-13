@@ -21,12 +21,12 @@ export default function ShareCard({ eaten, format }: { eaten: Set<number>; forma
 
   const header = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-      <div style={{ width: story ? 16 : 12, height: story ? 64 : 48, borderRadius: 10, background: '#D9361E' }} />
+      <div style={{ width: story ? 16 : 12, height: story ? 64 : 48, borderRadius: 10, background: '#D23021' }} />
       <div>
-        <div style={{ fontSize: story ? 26 : 19, fontWeight: 800, color: '#6e786b', letterSpacing: 3 }}>
+        <div style={{ fontSize: story ? 26 : 19, fontWeight: 800, color: '#596653', letterSpacing: 3 }}>
           KHABAR BOOK · EDITION 01
         </div>
-        <div style={{ marginTop: 5, fontSize: story ? 56 : 38, fontWeight: 800, color: '#4F7D32' }}>
+        <div style={{ marginTop: 5, fontSize: story ? 56 : 38, fontWeight: 800, color: '#3D852D' }}>
           বাংলাদেশের খাবার মানচিত্র
         </div>
       </div>
@@ -35,16 +35,16 @@ export default function ShareCard({ eaten, format }: { eaten: Set<number>; forma
 
   const summary = (
     <div style={{ textAlign: story ? 'center' : 'left', color: '#20291f' }}>
-      <div style={{ fontSize: story ? 104 : 72, fontWeight: 800, lineHeight: 1.3, color: '#4F7D32' }}>
+      <div style={{ fontSize: story ? 104 : 72, fontWeight: 800, lineHeight: 1.3, color: '#3D852D' }}>
         {tier.bn}
       </div>
-      <div style={{ display: 'inline-block', marginTop: 16, padding: '12px 20px', borderRadius: 18, background: '#FFD16A', fontSize: story ? 64 : 44, fontWeight: 800, lineHeight: 1.3 }}>
+      <div style={{ display: 'inline-block', marginTop: 16, padding: '12px 20px', borderRadius: 18, background: '#E1C714', color: '#20291f', fontSize: story ? 64 : 44, fontWeight: 800, lineHeight: 1.3 }}>
         {bn(eaten.size)} <span style={{ fontSize: story ? 40 : 28, fontWeight: 600 }}> / {bn(totalDishes)} খাবার চেখেছি</span>
       </div>
-      <div style={{ marginTop: story ? 40 : 28, fontSize: story ? 46 : 32, color: '#5f6b5e', lineHeight: 1.4 }}>
+      <div style={{ marginTop: story ? 40 : 28, fontSize: story ? 46 : 32, color: '#596653', lineHeight: 1.4 }}>
         তুমি কতটা চেখেছ?
       </div>
-      <div style={{ marginTop: 12, fontSize: story ? 28 : 20, fontWeight: 700, color: '#4F7D32' }}>{SITE_HOST}</div>
+      <div style={{ marginTop: 12, fontSize: story ? 28 : 20, fontWeight: 700, color: '#3D852D' }}>{SITE_HOST}</div>
     </div>
   );
 
@@ -56,7 +56,7 @@ export default function ShareCard({ eaten, format }: { eaten: Set<number>; forma
         width: w,
         height: h,
         boxSizing: 'border-box',
-        background: '#faf7ef',
+        background: '#E9EEE0',
         color: '#20291f',
         display: 'flex',
         flexDirection: story ? 'column' : 'row',
@@ -64,7 +64,7 @@ export default function ShareCard({ eaten, format }: { eaten: Set<number>; forma
         justifyContent: 'space-between',
         padding: story ? 90 : 56,
         gap: 40,
-        border: '18px solid #e9e4d7',
+        border: '18px solid #d5ddce',
       }}
     >
       {story ? (

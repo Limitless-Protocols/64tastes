@@ -66,10 +66,10 @@ async function DishContent({ params }: Props) {
       {votes >= MIN_VOTES && stat ? (
         <section className="mt-4">
           <p className="text-sm text-gray-600">{bn(votes)}টি ভোটের ভিত্তিতে</p>
-          <Bar label="😍 দারুণ" pct={pct(stat.loved)} color="#059669" />
-          <Bar label="🙂 মোটামুটি" pct={pct(stat.okay)} color="#f59e0b" />
-          <Bar label="😕 পছন্দ হয়নি" pct={pct(stat.notForMe)} color="#ef4444" />
-          <Bar label="🙄 ওভাররেটেড বলেছেন" pct={pct(stat.overrated)} color="#6b7280" />
+          <Bar label="😍 দারুণ" pct={pct(stat.loved)} color="#3D852D" />
+          <Bar label="🙂 মোটামুটি" pct={pct(stat.okay)} color="#F0BE64" />
+          <Bar label="😕 পছন্দ হয়নি" pct={pct(stat.notForMe)} color="#D23021" />
+          <Bar label="🙄 ওভাররেটেড বলেছেন" pct={pct(stat.overrated)} color="#E69030" />
         </section>
       ) : (
         <p className="mt-4 text-gray-600">
