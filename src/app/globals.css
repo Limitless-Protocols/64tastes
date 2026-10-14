@@ -597,6 +597,33 @@ html:has(.result), body:has(.result){overflow:auto;height:auto}
 .bar-t{height:8px;border-radius:99px;background:var(--sand);overflow:hidden}
 .bar-t i{display:block;height:100%;border-radius:99px}
 
+/* ---------- /admin — the moderation desk, on the same paper book ----------
+   A secret URL (ft_admin cookie), never linked from the UI. Same frame as the
+   wiki/result pages: wooden desk + full-bleed paper, the wiki-style title
+   band, and one nakshi-kantha piece per review queue. */
+.book.admin{display:block;width:100%;height:auto;min-height:100dvh;padding:clamp(16px,3.5vw,44px);border-width:8px;overflow:visible}
+/* long queues scroll the window on every viewport — the :has escape hatch
+   from the wiki/result pages (the responsive html/body locks would clip it) */
+html:has(.admin), body:has(.admin){overflow:auto}
+body:has(.admin){height:auto;align-items:start}
+.admin-wrap{position:relative;z-index:1;max-width:760px;margin-inline:auto;display:flex;flex-direction:column;gap:14px}
+.admin-out{margin-left:auto;background:none;border:0;padding:0;min-height:44px;color:var(--leaf);font-weight:700;font-size:var(--text-label);text-decoration:underline;cursor:pointer}
+.admin-sec{display:grid;gap:10px;padding:16px 18px}
+.admin-sec-h{display:flex;align-items:center;gap:10px}
+.admin-sec-h h2{font:400 var(--text-ui) var(--serif);margin:0}
+.admin-count{background:var(--mango);color:var(--ink);font-weight:700;font-size:var(--text-label);border-radius:99px;padding:1px 9px}
+.admin-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.adm-row{display:grid;gap:6px;background:color-mix(in srgb,var(--card) 70%,transparent);border:1px solid var(--edge);border-radius:8px;padding:10px 12px}
+.admin-sec.approved .adm-row{border-left:3px solid color-mix(in srgb,var(--leaf) 55%,var(--edge))}
+.adm-name{margin:0;font-weight:700;font-size:var(--text-small)}
+.adm-row-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.adm-row .btn{min-height:40px;padding:6px 14px;font-size:var(--text-small)}
+.adm-input{width:100%;box-sizing:border-box;font:600 var(--text-small) var(--sans);color:var(--ink);background:var(--card);border:1.5px solid var(--edge);border-radius:8px;padding:8px 10px}
+.adm-input:focus{outline:2px solid color-mix(in srgb,var(--tomato) 55%,transparent);outline-offset:1px}
+.adm-err{margin:8px 0 0;color:var(--tomato-d);font-weight:600;font-size:var(--text-small)}
+.admin-login{display:grid;gap:10px;max-width:460px;margin:6vh auto 0;padding:20px 22px}
+.admin-login h2{font:400 var(--text-title) var(--serif);margin:0;color:var(--leaf)}
+
 /* ---------- phone-only pieces: styled in the ≤767px block below,
    display:none here so the desktop/tablet page stays pixel-identical ---------- */
 .dock{display:none}                 /* bottom nav — replaces the header nav */

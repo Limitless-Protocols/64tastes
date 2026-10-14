@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Piece } from './ui';
 
 type GoogleId = {
   initialize: (options: Record<string, unknown>) => void;
@@ -63,10 +64,11 @@ export default function AdminLogin() {
   }, [router]);
 
   return (
-    <div className="mt-4">
-      <p className="mb-3 text-sm text-gray-600">Sign in with an admin Google account.</p>
+    <Piece className="admin-login">
+      <h2>Admin sign-in</h2>
+      <p className="note">Sign in with an admin Google account.</p>
       <div ref={box} />
-      {message && <p className="mt-3 text-sm text-red-600">{message}</p>}
-    </div>
+      {message && <p className="adm-err">{message}</p>}
+    </Piece>
   );
 }

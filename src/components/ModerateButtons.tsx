@@ -1,5 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
+import { Check, Undo2, X } from 'lucide-react';
+import { PrimaryButton, SecondaryButton } from './ui';
 
 export default function ModerateButtons({ id, status }: { id: number; status: 'pending' | 'approved' }) {
   const router = useRouter();
@@ -13,15 +15,20 @@ export default function ModerateButtons({ id, status }: { id: number; status: 'p
     router.refresh();
   }
 
-  const btn = 'rounded-lg border px-3 py-1 text-sm';
   return status === 'pending' ? (
-    <div className="mt-2 flex gap-2">
-      <button onClick={() => set('approved')} className={`${btn} border-emerald-600 text-emerald-800`}>Approve</button>
-      <button onClick={() => set('rejected')} className={`${btn} border-red-400 text-red-700`}>Reject</button>
+    <div className="adm-row-acts">
+      <PrimaryButton onClick={() => set('approved')}>
+        <Check className="icon" aria-hidden="true" /> Approve
+      </PrimaryButton>
+      <SecondaryButton onClick={() => set('rejected')}>
+        <X className="icon" aria-hidden="true" /> Reject
+      </SecondaryButton>
     </div>
   ) : (
-    <div className="mt-2">
-      <button onClick={() => set('pending')} className={`${btn} border-gray-300 text-gray-700`}>Move back to pending</button>
+    <div className="adm-row-acts">
+      <SecondaryButton onClick={() => set('pending')}>
+        <Undo2 className="icon" aria-hidden="true" /> Move back to pending
+      </SecondaryButton>
     </div>
   );
 }

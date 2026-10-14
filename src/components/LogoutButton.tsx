@@ -9,7 +9,7 @@ export default function LogoutButton() {
         await fetch('/api/admin/logout', { method: 'POST' });
         router.refresh();
       }}
-      className="text-sm text-gray-500 underline"
+      className="admin-out"
     >
       Log out
     </button>

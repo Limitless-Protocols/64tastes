@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Check, Undo2, X } from 'lucide-react';
+import { PrimaryButton, SecondaryButton } from './ui';
 
 type Props = {
   placeId: string;
@@ -25,28 +27,26 @@ export default function PlaceModerateRow({ placeId, initialName, detail, approve
     router.refresh();
   }
 
-  const btn = 'rounded-lg border px-3 py-1 text-sm disabled:opacity-50';
-
   return (
-    <li className="rounded-xl border border-gray-200 p-3">
+    <li className="adm-row">
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
         maxLength={60}
-        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+        className="adm-input"
       />
-      <p className="mt-1 text-xs text-gray-500">{detail}</p>
-      <div className="mt-2 flex gap-2">
-        <button disabled={busy} onClick={() => act('approve')} className={`${btn} border-emerald-600 text-emerald-800`}>
-          {approved ? 'Save name' : 'Approve'}
-        </button>
-        <button disabled={busy} onClick={() => act('reject')} className={`${btn} border-red-400 text-red-700`}>
-          Reject
-        </button>
+      <p className="note">{detail}</p>
+      <div className="adm-row-acts">
+        <PrimaryButton disabled={busy} onClick={() => act('approve')}>
+          <Check className="icon" aria-hidden="true" /> {approved ? 'Save name' : 'Approve'}
+        </PrimaryButton>
+        <SecondaryButton disabled={busy} onClick={() => act('reject')}>
+          <X className="icon" aria-hidden="true" /> Reject
+        </SecondaryButton>
         {approved && (
-          <button disabled={busy} onClick={() => act('reset')} className={`${btn} border-gray-300 text-gray-700`}>
-            Move back to pending
-          </button>
+          <SecondaryButton disabled={busy} onClick={() => act('reset')}>
+            <Undo2 className="icon" aria-hidden="true" /> Move back to pending
+          </SecondaryButton>
         )}
       </div>
     </li>
