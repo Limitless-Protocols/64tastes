@@ -14,7 +14,9 @@ export const metadata = { title: 'Admin', robots: { index: false, follow: false 
 
 export default function AdminPage() {
   return (
-    <main className="mx-auto max-w-lg p-4 text-gray-900">
+    <main className="block w-full mx-auto max-w-lg p-4 text-gray-900">
+      {/* `block`: the app-wide `main{display:grid}` rule (the book's pages)
+          would otherwise auto-place this page into the first narrow column */}
       <h1 className="text-2xl font-bold">Admin Moderation</h1>
       <Suspense fallback={<p className="mt-4 text-gray-500">Loading…</p>}>
         <AdminContent />

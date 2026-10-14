@@ -546,6 +546,12 @@ main.pane>*{flex:0 0 auto}
    html/body overflow lock and the phone / tall-desktop lock rules. */
 html:has(.wiki), body:has(.wiki){overflow:auto}
 body:has(.wiki){height:auto;align-items:start}
+/* the shared-results page (/r/) may be taller than one screen too — same
+   reasoning as the wiki above: the responsive html/body locks below live in
+   this layer and would otherwise outrank the base-layer :has(.result) rule.
+   height:auto also undoes body{height:100%} so the centered .book.result
+   can't clip its own top half off. */
+html:has(.result), body:has(.result){overflow:auto;height:auto}
 .wiki-wrap{position:relative;z-index:1;max-width:1060px;margin-inline:auto;display:flex;flex-direction:column;gap:12px}
 .wiki-topbar{display:flex;align-items:center;gap:14px}
 .wiki-topbar .eyebrow{margin:0}
@@ -628,31 +634,36 @@ body:has(.wiki){height:auto;align-items:start}
 
 /* portrait tablets & large portrait screens (≥768px wide, taller than wide):
    the landscape 3-column book starves here — intro crushed to ~180px, a tiny
-   map, dead vertical space. Restack into a scrollable magazine flow:
-   intro + passport, the map (naturally portrait) as a full-width hero, then
-   the panels. Lands AFTER the desktop single-screen lock above, so it wins;
-   ≤767px keeps the phone book, landscape keeps the 3-column book. */
+   map, dead vertical space. Restack into a SINGLE screen (no page scroll —
+   the book owns the viewport, same rule as landscape desktop): intro + passport
+   on top, the map as the hero with the highlight card at a FIXED height beside
+   it (never a full-height bar), leaderboard + CTA along the bottom. The map
+   zone keeps its default stretch — the SVG letterboxes into the grid area, so
+   a content-sized zone would overflow into the rows above/below. Lands AFTER
+   the desktop and tablet locks above, so it wins; ≤767px keeps the phone book,
+   landscape keeps the 3-column book, /dishes/[slug] keeps scrolling (its
+   :has(.wiki) rules outrank this block). */
 @media (min-width: 768px) and (orientation: portrait) {
-  html, body { overflow: auto; height: auto; }
-  .book { height: auto; min-height: 100dvh; overflow: visible; }
+  html, body { overflow: hidden; height: 100%; }
+  /* cap the book so a 4K portrait monitor keeps book-like proportions and the
+     desk shows around it — every iPad (≤1024×1366) still fills its viewport */
+  .book { width: min(100vw, 1100px); height: min(1400px, 100dvh); overflow: hidden; }
   main {
-    max-width: 1500px; margin-inline: auto;
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 32%);
-    grid-template-rows: auto auto auto auto auto;
+    grid-template-columns: minmax(0, 1fr) minmax(230px, 30%);
+    grid-template-rows: auto minmax(0, 1fr) auto;
     grid-template-areas:
       "intro  pass"
-      "map    map"
-      "panel  cards"
-      "top    top"
-      "next   next";
+      "map    panel"
+      "top    next";
   }
-  /* the map row is its own height — tall enough to be the hero, capped so a
-     4K portrait monitor doesn't stretch it into oblivion */
-  .map-zone { height: clamp(360px, 56dvh, 660px); }
-  /* the narrow-desktop shed rules above don't apply once the page scrolls */
-  .cards { display: flex; }
+  /* the highlight card keeps ONE consistent size at every portrait size;
+     .p-body scrolls internally if the text overflows — never the page */
+  .panel { height: min(100%, 340px); align-self: start; }
+  .p-top .ph { max-height: 100px; }
+  /* the narrow-desktop shed rules above don't apply uniformly on this restack:
+     polaroids drop out at EVERY portrait size, the panel's story line stays */
+  .cards { display: none; }
   .p-desc { display: -webkit-box; }
-  .p-top .ph { max-height: 15dvh; }
 }
 
 /* mobile (<768px) — the phone book: no page scroll, three tabs in the dock */
