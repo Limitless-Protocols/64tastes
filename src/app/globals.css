@@ -215,3 +215,67 @@ body:has(.food-app) .fixed.inset-0.z-20.flex.items-end>div:first-child>div:nth-c
 @media(max-width:360px){.site-nav{gap:8px;font-size:11px}.site-nav .nav-share{padding:7px 9px}.share-banner{gap:8px;padding:10px}.share-banner button{padding:8px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 @media(min-width:760px){.food-dashboard>.dish-postcards,.food-dashboard>.next-card{display:none!important}}
+
+/* ── /top (সেরা খাবার): same editorial shell as the home map ─────────────── */
+.food-dashboard.top-dashboard{
+  grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"intro" "ranks" "cta" "footer";
+  grid-template-rows:auto auto auto auto;
+  gap:14px;
+  padding:19px 15px 28px;
+}
+.food-dashboard.top-dashboard>.intro-card{grid-area:intro}
+.food-dashboard.top-dashboard>.top-loading,
+.food-dashboard.top-dashboard>.top-empty,
+.food-dashboard.top-dashboard>.rank-column{grid-area:ranks}
+.food-dashboard.top-dashboard>.top-cta{grid-area:cta}
+.food-dashboard.top-dashboard>.home-footer{grid-area:footer}
+
+.rank-column{display:flex;flex-direction:column;gap:14px}
+.rank-card{padding:14px}
+.rank-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.rank-heading h2{margin:3px 0 0;font-size:17px;font-weight:800;letter-spacing:-.4px}
+.rank-tag{flex:none;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.06em}
+.rank-list{display:flex;flex-direction:column;gap:8px;margin:12px 0 0;padding:0;list-style:none}
+.rank-row{display:flex;align-items:center;gap:11px;padding:9px 11px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:0 3px 10px #27382808;color:inherit;text-decoration:none;transition:transform .18s,box-shadow .18s}
+a.rank-row:hover{transform:translateY(-2px);box-shadow:0 8px 18px #27382814}
+.rank-num{display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:9px;background:#e1ead8;color:var(--leaf-deep);font-size:12px;font-weight:800}
+.rank-art{display:grid;place-items:center;flex:none;width:38px;height:38px;border-radius:11px;background:#f6ddb8;font-size:19px}
+.rank-over .rank-art{background:#f8e4df}
+.rank-district .rank-art{background:#e1ead8}
+.rank-body{display:flex;min-width:0;flex:1;flex-direction:column}
+.rank-body strong{font-size:13px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-body small{margin-top:2px;color:var(--muted);font-size:10px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-score{display:flex;flex:none;width:62px;flex-direction:column;align-items:flex-end}
+.rank-score b{font-size:14px;font-weight:800}
+.rank-bar{width:100%;height:5px;margin-top:5px;overflow:hidden;border-radius:9px;background:#dfe6d8}
+.rank-bar span{display:block;height:100%;border-radius:inherit;background:var(--leaf)}
+.rank-loved .rank-score b{color:var(--leaf)}
+.rank-over .rank-score b{color:var(--orange-grove)}
+.rank-over .rank-bar span{background:var(--orange-grove)}
+.rank-district .rank-bar span{background:var(--turmeric)}
+
+.top-loading{margin:6px 2px;color:var(--muted);font-size:13px}
+.top-empty{padding:16px}
+.top-empty p{margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.6}
+
+.top-cta-button{flex:none;border:0;border-radius:9px;padding:9px 11px;background:var(--vermilion);color:#fff;font-size:10px;font-weight:800;white-space:nowrap;text-decoration:none}
+.top-cta-button span{margin-left:3px}
+
+@media(min-width:760px){
+  .food-dashboard.top-dashboard{
+    grid-template-columns:minmax(0,.82fr) minmax(0,1.35fr);
+    grid-template-areas:"intro ranks" "cta ranks" "footer footer";
+    grid-template-rows:auto auto auto;
+    gap:18px clamp(16px,2.5vw,28px);
+    padding:28px clamp(24px,4vw,48px) 22px;
+    max-width:1340px;
+  }
+  .rank-card{padding:16px}
+  .rank-heading h2{font-size:19px}
+}
+@media(max-width:360px){
+  .rank-row{gap:9px;padding:8px 9px}
+  .rank-art{width:32px;height:32px;font-size:16px}
+  .rank-score{width:54px}
+}
