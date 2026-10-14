@@ -26,10 +26,22 @@ export default function Verifier({ onToken }: { onToken: (token: string) => void
 
     function mount() {
       if (cancelled || !box.current || !window.turnstile) return;
-      widgetId = window.turnstile.render(box.current, {
-        sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
-        callback: (token: string) => cb.current(token),
-      });
+      // No key configured (local dev without .env.local): there is nothing to
+      // render — and passing undefined makes the widget THROW, which would
+      // crash the page via React's error boundary. VerifierHost skips the
+      // dialog entirely in that case, so mount is a no-op safety net.
+      const sitekey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+      if (!sitekey) return;
+      try {
+        widgetId = window.turnstile.render(box.current, {
+          sitekey,
+          callback: (token: string) => cb.current(token),
+        });
+      } catch (err) {
+        // A widget failure must degrade to "verification declined", never take
+        // the page down.
+        console.error('[turnstile] render failed:', err);
+      }
     }
 
     if (window.turnstile) {

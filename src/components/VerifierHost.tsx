@@ -10,6 +10,11 @@ export default function VerifierHost() {
 
   useEffect(() => {
     setVerifyListener((resolve) => {
+      // Local dev without NEXT_PUBLIC_TURNSTILE_SITE_KEY: no widget can ever
+      // complete, so don't trap the user behind a modal — decline right away.
+      // The API stays strict (401 without a session); actions keep working as
+      // optimistic local state. Production always has the key set.
+      if (!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) return resolve(false);
       waiters.current.push(resolve);
       setOpen(true);
     });

@@ -344,6 +344,9 @@ export default function MapZone({
               aria-pressed={selected === c.id}
               onClick={(e) => onClick(e, c.id)}
               onPointerMove={(e) => onMove(e, c.bn, c.en)}
+              // Hide the label the moment the mouse/pen leaves the district —
+              // without this it stays stuck at its last position over the sea.
+              onPointerLeave={hideLabel}
               onFocus={(e) => onFocus(e, c.bn, c.en)}
               onBlur={hideLabel}
               onKeyDown={(e) => {

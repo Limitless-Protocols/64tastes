@@ -80,14 +80,24 @@ function Bar({ label, pct, color }: { label: string; pct: number; color: string 
 }
 
 /** Community vote stats — the only DB-reading part, deferred to request time
-    so `next build` never opens a Neon connection for this route. */
+    so `next build` never opens a Neon connection for this route.
+
+    The DB read is wrapped in try/catch on purpose: this section streams in
+    AFTER the page shell, so a thrown error would bubble to the root error
+    boundary and replace the whole dish page. A missing/broken DATABASE_URL
+    must degrade to the "not enough votes" note instead. */
 async function DishStats({ params }: Props) {
   const { slug } = await params;
   const dish = dishes.find((d) => d.slug === slug);
   if (!dish) return null;
 
-  await connection();
-  const stat = (await getDishStats()).find((s) => s.id === dish.id);
+  let stat: Awaited<ReturnType<typeof getDishStats>>[number] | undefined;
+  try {
+    await connection();
+    stat = (await getDishStats()).find((s) => s.id === dish.id);
+  } catch (err) {
+    console.error('[dish-stats] falling back:', err);
+  }
   const votes = stat?.votes ?? 0;
   const pct = (n: number) => (votes ? Math.round((n / votes) * 100) : 0);
 
