@@ -323,6 +323,9 @@ h1 em{font-style:normal;color:var(--leaf);text-decoration:underline;text-decorat
 .rank:hover{translate:0 -3px}
 .rank .ph{width:56px;height:56px;border-radius:50%;border:2px solid #fff;flex:none}
 .rank b{display:block;font-size:var(--text-ui);line-height:1.3}.rank small{display:block;color:var(--tomato-d);font-size:var(--text-label);font-weight:700}.rank em{font-style:normal;font-size:var(--text-label);color:var(--muted)}
+/* the text column shrinks below the dish name's min-content, so the three
+   rank chips can never grow the grid past the card (long names wrap) */
+.rank>div{min-width:0}.rank b,.rank small,.rank em{overflow-wrap:anywhere}
 
 /* dish panel (today's special / selected district) — structured, no dead gap */
 .panel{grid-area:panel;display:flex;flex-direction:column;gap:8px;padding:16px 18px;rotate:1.5deg;overflow:hidden;z-index:var(--z-content-4)}
@@ -502,10 +505,10 @@ main.pane>*{flex:0 0 auto}
 .podium{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
 .pod{display:flex;flex-direction:column;gap:8px;padding:14px 16px;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);border-radius:var(--radius-paper);cursor:pointer;transition:translate .15s}
 .pod:hover{translate:0 -4px}
-.pod-top{display:flex;align-items:center;gap:12px}
+.pod-top{display:flex;flex-wrap:wrap;align-items:center;gap:12px} /* wraps to photo row + names when the card is narrow (phones) */
 .pod-rank{font:700 var(--text-title)/1 var(--sans);color:var(--tomato-d);min-width:1.6em;text-align:center}
 .pod .ph{width:72px;height:72px;border-radius:50%;border:3px solid #fff;flex:none;box-shadow:var(--shadow)}
-.pod-name{font:700 var(--text-title)/1.25 var(--sans)}
+.pod-name{font:700 var(--text-title)/1.25 var(--sans);overflow-wrap:anywhere}
 .pod-dist{display:flex;align-items:center;gap:5px;font-size:var(--text-small);color:var(--muted)}
 .pod-dist .icon{width:14px;height:14px}
 .pod-pct{font-size:var(--text-title);font-weight:700;color:var(--leaf)}
@@ -618,6 +621,8 @@ html:has(.result), body:has(.result){overflow:auto;height:auto}
 @media (min-width:761px) and (max-height:760px){.p-en{display:none}.p-top .ph{max-height:64px}}
 /* narrow desktop columns: polaroids need width, so they go; photo capped to column */
 @media (min-width:761px) and (max-width:1100px){.cards{display:none}.p-desc{display:none}.p-top .ph{max-height:120px}}
+/* narrow: slim the leaderboard's rank chips so all three stay inside the card */
+@media (min-width:761px) and (max-width:1100px){.ranks{gap:8px}.rank{gap:7px;padding:6px}.rank .ph{width:44px;height:44px}}
 
 /* desktop single-screen (≥1024px & height ≥700px) — nothing scrolls */
 @media (min-width: 1024px) and (min-height: 700px) {
