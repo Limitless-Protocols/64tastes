@@ -9,6 +9,7 @@ import { getDishStats } from '@/lib/stats';
 import { MIN_VOTES } from '@/lib/ranking';
 import { bn } from '@/lib/format';
 import DishActions from '@/components/DishActions';
+import BackButton from '@/components/BackButton';
 import PhotoSlot from '@/components/PhotoSlot';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -44,7 +45,10 @@ export default function DishPage({ params }: Props) {
       <div className="desk" aria-hidden="true" />
       <main className="book wiki dish-page">
         <div className="wiki-wrap">
-          <div className="eyebrow">খাবার বুক · রেসিপি</div>
+          <div className="wiki-topbar">
+            <BackButton />
+            <div className="eyebrow">খাবার বুক · রেসিপি</div>
+          </div>
 
           <Suspense fallback={<p className="note">লোড হচ্ছে…</p>}>
             <DishRecipe params={params} />

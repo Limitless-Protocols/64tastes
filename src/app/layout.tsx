@@ -3,6 +3,7 @@ import { SITE_URL } from '@/lib/site';
 import { Hind_Siliguri, Tiro_Bangla } from 'next/font/google';
 import './globals.css';
 import VerifierHost from '@/components/VerifierHost';
+import HistoryBaseline from '@/components/HistoryBaseline';
 
 // Style guide §3: Tiro Bangla is the serif (italics for English asides),
 // Hind Siliguri the UI family — Bangla first, English second.
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <VerifierHost />
+        <HistoryBaseline />
       </body>
     </html>
   );
