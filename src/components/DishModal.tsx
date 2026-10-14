@@ -5,6 +5,7 @@ import type { Dish } from '@/lib/types';
 import { stories, FALLBACK_STORY } from '@/lib/stories';
 import { useFocusTrap } from '@/lib/focus';
 import PhotoSlot from './PhotoSlot';
+import DishActions from './DishActions';
 import { PrimaryButton } from './ui';
 
 type Props = {
@@ -16,14 +17,18 @@ type Props = {
       announcing the pick came from Surprise (never repeats the current dish). */
   onReroll?: () => void;
   surprise?: boolean;
+  /** Map-popup variant: the card carries the চেখেছি + rating controls (tick &
+      rate without leaving the map) instead of the action row. */
+  rate?: boolean;
 };
 
 /**
- * DishDetailModal — now only Surprise's re-roll card. Every other dish click
- * opens the dish's page at /dishes/[slug] instead. Photo on top, names +
- * district + a short history line. Distinct from MapDishPopup (district list).
+ * DishDetailModal — the dish CARD. Two variants: Surprise's re-roll card
+ * (source of the pick + "another dish"), and the map popup's rate card
+ * (tick চেখেছি + reaction chips). Photo on top, names + district + a short
+ * history line. Distinct from MapDishPopup (district list).
  */
-export default function DishDetailModal({ dish, onShowOnMap, onClose, onReroll, surprise = false }: Props) {
+export default function DishDetailModal({ dish, onShowOnMap, onClose, onReroll, surprise = false, rate = false }: Props) {
   const d = districtById[dish.districtId];
   const ref = useFocusTrap<HTMLDivElement>();
 
@@ -60,16 +65,20 @@ export default function DishDetailModal({ dish, onShowOnMap, onClose, onReroll, 
           <MapPin className="icon" aria-hidden="true" /> {d?.nameBn} · {d?.nameEn}
         </div>
         <p className="dish-story">{stories[dish.slug] ?? FALLBACK_STORY}</p>
-        <div className="acts">
-          <PrimaryButton onClick={() => onShowOnMap(dish.districtId)}>
-            <Map className="icon" aria-hidden="true" /> মানচিত্রে দেখো
-          </PrimaryButton>
-          {onReroll && (
-            <PrimaryButton onClick={onReroll}>
-              <Shuffle className="icon" aria-hidden="true" /> অন্য খাবার দেখাও
+        {rate ? (
+          <DishActions dish={dish} compact />
+        ) : (
+          <div className="acts">
+            <PrimaryButton onClick={() => onShowOnMap(dish.districtId)}>
+              <Map className="icon" aria-hidden="true" /> মানচিত্রে দেখো
             </PrimaryButton>
-          )}
-        </div>
+            {onReroll && (
+              <PrimaryButton onClick={onReroll}>
+                <Shuffle className="icon" aria-hidden="true" /> অন্য খাবার দেখাও
+              </PrimaryButton>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -535,14 +535,45 @@ main.pane>*{flex:0 0 auto}
 .result-card .btn{align-self:flex-start;margin-top:10px;text-decoration:none}
 .result-credit{margin:6px 0 0;font-size:var(--text-label);color:var(--muted)}
 
-/* ---------- /dishes/[slug] — the dish recipe page (the old detail card) ----------
-   reuses the .book.result frame + .result-card; only the innards are new */
-.dish-page .ph{width:100%;aspect-ratio:16/10;max-height:38dvh;border:1px solid var(--edge);border-radius:8px;flex:none}
+/* ---------- /dishes/[slug] — the full-screen WIKI ARTICLE ----------
+   The paper fills the screen (no floating card): title band on top, article
+   text left, a wiki-style infobox (photo + quick facts) right. The tick/rate
+   controls sit in the "তোমার রায়" section (DishActions). */
+.book.wiki{display:block;width:100%;height:auto;min-height:100dvh;padding:clamp(16px,3.5vw,44px);border-width:8px;overflow:visible}
+/* the article may be taller than one screen: scroll the window, starting at
+   the top (never grid-centered — that clips the title off-screen). Lives in
+   the components layer with :has specificity so it beats both the base
+   html/body overflow lock and the phone / tall-desktop lock rules. */
+html:has(.wiki), body:has(.wiki){overflow:auto}
+body:has(.wiki){height:auto;align-items:start}
+.wiki-wrap{position:relative;z-index:1;max-width:1060px;margin-inline:auto;display:flex;flex-direction:column;gap:12px}
+.wiki-art{display:flex;flex-direction:column;gap:16px}
+.wiki-head{display:block;border-bottom:2px solid var(--ink);padding-bottom:10px}  /* display:block beats the app-wide <header> flex rule */
+.wiki-title{font:400 clamp(30px,5.5vw,50px)/1.2 var(--serif);color:var(--leaf);margin:2px 0 0}
+.wiki-en{margin:2px 0 0;font-style:italic;color:var(--muted);font-size:clamp(14px,2vw,17px)}
+.wiki-loc{margin:6px 0 0;font-weight:700;font-size:var(--text-small);color:var(--tomato-d)}
+.wiki-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(210px,300px);gap:clamp(18px,3vw,40px);align-items:start}
+.wiki-main{min-width:0}
+.wiki-story{margin:0;font-size:clamp(16px,2.2vw,19px);line-height:1.9}
+.wiki-sec{border-top:1px dashed var(--line);margin-top:18px;padding-top:12px;display:grid;gap:10px}
+.wiki-sec h2{font:400 var(--text-ui) var(--serif);margin:0}
+.wiki-info{background:var(--card);border:1.5px solid var(--ink);align-self:start}
+.wiki-info-h{background:var(--ink);color:var(--paper);font:700 var(--text-small) var(--serif);padding:6px 10px;text-align:center}
+.wiki-info .ph{width:100%;aspect-ratio:4/3;max-height:none;border:0;border-radius:0}
+.wiki-facts{margin:0;padding:6px 10px 10px;font-size:var(--text-small)}
+.wiki-facts div{display:flex;gap:10px;padding:5px 0;border-top:1px solid var(--line)}
+.wiki-facts div:first-child{border-top:0}
+.wiki-facts dt{font-weight:700;color:var(--muted);min-width:56px}
+.wiki-facts dd{margin:0}
+.wiki-foot{display:flex;flex-wrap:wrap;align-items:center;gap:14px;border-top:1px dashed var(--line);padding-top:12px}
+.wiki-foot .btn{text-decoration:none}
+@media (max-width:820px){.wiki-body{grid-template-columns:1fr}.wiki-info{order:-1;max-width:min(340px,100%)}}
 .dish-page .ph-letter{font-size:64px}
-.dish-page .check{align-self:flex-start;width:auto;min-width:180px;margin-top:2px}
+.dish-page .check{justify-self:start;width:auto;min-width:180px;margin-top:2px}
+.wiki-sec .place-add{justify-self:start}
+.dish-modal .chips{margin-top:8px}
 .dish-loc-link{color:inherit;text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}
-.dish-stats{border-top:1px dashed var(--line);padding-top:10px;display:grid;gap:8px}
-.dish-stats h2{font:400 var(--text-ui) var(--serif)}
+.dish-stats{display:grid;gap:8px}
 .bar{display:grid;gap:3px;font-size:var(--text-small);color:var(--body)}
 .bar-h{display:flex;justify-content:space-between;gap:8px}
 .bar-h b{font-weight:600;color:var(--ink)}

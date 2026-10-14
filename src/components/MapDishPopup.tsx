@@ -1,5 +1,4 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { Check, ChevronLeft, X } from 'lucide-react';
 import { districtById, dishesByDistrict } from '@/lib/data';
 import { bn } from '@/lib/format';
@@ -11,6 +10,9 @@ import type { Dish } from '@/lib/types';
 type Props = {
   districtId: string;
   eaten: Set<number>;
+  /** Tapping a dish opens its CARD (tick & rate) — the popup never navigates
+      to the dishes page; the full wiki article is reached from the book tabs. */
+  onOpenDish: (dish: Dish) => void;
   onSuggest: () => void;
   onClose: () => void;
 };
@@ -27,12 +29,11 @@ function brief(districtBn: string, dishes: Dish[]): string {
  * MapDishPopup — the district popup: mouse click / Enter on desktop, a plain
  * tap on a phone (no hold gesture). On ≤767px CSS turns it into a bottom
  * sheet (`.sheet-mb`). Shows the district's name, a short culinary brief and
- * its dish list; tapping a dish opens its recipe PAGE at /dishes/[slug]
- * (the old in-popup recipe card moved there). A district with no food just
- * offers a suggestion prompt.
+ * its dish list; tapping a dish opens its CARD (tick চেখেছি + rate) on top —
+ * from here users rate, they don't browse away to the dishes page. A district
+ * with no food just offers a suggestion prompt.
  */
-export default function MapDishPopup({ districtId, eaten, onSuggest, onClose }: Props) {
-  const router = useRouter();
+export default function MapDishPopup({ districtId, eaten, onOpenDish, onSuggest, onClose }: Props) {
   // One trap for whichever root is mounted (list / no-food); the ref is
   // attached to each branch's dialog div.
   const ref = useFocusTrap<HTMLDivElement>();
@@ -100,7 +101,7 @@ export default function MapDishPopup({ districtId, eaten, onSuggest, onClose }: 
           {list.map((dish) => {
             const isEaten = eaten.has(dish.id);
             return (
-              <button key={dish.id} className="mp-row" onClick={() => router.push(`/dishes/${dish.slug}`)}>
+              <button key={dish.id} className="mp-row" onClick={() => onOpenDish(dish)}>
                 <PhotoSlot dish={dish} className="mp-ph" />
                 <span className="mp-names">
                   <b>{dish.nameBn}</b>

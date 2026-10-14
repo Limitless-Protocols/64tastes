@@ -3,11 +3,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
-import { dishes } from '@/lib/data';
+import { districtById, dishes } from '@/lib/data';
+import { stories, FALLBACK_STORY } from '@/lib/stories';
 import { getDishStats } from '@/lib/stats';
 import { MIN_VOTES } from '@/lib/ranking';
 import { bn } from '@/lib/format';
 import DishActions from '@/components/DishActions';
+import PhotoSlot from '@/components/PhotoSlot';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -26,22 +28,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * /dishes/[slug] — the dish's recipe PAGE. Clicking a dish anywhere in the
- * book (catalog card, polaroid, highlight, search, board row, district
- * popup) lands here instead of opening the old detail card. Bound-book frame
- * like /r/[code]; the interactive half (চেখেছি, chips, কোথায় পাবেন) is the
- * client DishActions component.
+ * /dishes/[slug] — the dish's full-screen WIKI ARTICLE. The paper fills the
+ * viewport (no floating card): title band on top, article text on the left,
+ * a wiki-style infobox (photo + quick facts) on the right, then the vote
+ * stats. The interactive controls (চেখেছি, chips, কোথায় পাবেন) live in the
+ * client DishActions component inside the "তোমার রায়" section.
  *
- * Next 16 (cacheComponents): the frame is static and prerenders; the recipe
- * and the vote stats each stream in behind their own <Suspense>, because
- * `params` and the DB read are runtime data.
+ * Next 16 (cacheComponents): the article is static JSON and prerenders; the
+ * recipe params and the vote stats each stream in behind their own <Suspense>
+ * because `params` and the DB read are runtime data.
  */
 export default function DishPage({ params }: Props) {
   return (
     <>
       <div className="desk" aria-hidden="true" />
-      <main className="book result dish-page">
-        <article className="piece result-card">
+      <main className="book wiki dish-page">
+        <div className="wiki-wrap">
           <div className="eyebrow">খাবার বুক · রেসিপি</div>
 
           <Suspense fallback={<p className="note">লোড হচ্ছে…</p>}>
@@ -52,11 +54,13 @@ export default function DishPage({ params }: Props) {
             <DishStats params={params} />
           </Suspense>
 
-          <Link href="/" className="btn">
-            ম্যাপে ফিরে যাও
-          </Link>
-          <p className="result-credit">Map data: geoBoundaries</p>
-        </article>
+          <div className="wiki-foot">
+            <Link href="/" className="btn">
+              ম্যাপে ফিরে যাও
+            </Link>
+            <p className="result-credit">Map data: geoBoundaries</p>
+          </div>
+        </div>
       </main>
     </>
   );
@@ -67,7 +71,48 @@ async function DishRecipe({ params }: Props) {
   const { slug } = await params;
   const dish = dishes.find((d) => d.slug === slug);
   if (!dish) notFound();
-  return <DishActions dish={dish} />;
+  const d = districtById[dish.districtId];
+
+  return (
+    <article className="wiki-art">
+      <header className="wiki-head">
+        <h1 className="wiki-title">{dish.nameBn}</h1>
+        <div className="wiki-en">{dish.nameEn}</div>
+        <div className="wiki-loc">
+          <span aria-hidden="true">📍</span>{' '}
+          <a className="dish-loc-link" href={`/?district=${dish.districtId}`}>
+            {d.nameBn} · {d.nameEn}
+          </a>
+        </div>
+      </header>
+
+      <div className="wiki-body">
+        <div className="wiki-main">
+          <p className="wiki-story">{stories[dish.slug] ?? FALLBACK_STORY}</p>
+
+          <section className="wiki-sec">
+            <h2>তোমার রায়</h2>
+            <DishActions dish={dish} />
+          </section>
+        </div>
+
+        <aside className="wiki-info">
+          <div className="wiki-info-h">{dish.nameBn}</div>
+          <PhotoSlot dish={dish} tag />
+          <dl className="wiki-facts">
+            <div>
+              <dt>জেলা</dt>
+              <dd>{d.nameBn} · {d.nameEn}</dd>
+            </div>
+            <div>
+              <dt>ইংরেজি</dt>
+              <dd>{dish.nameEn}</dd>
+            </div>
+          </dl>
+        </aside>
+      </div>
+    </article>
+  );
 }
 
 function Bar({ label, pct, color }: { label: string; pct: number; color: string }) {
@@ -103,14 +148,17 @@ async function DishStats({ params }: Props) {
 
   if (votes < MIN_VOTES || !stat) {
     return (
-      <p className="note big">
-        এখনও {bn(votes)}টি ভোট। ফলাফল দেখাতে কমপক্ষে {bn(MIN_VOTES)}টি ভোট লাগবে।
-      </p>
+      <section className="wiki-sec">
+        <h2>কে কী বলছে</h2>
+        <p className="note big">
+          এখনও {bn(votes)}টি ভোট। ফলাফল দেখাতে কমপক্ষে {bn(MIN_VOTES)}টি ভোট লাগবে।
+        </p>
+      </section>
     );
   }
 
   return (
-    <section className="dish-stats">
+    <section className="wiki-sec dish-stats">
       <h2>কে কী বলছে</h2>
       <p className="note">{bn(votes)}টি ভোটের ভিত্তিতে</p>
       <Bar label="😍 দারুণ" pct={pct(stat.loved)} color="var(--leaf)" />

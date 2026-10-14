@@ -42,7 +42,7 @@ type Overlay =
   | { kind: 'share' }
   | { kind: 'suggest'; districtId: string | null }
   | { kind: 'reset' }
-  | { kind: 'detail'; dish: Dish; source?: 'surprise' }
+  | { kind: 'detail'; dish: Dish; source?: 'surprise' | 'map'; returnTo?: Overlay }
   | { kind: 'map'; districtId: string };
 
 /** One URL per tab — refreshing lands you back on the tab you were on. */
@@ -75,7 +75,11 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
   const menuBtnRef = useRef<HTMLSpanElement>(null);
   const dockMoreRef = useRef<HTMLButtonElement>(null);
   const isMobile = useMedia(BREAKPOINTS.mobile);
-  const closeOverlay = useCallback(() => setOverlay(null), []);
+  // Closing the map popup's dish card returns to the district popup it
+  // opened from (stored in `returnTo`); every other overlay just closes.
+  const closeOverlay = useCallback(() => {
+    setOverlay((cur) => (cur?.kind === 'detail' && cur.returnTo ? cur.returnTo : null));
+  }, []);
   const router = useRouter();
   /**
    * Clicking a dish (catalog card, polaroid, highlight, search hit, board row)
@@ -83,6 +87,19 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
    * Surprise (it needs the in-card re-roll).
    */
   const openDish = useCallback((d: Dish) => router.push(`/dishes/${d.slug}`), [router]);
+
+  // Map popup rows open the dish's CARD (tick & rate) on top of the popup —
+  // no navigation away from the map; closing the card returns to the popup.
+  const openCard = useCallback(
+    (d: Dish) =>
+      setOverlay((cur) => ({
+        kind: 'detail',
+        dish: d,
+        source: 'map',
+        returnTo: cur?.kind === 'map' ? cur : undefined,
+      })),
+    []
+  );
 
   const count = eaten.size;
   const tier = getTier(count, totalDishes);
@@ -543,6 +560,7 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
             }}
             onReroll={overlay.source === 'surprise' ? reroll : undefined}
             surprise={overlay.source === 'surprise'}
+            rate={overlay.source === 'map'}
           />
         )}
 
@@ -552,6 +570,7 @@ export default function FoodMap({ initialView = 'map' }: { initialView?: View })
           <MapDishPopup
             districtId={overlay.districtId}
             eaten={eaten}
+            onOpenDish={openCard}
             onSuggest={() => setOverlay({ kind: 'suggest', districtId: overlay.districtId })}
             onClose={closeOverlay}
           />

@@ -1,47 +1,29 @@
 'use client';
-import { Check, MapPin } from 'lucide-react';
-import { districtById } from '@/lib/data';
-import { stories, FALLBACK_STORY } from '@/lib/stories';
+import { Check } from 'lucide-react';
 import { useProgress } from '@/lib/useProgress';
 import { useRatings, RATING_OPTIONS, type MyRating } from '@/lib/useRatings';
 import { usePlacePicks } from '@/lib/usePlacePicks';
-import PhotoSlot from './PhotoSlot';
 import PlaceRow from './PlaceRow';
 import { Chip, PrimaryButton } from './ui';
 import type { Dish } from '@/lib/types';
 
 /**
- * DishActions — the interactive half of the dish PAGE (/dishes/[slug]).
- * This is the old in-popup recipe card's চেখেছি button, reaction chips and
- * কোথায় পাবেন row, moved onto the page so clicking a dish can open the page
- * instead of a card without losing any control.
+ * DishActions — the interactive controls for one dish: the চেখেছি toggle, the
+ * reaction chips (incl. ওভাররেটেড) and the কোথায় পাবেন row. Used in two places:
+ *   - the wiki page /dishes/[slug] (full set, `compact` off)
+ *   - the map popup's dish card (tick & rate only, `compact` on)
+ * The head/story/photo live with whichever surface renders them.
  */
-export default function DishActions({ dish }: { dish: Dish }) {
+export default function DishActions({ dish, compact = false }: { dish: Dish; compact?: boolean }) {
   const { eaten, toggle } = useProgress();
   const { ratings, rate, toggleOverrated } = useRatings();
   const { picks, pick } = usePlacePicks();
 
-  const d = districtById[dish.districtId];
   const on = eaten.has(dish.id);
   const rating: MyRating | undefined = ratings[dish.id];
 
   return (
     <>
-      <div className="dish-head">
-        <PhotoSlot dish={dish} tag />
-        <div className="dish-head-txt">
-          <h1>{dish.nameBn}</h1>
-          <div className="dish-en">{dish.nameEn}</div>
-        </div>
-      </div>
-      <div className="dish-loc">
-        <MapPin className="icon" aria-hidden="true" />{' '}
-        <a className="dish-loc-link" href={`/?district=${dish.districtId}`}>
-          {d.nameBn} · {d.nameEn}
-        </a>
-      </div>
-      <p className="dish-story">{stories[dish.slug] ?? FALLBACK_STORY}</p>
-
       <PrimaryButton
         className={`check${on ? ' on' : ''}`}
         aria-pressed={on}
@@ -67,11 +49,13 @@ export default function DishActions({ dish }: { dish: Dish }) {
         </Chip>
       </div>
 
-      <PlaceRow
-        name={picks[dish.id]}
-        onSave={(n) => pick(dish.id, n)}
-        onClear={() => pick(dish.id, null)}
-      />
+      {!compact && (
+        <PlaceRow
+          name={picks[dish.id]}
+          onSave={(n) => pick(dish.id, n)}
+          onClear={() => pick(dish.id, null)}
+        />
+      )}
     </>
   );
 }
