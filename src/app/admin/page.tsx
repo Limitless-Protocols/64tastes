@@ -9,6 +9,7 @@ import ModerateButtons from '@/components/ModerateButtons';
 import { MIN_PICKS } from '@/lib/spots';
 import PlaceModerateRow from '@/components/PlaceModerateRow';
 import LogoutButton from '@/components/LogoutButton';
+import Link from 'next/link';
 
 export const metadata = { title: 'Admin', robots: { index: false, follow: false } };
 
@@ -68,6 +69,7 @@ async function AdminContent() {
   return (
     <>
       <LogoutButton/>
+      <Link href="/admin/dishes" className="ml-4 text-sm text-emerald-700 underline">Edit dish pages →</Link>
       <h2 className="mt-6 text-lg font-semibold">Food suggestions to review ({pending.length})</h2>
       <ul className="mt-2 space-y-3">
         {pending.map((r) => (
