@@ -424,9 +424,13 @@ main.pane>*{flex:0 0 auto}
 .cat-count{margin:0;font-size:var(--text-small);color:var(--muted);font-weight:600}
 /* column count lives here (phones 2, then 2/3/4) — no Tailwind grid utilities
    in the markup so the phone layout can differ from the desktop one */
-.cat-grid{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr));max-width:1200px}
+.cat-grid{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr))}
 @media (min-width:1024px){.cat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (min-width:1536px){.cat-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+/* wide screens: keep filling the pane (was a left-hugging 1200px cap) while
+   holding cards near ~300-390px — extra column steps instead of wide cards */
+@media (min-width:1700px){.cat-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media (min-width:2300px){.cat-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
 /* search wrap: was an inline style, now a class so phones can restyle it */
 .cat-search{position:relative;flex:1 1 auto;min-width:200px;display:inline-flex}
 .cat-card{display:flex;flex-direction:column;align-items:stretch;padding:0;overflow:hidden;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);border-radius:var(--radius-paper);text-align:left;font-weight:600;font-size:var(--text-ui);transition:translate .15s,rotate .15s}
