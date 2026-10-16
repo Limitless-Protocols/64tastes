@@ -30,6 +30,8 @@ button{font:inherit;cursor:pointer}
 .site-nav a,.site-nav button{border:0;color:#fff;background:none;text-decoration:none}
 .site-nav .nav-current{display:none}
 .site-nav .nav-share{padding:8px 11px;border-radius:9px;background:#E1C714;color:#20291f}
+.site-nav .nav-guide{display:flex;align-items:center;gap:4px;white-space:nowrap}
+.nav-guide>span:first-child{font-size:15px}
 .nav-share span{font-size:15px}
 .food-dashboard{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"intro" "passport" "map" "share" "postcards" "next" "footer";gap:14px;padding:19px 15px 28px}
 .food-dashboard>*{min-width:0}
@@ -213,8 +215,92 @@ body:has(.food-app) .fixed.inset-0.z-20.flex.items-end>div:first-child>div:nth-c
  .home-footer{padding-top:7px;}
 }
 @media(max-width:360px){.site-nav{gap:8px;font-size:11px}.site-nav .nav-share{padding:7px 9px}.share-banner{gap:8px;padding:10px}.share-banner button{padding:8px}}
+@media(max-width:390px){.nav-guide-label{display:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 @media(min-width:760px){.food-dashboard>.dish-postcards,.food-dashboard>.next-card{display:none!important}}
+
+/* Community food guide */
+.site-content>main.food-guide-main{width:min(100% - 28px,1120px);margin:20px auto 36px;border:0;border-radius:0;background:transparent;padding:0;color:var(--ink);box-shadow:none}
+.food-guide{--guide-green:#285c20;--guide-gold:#E1C714;--guide-paper:#F7F9F3;--guide-ink:#20291f;--guide-muted:#65715e}
+.guide-back{display:inline-flex;align-items:center;margin:2px 0 13px;color:var(--guide-green);font-size:13px;font-weight:700;text-decoration:none}
+.guide-hero{position:relative;overflow:hidden;border:1px solid #285c2020;border-radius:24px;background:linear-gradient(130deg,#285c20 0%,#3d852d 66%,#568b38 100%);padding:clamp(22px,5vw,42px);color:#fff;box-shadow:0 16px 38px #172d181e}
+.guide-hero:after{position:absolute;right:-52px;bottom:-122px;width:300px;height:300px;border:1px solid #e1c71470;border-radius:50%;box-shadow:0 0 0 24px #e1c71413,0 0 0 48px #e1c7140d;content:""}
+.guide-kicker{display:inline-flex;align-items:center;gap:8px;color:#f2d945;font-size:10px;font-weight:800;letter-spacing:.14em}
+.guide-kicker i{width:7px;height:7px;border-radius:50%;background:#E1C714;box-shadow:0 0 0 4px #e1c71424}
+.guide-hero h1{position:relative;z-index:1;margin:13px 0 8px;font-size:clamp(34px,7vw,58px);font-weight:800;letter-spacing:-1.5px;line-height:1.08}
+.guide-hero h1 em{color:#f5cf33;font-style:normal}
+.guide-hero>p{position:relative;z-index:1;max-width:590px;margin:0;color:#edf4e8;font-size:14px;line-height:1.75}
+.guide-summary{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}
+.guide-summary span{border:1px solid #ffffff37;border-radius:999px;background:#ffffff12;padding:7px 12px;color:#f5f7ee;font-size:11px}
+.guide-summary b{margin-right:3px;color:#f5cf33;font-size:14px}
+.guide-loading,.guide-empty{margin-top:18px;border:1px solid var(--line);border-radius:20px;background:var(--surface);padding:25px;color:var(--ink)}
+.guide-empty{display:grid;justify-items:center;text-align:center}
+.guide-empty>span{display:grid;width:54px;height:54px;place-items:center;border-radius:17px;background:#e1ead8;font-size:27px}
+.guide-empty h2{margin:12px 0 4px;font-size:21px;font-weight:800}
+.guide-empty p{max-width:490px;color:var(--muted);font-size:13px;line-height:1.7}
+.guide-primary-link{margin-top:8px;border-radius:10px;background:var(--leaf-deep);padding:11px 15px;color:#fff;font-size:13px;font-weight:700;text-decoration:none}
+.guide-filters{display:flex;gap:8px;overflow-x:auto;margin:17px 0;padding:2px 1px 7px;scrollbar-width:thin}
+.guide-filters button{flex:none;border:1px solid #d5ddce;border-radius:999px;background:#f7f9f3;padding:8px 13px;color:#404d3a;font-size:12px;font-weight:700}
+.guide-filters button.is-active{border-color:#285c20;background:#285c20;color:#fff}
+.guide-layout{display:grid;grid-template-areas:"detail" "route";gap:15px}
+.guide-detail{position:relative;grid-area:detail;overflow:hidden;border:1px solid #d7dfd0;border-radius:20px;background:#f7f9f3;padding:19px;box-shadow:0 10px 28px #263a2412}
+.guide-detail:before{position:absolute;top:0;left:0;width:6px;height:100%;background:linear-gradient(#E1C714,#E69030,#D23021);content:""}
+.guide-detail-top{display:flex;justify-content:space-between;color:var(--guide-muted);font-size:11px;font-weight:700}
+.guide-map-mark{display:grid;width:44px;height:44px;margin-top:17px;place-items:center;border:1px solid #e1c71480;border-radius:14px;background:#fbf7d9;color:#6d6000;font-size:22px}
+.guide-district{margin:13px 0 2px;color:#3D852D;font-size:12px;font-weight:800;letter-spacing:.02em}
+.guide-detail h2{margin:0;color:var(--guide-ink);font-size:clamp(23px,5vw,32px);font-weight:800;line-height:1.25}
+.guide-dish-en{margin:3px 0 15px;color:var(--guide-muted);font-size:13px}
+.guide-spot-box{display:flex;gap:11px;border:1px solid #e0e6d9;border-radius:14px;background:#fff;padding:13px}
+.guide-pin{display:grid;flex:none;width:36px;height:36px;place-items:center;border-radius:11px;background:#faeee9;font-size:17px}
+.guide-spot-box>div{display:grid;gap:3px;min-width:0}
+.guide-spot-box small{color:#9a6c13;font-size:9px;font-weight:800;letter-spacing:.1em}
+.guide-spot-box strong{overflow-wrap:anywhere;color:#263323;font-size:15px;line-height:1.35}
+.guide-spot-box>div>span{color:#687263;font-size:11px}
+.guide-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px}
+.guide-map-link,.guide-dish-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:41px;border-radius:10px;padding:9px 13px;font-size:12px;font-weight:800;text-decoration:none}
+.guide-map-link{background:#285c20;color:#fff}
+.guide-map-link span{color:#f5cf33;font-size:17px}
+.guide-dish-link{border:1px solid #cfd9c8;background:#fff;color:#285c20}
+.guide-step-controls{display:flex;justify-content:space-between;gap:10px;margin-top:17px;padding-top:13px;border-top:1px solid #dfe5d9}
+.guide-step-controls button{border:0;border-radius:9px;background:#e9eee0;padding:9px 12px;color:#285c20;font-size:12px;font-weight:800}
+.guide-step-controls button:disabled{opacity:.45}
+.guide-map-note{margin:12px 0 0;color:#7a8474;font-size:10px;line-height:1.55}
+.guide-route{grid-area:route;min-width:0;border:1px solid #dce3d5;border-radius:20px;background:#edf1e7;padding:16px}
+.guide-route-heading{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:10px}
+.guide-route-heading>div>span{color:#71806a;font-size:9px;font-weight:800;letter-spacing:.13em}
+.guide-route-heading h2{margin:2px 0 0;color:#263323;font-size:18px;font-weight:800}
+.guide-route-heading>span{border-radius:999px;background:#fff;padding:5px 9px;color:#53614e;font-size:10px;font-weight:800}
+.guide-stop-list{position:relative;display:grid;gap:7px;margin:0;padding:0;list-style:none}
+.guide-stop-list:before{position:absolute;top:19px;bottom:19px;left:19px;border-left:2px dashed #a5b68f;content:""}
+.guide-stop-list li{position:relative;min-width:0}
+.guide-stop{position:relative;display:flex;width:100%;align-items:center;gap:10px;border:1px solid transparent;border-radius:13px;background:#f8faf5;padding:9px;text-align:left;transition:border-color .15s,background-color .15s,transform .15s}
+.guide-stop:hover{transform:translateX(2px)}
+.guide-stop.is-selected{border-color:#7ba36b;background:#fff;box-shadow:0 4px 12px #27382812}
+.guide-stop-number{position:relative;z-index:1;display:grid;flex:none;width:22px;height:22px;place-items:center;border:2px solid #edf1e7;border-radius:50%;background:#3D852D;color:#fff;font-size:9px;font-weight:800}
+.guide-stop.is-selected .guide-stop-number{background:#D23021}
+.guide-stop-copy{display:grid;gap:2px;min-width:0;flex:1}
+.guide-stop-district{color:#76816f;font-size:10px;font-weight:700}
+.guide-stop-district i{color:#d49523;font-style:normal}
+.guide-stop-copy strong{overflow:hidden;color:#293527;font-size:13px;text-overflow:ellipsis;white-space:nowrap}
+.guide-stop-spot{overflow:hidden;color:#5c6b55;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.guide-stop-votes{flex:none;color:#9c7510;font-size:11px;font-weight:800;text-align:right}
+.guide-stop-votes small{display:block;color:#899182;font-size:8px;font-weight:600}
+.guide-filters button:focus-visible,.guide-stop:focus-visible,.guide-step-controls button:focus-visible,.guide-map-link:focus-visible,.guide-dish-link:focus-visible,.guide-back:focus-visible,.guide-primary-link:focus-visible{outline:3px solid #E69030;outline-offset:2px}
+@media(min-width:780px){
+ .food-guide-main{width:min(100% - 56px,1120px);margin-top:30px}
+ .guide-layout{grid-template-columns:minmax(0,1fr) minmax(340px,.82fr);grid-template-areas:"route detail";align-items:start;gap:18px}
+ .guide-detail{position:sticky;top:20px;padding:23px}
+ .guide-route{padding:19px}
+}
+@media(max-width:390px){
+ .food-guide-main{width:calc(100% - 20px);margin-top:12px}
+ .guide-hero{border-radius:19px;padding:20px 17px}
+ .guide-summary{gap:6px}
+ .guide-summary span{padding:6px 9px;font-size:10px}
+ .guide-route{padding:12px}
+ .guide-stop{gap:7px;padding:8px 6px}
+ .guide-stop-votes small{display:none}
+}
 
 /* ── /top (সেরা খাবার): same editorial shell as the home map ─────────────── */
 .food-dashboard.top-dashboard{

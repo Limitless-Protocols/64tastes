@@ -66,6 +66,7 @@ export default function FoodMap() {
           <nav className="site-nav" aria-label="Main navigation">
             <a className="nav-current" href="#map">মানচিত্র</a>
             <Link href="/top">সেরা খাবার</Link>
+            <Link className="nav-guide" href="/guide" aria-label="Food Guide" title="Food Guide"><span aria-hidden="true">🧭</span><span className="nav-guide-label">গাইড</span></Link>
             <button className="nav-share" onClick={() => setShowShare(true)}><span aria-hidden="true">➤</span> শেয়ার</button>
           </nav>
         </header>
