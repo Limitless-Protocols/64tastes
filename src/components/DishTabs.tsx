@@ -28,7 +28,7 @@ export default function DishTabs({ tabs }: { tabs: TabDef[] }) {
     <div className="mt-5">
       <div
         role="tablist"
-        className="flex gap-1 rounded-2xl bg-[#F1F5EC] p-1 ring-1 ring-[#14261C]/10"
+        className="flex gap-1 rounded-2xl border-2 border-[#E1C714] bg-[#E9EEE0] p-1 ring-1 ring-[#20291F]/10"
       >
         {tabs.map((t, i) => {
           const selected = t.id === active;
@@ -44,10 +44,10 @@ export default function DishTabs({ tabs }: { tabs: TabDef[] }) {
               tabIndex={selected ? 0 : -1}
               onClick={() => setActive(t.id)}
               onKeyDown={(e) => onKeyDown(e, i)}
-              className={`flex-1 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F5C3F] ${
+              className={`flex-1 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3D852D] ${
                 selected
-                  ? 'bg-[#0F5C3F] text-white'
-                  : 'text-[#6B7A70] hover:bg-[#14261C]/5 hover:text-[#14261C]'
+                  ? 'bg-[#3D852D] text-white'
+                  : 'text-[#596653] hover:bg-white hover:text-[#20291F]'
               }`}
             >
               {t.label}
@@ -64,7 +64,7 @@ export default function DishTabs({ tabs }: { tabs: TabDef[] }) {
           aria-labelledby={`${uid}-tab-${t.id}`}
           hidden={t.id !== active}
           tabIndex={0}
-          className="mt-5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0F5C3F] [&>*:first-child]:mt-0"
+          className="mt-5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#3D852D] [&>*:first-child]:mt-0"
         >
           {t.content}
         </div>
